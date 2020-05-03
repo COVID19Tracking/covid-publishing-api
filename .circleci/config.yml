@@ -9,5 +9,3 @@ jobs:
       - checkout
       - run: pipenv run pip install -r requirements.txt
       - run: pipenv run python -m pytest
-      - store_test_results:
-          path: test-results

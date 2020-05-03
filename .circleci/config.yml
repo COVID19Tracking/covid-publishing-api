@@ -8,6 +8,7 @@ jobs:
     steps:
       - checkout
       - run:
+        name: run pytest
         command: |
           pipenv run python -m pytest
       - store_test_results:

@@ -7,9 +7,6 @@ jobs:
           PIPENV_VENV_IN_PROJECT: true
     steps:
       - checkout
-      - run:
-        name: run pytest
-        command: |
-          pipenv run python -m pytest
+      - run: pipenv run python -m pytest
       - store_test_results:
           path: test-results

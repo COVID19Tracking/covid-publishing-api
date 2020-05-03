@@ -781,3 +781,28 @@ FROM stories]
 (Background on this error at: http://sqlalche.me/e/f405)
 Thread-1 - 2020-05-03 17:10:58,817 - flask.app - INFO - Retrieving all data: placeholder
 Thread-1 - 2020-05-03 17:10:58,817 - flask.app - DEBUG - This is a debug log
+Thread-1 - 2020-05-03 17:40:28,364 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 17:40:28,365 - flask.app - DEBUG - This is a debug log
+Thread-2 - 2020-05-03 17:40:33,155 - flask.app - INFO - Retrieving all batches
+Thread-2 - 2020-05-03 17:40:33,866 - flask.app - ERROR - Exception on /api/v1/data/batch/ [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 21, in get_batches
+    'batches': [batch.to_dict() for batch in batches]
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 21, in <listcomp>
+    'batches': [batch.to_dict() for batch in batches]
+  File "/Users/julia/code/covid-publishing-api/app/models/data.py", line 31, in to_dict
+    d[column.name] = str(getattr(self, column.name))
+NameError: name 'd' is not defined
+Thread-1 - 2020-05-03 17:41:06,485 - flask.app - INFO - Retrieving all batches

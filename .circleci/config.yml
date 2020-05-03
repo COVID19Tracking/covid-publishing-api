@@ -1,0 +1,10 @@
+version: 2.1
+jobs:
+  build:
+    steps:
+      - checkout
+      - run:
+        command: |
+          pipenv run python -m pytest
+      - store_test_results:
+          path: test-results

@@ -30,7 +30,7 @@ from googleapiclient.discovery import build
 from data_convert.encryption import access_encrypted_file, cleanup_encrypted_file
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-KEY_PATH = "../../credentials-scanner.json"
+KEY_PATH = "./credentials-scanner.json"
 KEY_PRESHARED_KEY = "covid"
 
 class WorksheetWrapper():

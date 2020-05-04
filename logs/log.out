@@ -1,0 +1,808 @@
+Thread-1 - 2020-05-02 16:18:07,597 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "db" to address: nodename nor servname provided, or not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3339, in _execute_and_instances
+    querycontext, self._connection_from_session, close_with_result=True
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3354, in _get_bind_args
+    mapper=self._bind_mapper(), clause=querycontext.statement, **kw
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3332, in _connection_from_session
+    conn = self.session.connection(**kw)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1123, in connection
+    execution_options=execution_options,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1129, in _connection_for_bind
+    engine, execution_options
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 430, in _connection_for_bind
+    conn = bind._contextual_connect()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2226, in _contextual_connect
+    self._wrap_pool_connect(self.pool.connect, None),
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2266, in _wrap_pool_connect
+    e, dialect, self
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1536, in _handle_dbapi_exception_noconnection
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "db" to address: nodename nor servname provided, or not known
+
+(Background on this error at: http://sqlalche.me/e/e3q8)
+Thread-1 - 2020-05-02 16:19:20,745 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3342, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 988, in execute
+    return meth(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 287, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1107, in _execute_clauseelement
+    distilled_params,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1248, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1466, in _handle_dbapi_exception
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+[SQL: SELECT stories.id AS stories_id, stories.title AS stories_title, stories.topic AS stories_topic, stories.text AS stories_text, stories.author AS stories_author, stories.created_at AS stories_created_at 
+FROM stories]
+(Background on this error at: http://sqlalche.me/e/f405)
+Thread-1 - 2020-05-03 15:31:34,932 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3342, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 988, in execute
+    return meth(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 287, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1107, in _execute_clauseelement
+    distilled_params,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1248, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1466, in _handle_dbapi_exception
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+[SQL: SELECT stories.id AS stories_id, stories.title AS stories_title, stories.topic AS stories_topic, stories.text AS stories_text, stories.author AS stories_author, stories.created_at AS stories_created_at 
+FROM stories]
+(Background on this error at: http://sqlalche.me/e/f405)
+Thread-1 - 2020-05-03 15:31:53,509 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: could not translate host name "ctp-db-test.cpyxx7tsbkom.us-east-2.rds.amazonaws.co" to address: nodename nor servname provided, or not known
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3339, in _execute_and_instances
+    querycontext, self._connection_from_session, close_with_result=True
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3354, in _get_bind_args
+    mapper=self._bind_mapper(), clause=querycontext.statement, **kw
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3332, in _connection_from_session
+    conn = self.session.connection(**kw)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1123, in connection
+    execution_options=execution_options,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1129, in _connection_for_bind
+    engine, execution_options
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 430, in _connection_for_bind
+    conn = bind._contextual_connect()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2226, in _contextual_connect
+    self._wrap_pool_connect(self.pool.connect, None),
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2266, in _wrap_pool_connect
+    e, dialect, self
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1536, in _handle_dbapi_exception_noconnection
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) could not translate host name "ctp-db-test.cpyxx7tsbkom.us-east-2.rds.amazonaws.co" to address: nodename nor servname provided, or not known
+
+(Background on this error at: http://sqlalche.me/e/e3q8)
+Thread-1 - 2020-05-03 15:32:15,897 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3342, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 988, in execute
+    return meth(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 287, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1107, in _execute_clauseelement
+    distilled_params,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1248, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1466, in _handle_dbapi_exception
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+[SQL: SELECT stories.id AS stories_id, stories.title AS stories_title, stories.topic AS stories_topic, stories.text AS stories_text, stories.author AS stories_author, stories.created_at AS stories_created_at 
+FROM stories]
+(Background on this error at: http://sqlalche.me/e/f405)
+Thread-3 - 2020-05-03 15:35:50,277 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3342, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 988, in execute
+    return meth(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 287, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1107, in _execute_clauseelement
+    distilled_params,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1248, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1466, in _handle_dbapi_exception
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+[SQL: SELECT stories.id AS stories_id, stories.title AS stories_title, stories.topic AS stories_topic, stories.text AS stories_text, stories.author AS stories_author, stories.created_at AS stories_created_at 
+FROM stories]
+(Background on this error at: http://sqlalche.me/e/f405)
+Thread-14 - 2020-05-03 16:00:22,820 - flask.app - INFO - Retrieving all stories
+Thread-14 - 2020-05-03 16:00:22,829 - flask.app - DEBUG - This is a debug log
+Thread-15 - 2020-05-03 16:01:23,638 - flask.app - INFO - Retrieving story 1
+Thread-18 - 2020-05-03 16:01:45,252 - flask.app - INFO - Retrieving story 1
+Thread-1 - 2020-05-03 16:18:05,876 - flask.app - INFO - Retrieving all stories
+Thread-1 - 2020-05-03 16:18:05,879 - flask.app - DEBUG - This is a debug log
+Thread-1 - 2020-05-03 16:18:06,271 - flask.app - ERROR - Exception on /api/v1/stories/ [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: FATAL:  password authentication failed for user "postgres"
+FATAL:  password authentication failed for user "postgres"
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/api/stories.py", line 14, in get_stories
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3339, in _execute_and_instances
+    querycontext, self._connection_from_session, close_with_result=True
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3354, in _get_bind_args
+    mapper=self._bind_mapper(), clause=querycontext.statement, **kw
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3332, in _connection_from_session
+    conn = self.session.connection(**kw)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1123, in connection
+    execution_options=execution_options,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1129, in _connection_for_bind
+    engine, execution_options
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 430, in _connection_for_bind
+    conn = bind._contextual_connect()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2226, in _contextual_connect
+    self._wrap_pool_connect(self.pool.connect, None),
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2266, in _wrap_pool_connect
+    e, dialect, self
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1536, in _handle_dbapi_exception_noconnection
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  password authentication failed for user "postgres"
+FATAL:  password authentication failed for user "postgres"
+
+(Background on this error at: http://sqlalche.me/e/e3q8)
+Thread-1 - 2020-05-03 16:19:30,587 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 16:19:30,588 - flask.app - DEBUG - This is a debug log
+Thread-1 - 2020-05-03 16:26:06,233 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 16:26:06,235 - flask.app - DEBUG - This is a debug log
+Thread-1 - 2020-05-03 16:31:23,671 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 16:31:23,671 - flask.app - DEBUG - This is a debug log
+Thread-2 - 2020-05-03 16:31:31,548 - flask.app - INFO - Retrieving all batches
+Thread-2 - 2020-05-03 16:31:32,067 - flask.app - ERROR - Exception on /api/v1/data/batch/ [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+psycopg2.OperationalError: FATAL:  password authentication failed for user "postgres"
+FATAL:  password authentication failed for user "postgres"
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 20, in get_batches
+    batches = Batch.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3339, in _execute_and_instances
+    querycontext, self._connection_from_session, close_with_result=True
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3354, in _get_bind_args
+    mapper=self._bind_mapper(), clause=querycontext.statement, **kw
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3332, in _connection_from_session
+    conn = self.session.connection(**kw)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1123, in connection
+    execution_options=execution_options,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 1129, in _connection_for_bind
+    engine, execution_options
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/session.py", line 430, in _connection_for_bind
+    conn = bind._contextual_connect()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2226, in _contextual_connect
+    self._wrap_pool_connect(self.pool.connect, None),
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2266, in _wrap_pool_connect
+    e, dialect, self
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1536, in _handle_dbapi_exception_noconnection
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 2262, in _wrap_pool_connect
+    return fn()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 363, in connect
+    return _ConnectionFairy._checkout(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 760, in _checkout
+    fairy = _ConnectionRecord.checkout(pool)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 492, in checkout
+    rec = pool._do_get()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 139, in _do_get
+    self._dec_overflow()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/langhelpers.py", line 68, in __exit__
+    compat.reraise(exc_type, exc_value, exc_tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 129, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/impl.py", line 136, in _do_get
+    return self._create_connection()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 308, in _create_connection
+    return _ConnectionRecord(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 437, in __init__
+    self.__connect(first_connect_check=True)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/pool/base.py", line 639, in __connect
+    connection = pool._invoke_creator(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/strategies.py", line 114, in connect
+    return dialect.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 453, in connect
+    return self.dbapi.connect(*cargs, **cparams)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/psycopg2/__init__.py", line 130, in connect
+    conn = _connect(dsn, connection_factory=connection_factory, **kwasync)
+sqlalchemy.exc.OperationalError: (psycopg2.OperationalError) FATAL:  password authentication failed for user "postgres"
+FATAL:  password authentication failed for user "postgres"
+
+(Background on this error at: http://sqlalche.me/e/e3q8)
+Thread-1 - 2020-05-03 16:33:44,577 - flask.app - INFO - Retrieving all batches
+Thread-1 - 2020-05-03 16:37:35,542 - flask.app - INFO - Retrieving all batches
+Thread-3 - 2020-05-03 16:37:54,150 - flask.app - INFO - Retrieving all batches
+Thread-4 - 2020-05-03 16:38:02,656 - flask.app - INFO - Retrieving all batches
+Thread-1 - 2020-05-03 16:49:20,674 - flask.app - INFO - Retrieving all batches
+Thread-1 - 2020-05-03 16:49:21,194 - flask.app - ERROR - Exception on /api/v1/data/batch/ [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 23, in get_batches
+    'batches': [batch.__dict__ for batch in batches]
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/json/__init__.py", line 321, in jsonify
+    dumps(data, indent=indent, separators=separators) + '\n',
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/json/__init__.py", line 179, in dumps
+    rv = _json.dumps(obj, **kwargs)
+  File "/Users/julia/miniconda3/envs/deep-learning-nlp/lib/python3.6/site-packages/simplejson/__init__.py", line 399, in dumps
+    **kw).encode(obj)
+  File "/Users/julia/miniconda3/envs/deep-learning-nlp/lib/python3.6/site-packages/simplejson/encoder.py", line 296, in encode
+    chunks = self.iterencode(o, _one_shot=True)
+  File "/Users/julia/miniconda3/envs/deep-learning-nlp/lib/python3.6/site-packages/simplejson/encoder.py", line 378, in iterencode
+    return _iterencode(o, 0)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/json/__init__.py", line 81, in default
+    return _json.JSONEncoder.default(self, o)
+  File "/Users/julia/miniconda3/envs/deep-learning-nlp/lib/python3.6/site-packages/simplejson/encoder.py", line 273, in default
+    o.__class__.__name__)
+TypeError: Object of type InstanceState is not JSON serializable
+Thread-1 - 2020-05-03 16:49:49,904 - flask.app - INFO - Retrieving all batches
+Thread-1 - 2020-05-03 16:50:14,619 - flask.app - INFO - Retrieving all batches
+Thread-1 - 2020-05-03 16:52:30,138 - flask.app - INFO - Retrieving all batches
+Thread-3 - 2020-05-03 17:02:25,252 - flask.app - INFO - Retrieving all data: placeholder
+Thread-3 - 2020-05-03 17:02:25,257 - flask.app - DEBUG - This is a debug log
+Thread-5 - 2020-05-03 17:05:03,039 - flask.app - ERROR - Exception on / [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+psycopg2.ProgrammingError: relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/main/views.py", line 22, in index
+    stories = Story.query.all()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3161, in all
+    return list(self)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3317, in __iter__
+    return self._execute_and_instances(context)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/orm/query.py", line 3342, in _execute_and_instances
+    result = conn.execute(querycontext.statement, self._params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 988, in execute
+    return meth(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/sql/elements.py", line 287, in _execute_on_connection
+    return connection._execute_clauseelement(self, multiparams, params)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1107, in _execute_clauseelement
+    distilled_params,
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1248, in _execute_context
+    e, statement, parameters, cursor, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1466, in _handle_dbapi_exception
+    util.raise_from_cause(sqlalchemy_exception, exc_info)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 383, in raise_from_cause
+    reraise(type(exception), exception, tb=exc_tb, cause=cause)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/util/compat.py", line 128, in reraise
+    raise value.with_traceback(tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/base.py", line 1244, in _execute_context
+    cursor, statement, parameters, context
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/sqlalchemy/engine/default.py", line 552, in do_execute
+    cursor.execute(statement, parameters)
+sqlalchemy.exc.ProgrammingError: (psycopg2.ProgrammingError) relation "stories" does not exist
+LINE 2: FROM stories
+             ^
+
+[SQL: SELECT stories.id AS stories_id, stories.title AS stories_title, stories.topic AS stories_topic, stories.text AS stories_text, stories.author AS stories_author, stories.created_at AS stories_created_at 
+FROM stories]
+(Background on this error at: http://sqlalche.me/e/f405)
+Thread-1 - 2020-05-03 17:10:58,817 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 17:10:58,817 - flask.app - DEBUG - This is a debug log
+Thread-1 - 2020-05-03 17:40:28,364 - flask.app - INFO - Retrieving all data: placeholder
+Thread-1 - 2020-05-03 17:40:28,365 - flask.app - DEBUG - This is a debug log
+Thread-2 - 2020-05-03 17:40:33,155 - flask.app - INFO - Retrieving all batches
+Thread-2 - 2020-05-03 17:40:33,866 - flask.app - ERROR - Exception on /api/v1/data/batch/ [GET]
+Traceback (most recent call last):
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 2292, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1815, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1718, in handle_user_exception
+    reraise(exc_type, exc_value, tb)
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/_compat.py", line 35, in reraise
+    raise value
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1813, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/Users/julia/miniconda3/envs/covid-publishing-api/lib/python3.6/site-packages/flask/app.py", line 1799, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 21, in get_batches
+    'batches': [batch.to_dict() for batch in batches]
+  File "/Users/julia/code/covid-publishing-api/app/api/data.py", line 21, in <listcomp>
+    'batches': [batch.to_dict() for batch in batches]
+  File "/Users/julia/code/covid-publishing-api/app/models/data.py", line 31, in to_dict
+    d[column.name] = str(getattr(self, column.name))
+NameError: name 'd' is not defined
+Thread-1 - 2020-05-03 17:41:06,485 - flask.app - INFO - Retrieving all batches

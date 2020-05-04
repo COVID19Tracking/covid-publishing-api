@@ -35,12 +35,6 @@ Werkzeug==1.0.1
 wrapt==1.12.1
 WTForms==2.3.1
 
-# for data convert
-loguru
-cryptography
-pandas
-numpy
-
 # for google sheets
 google-api-python-client~=1.8.0
 google-auth~=1.11.3

@@ -51,7 +51,7 @@ def decrypt(password: str, encrypted_msg: str) -> str:
 def find_in_parent(file_name: str) -> str:
     "locate a file in current directory or parents"
 
-    for xdir in [".", "..", "..."]:
+    for xdir in [".", "..", "../..", "../../.."]:
         path = os.path.join(xdir, file_name)
         if os.path.exists(path): return path
         encrypted_path = os.path.join(xdir, file_name + ".encrypted")

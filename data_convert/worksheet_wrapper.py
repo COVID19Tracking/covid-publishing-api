@@ -27,25 +27,27 @@ import re
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 
-from data_convert.encryption import access_encrypted_file, cleanup_encrypted_file
+from data_convert.encryption import access_encrypted_file, cleanup_encrypted_file, find_in_parent
 
 SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-KEY_PATH = "./credentials-scanner.json"
+KEY_FILE = "credentials-scanner.json"
 KEY_PRESHARED_KEY = "covid"
 
 class WorksheetWrapper():
 
     def __init__(self, debug = True):
+        # pylint: disable=no-member
+
         logger.info("load credentials")
 
-        # pylint: disable=no-member
-        tmp_path = access_encrypted_file(KEY_PRESHARED_KEY, KEY_PATH)
+        cred_path = find_in_parent(KEY_FILE)
+        tmp_path = access_encrypted_file(KEY_PRESHARED_KEY, cred_path)
         try:
             self.creds = service_account.Credentials.from_service_account_file(
                 tmp_path,
                 scopes=SCOPES)
         finally:
-            cleanup_encrypted_file(KEY_PATH)
+            cleanup_encrypted_file(cred_path)
 
         self.debug = debug
         if self.debug:

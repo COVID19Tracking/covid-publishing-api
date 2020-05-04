@@ -35,14 +35,11 @@ Werkzeug==1.0.1
 wrapt==1.12.1
 WTForms==2.3.1
 
-# for data convert
-loguru
-cryptography
-pandas
-numpy
-
 # for google sheets
 google-api-python-client~=1.8.0
 google-auth~=1.11.3
 google-auth-httplib2~=0.0.3
 google-auth-oauthlib~=0.4.1
+
+# install data_convert
+./data_convert

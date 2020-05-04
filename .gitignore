@@ -131,3 +131,5 @@ dmypy.json
 
 # dev web server logs
 logs/
+
+*.swp

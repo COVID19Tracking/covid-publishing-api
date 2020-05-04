@@ -102,7 +102,7 @@ def test_convert_types():
     assert(type(df.a[0]) == str)
     assert(df.a.tolist() == ["x", "y", "z"])
 
-    assert(type(df.b[0]) == np.int32)
+    assert(type(df.b[0]) == np.int64)
     assert(df.b.tolist() == [0, 1000, -1000])
 
     assert(str(df.c.dtype) == "datetime64[ns, US/Eastern]")

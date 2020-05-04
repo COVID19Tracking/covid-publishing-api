@@ -31,9 +31,33 @@ This will start a local server at http://127.0.0.1:5000/. For now, the landing i
 Instead, to test just API routing, you can go to: http://127.0.0.1:5000/api/v1/test/
 To test your CTP DB connection and list a bunch of batch IDs, go to: http://127.0.0.1:5000/api/v1/data/batch/
 
+## Running data_convert
+
+Data Convert is a standalone Python module that gets data from the google sheet and converts it into a
+typed and filtered Pandas DataFrame based on a meta-data file.  
+
+It uses the Google Sheets Python API and a read-only OAUTH api account.  The account credentials are stored in the repo as an encrypted file to make it easy to run locally while avoid getting pinged by external security review systems.  [The security risk is minimal because it is a public worksheet and
+a read-only account -- the Google auth system does not appear to support anonymous accounts.]
+
+To view the JSON for the current worksheet under development, run
+    > python tab_working.py
+To view the JSON for the Checks tab, run
+    > python tab_checks.py
+
+## Running the tests
+
+The project contains a tests directory that uses pytest.  
+
+For it to work, the root file of the repo needs be accessible as a Python module.  The easiest way to do this is:
+    > cd tests
+    > export PYTHONPATH=<base path for the repo>
+    > pytests
+
+All tests are run automatically by CircleCI when you create a PR that connects to master.  Please make
+sure tests run relatively quickly (seconds, not minutes).
 
 ## Documents
 
-[Design Doc] (https://docs.google.com/document/d/16JVr3aQE18BUEgrjf7UwQ7ssgghrYqN0lnCjzkghLV0/edit#heading=h.ng2qoy23i2hp)
+Design Doc (https://docs.google.com/document/d/16JVr3aQE18BUEgrjf7UwQ7ssgghrYqN0lnCjzkghLV0/edit#heading=h.ng2qoy23i2hp)
 
-[Data Entry Sheet] (https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/edit#gid=2335020)
+Data Entry Sheet (https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/edit#gid=2335020)

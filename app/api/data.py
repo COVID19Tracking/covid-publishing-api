@@ -20,3 +20,10 @@ def get_batches():
     return jsonify({
         'batches': [batch.to_dict() for batch in batches]
     })
+
+@api.route('/data/batch/', methods=['POST'])
+def post_data():
+    current_app.logger.info('Got a post request!')
+    payload = request.json
+    current_app.logger.info(payload)
+    return jsonify({'payload': payload})

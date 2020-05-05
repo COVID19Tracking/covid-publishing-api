@@ -36,9 +36,6 @@ To test your CTP DB connection and list a bunch of batch IDs, go to: http://127.
 Data Convert is a standalone Python module that gets data from the google sheet and converts it into a
 typed and filtered Pandas DataFrame based on a meta-data file.  
 
-It uses the Google Sheets Python API and a read-only OAUTH api account.  The account credentials are stored in the repo as an encrypted file to make it easy to run locally while avoid getting pinged by external security review systems.  [The security risk is minimal because it is a public worksheet and
-a read-only account -- the Google auth system does not appear to support anonymous accounts.]
-
 To view the JSON for the current worksheet under development, run
     > python tab_working.py
 To view the JSON for the Checks tab, run

@@ -6,6 +6,7 @@ WORKDIR /usr/src/stories
 
 # Copy python reqs
 COPY requirements.txt ./
+COPY data_convert ./data_convert
 
 # Install reqs
 RUN pip install --no-cache-dir -r requirements.txt
@@ -18,7 +19,7 @@ COPY app ./app
 COPY migrations ./migrations
 
 # Necessary Files
-COPY .env config.py stories.py boot.sh gunicorn.ini ./
+COPY config.py stories.py boot.sh gunicorn.ini ./
 RUN chmod +x ./boot.sh
 
 # Expose port

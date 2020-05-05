@@ -64,8 +64,7 @@ class TabWorking(TabBase):
         url = gs.get_sheet_url("dev")
 
         df = gs.download_data(url)
-        print(f"df.columns={df.columns}")
-
+        
         dates = gs.read_as_list(df, "W1:AN1", ignore_blank_cells=True, single_row=True)
         self.parse_dates(dates)
 
@@ -79,11 +78,10 @@ class TabWorking(TabBase):
         if df_meta_data is None:
             raise Exception("Meta-data not available")
 
-        msgs = cleaner.check_names(df, df_meta_data)
-        if not (msgs is None):
-            for m in msgs:
-                logger.error(m)
-            logger.error(f"Column names are:{df.columns}")
+        df_changed = cleaner.find_changes(df, df_meta_data)
+        if not (df_changed is None):
+            pd.set_option('display.max_rows', None)
+            logger.error(f"Names are\n{df_changed}")
             raise Exception("Meta-data is out-of-date")
 
         df = cleaner.remap_names(df, df_meta_data)

@@ -62,11 +62,9 @@ class TabChecks(TabBase):
         if df_meta_data is None:
             raise Exception("Meta-data not available")
 
-        msgs = cleaner.check_names(df, df_meta_data)
-        if not (msgs is None):
-            for m in msgs:
-                logger.error(m)
-            logger.error(f"Column names are:{df.columns}")
+        df_changed = cleaner.find_changes(df, df_meta_data)
+        if not (df_changed is None):
+            logger.error(f"Layout has changed\n{df_changed}")
             raise Exception("Meta-data is out-of-date")
 
         df = cleaner.remap_names(df, df_meta_data)

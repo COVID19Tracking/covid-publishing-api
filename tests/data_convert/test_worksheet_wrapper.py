@@ -9,8 +9,9 @@ def test_column_names():
     names = ws.generate_column_names(4)
     assert(names == ["A","B", "C", "D"])
     
-    names = ws.generate_column_names(27)
-    assert(names[-1] == "AA")
+    names = ws.generate_column_names(28)
+    assert(names[-2] == "AA")
+    assert(names[-1] == "AB")
 
 
 def test_parse_names():

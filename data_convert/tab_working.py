@@ -64,6 +64,7 @@ class TabWorking(TabBase):
         url = gs.get_sheet_url("dev")
 
         df = gs.download_data(url)
+        print(f"df.columns={df.columns}")
 
         dates = gs.read_as_list(df, "W1:AN1", ignore_blank_cells=True, single_row=True)
         self.parse_dates(dates)
@@ -87,7 +88,7 @@ class TabWorking(TabBase):
 
         df = cleaner.remap_names(df, df_meta_data)
 
-        cleaner.convert_types(df, df_meta_data)
+        #cleaner.convert_types(df, df_meta_data)
 
         df = df[ df.state != ""]
         return df

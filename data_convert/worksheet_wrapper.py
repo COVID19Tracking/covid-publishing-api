@@ -45,12 +45,13 @@ class WorksheetWrapper():
         "generate column names of a spreadsheet"
         n = "A"
         result = []
-        for i in range(cnt):
+        for _ in range(cnt):
             result.append(n)
 
             x = n[-1]
             if x < "Z":                
-                n = chr(ord(x) + 1)
+                x = chr(ord(x) + 1)
+                n = n[0] + x if len(n) > 1 else x
             else:
                 x = chr(ord(n[0])+1) if len(n) > 1 else "A"
                 n = x + "A"

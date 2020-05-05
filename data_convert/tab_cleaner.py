@@ -64,13 +64,10 @@ class TabCleaner:
 
         df.columns = cols
 
-    def check_names(self, df: pd.DataFrame, df_meta: pd.DataFrame) -> List:
+    def find_changes(self, df: pd.DataFrame, df_meta: pd.DataFrame) -> pd.DataFrame:
         """
-        Return a list of columns names that are not in expected locations.
+        If column names are not equivalent return a frame that shows differences
         """
-
-        #TODO: rewrite this as a output join and return a data table
-        
         if df is None:
             raise Exception("Missing data frame")
         if df_meta is None:
@@ -79,65 +76,24 @@ class TabCleaner:
         if not "name" in df_meta:
             raise Exception("Meta-Data should contain a 'name' column")
 
-        expected_names = df_meta.name.values.tolist()
 
         # the 'fast' path -- nothing changes
-        if df.columns.size == len(expected_names):
+        if df.columns.size == df_meta.shape[0]:
             is_diff = False
-            for n1, n2 in zip(df.columns, expected_names):
+            for n1, n2 in zip(df.columns, df_meta.name.values):
                 if n1 != n2: is_diff = True
             if not is_diff: return None 
 
         # the 'slow' path -- something changed 
-        def find(xlist: List, name: str) -> int:
-            name = name.lower()
-            for j, name2 in enumerate(xlist):
-                if name2.lower() == name: return j
-            return -1
-        def find2(xlist: List, name: str) -> int:
-            name = name.lower()
-            for j, pos_name in enumerate(xlist):
-                if pos_name[1].lower() == name: return j
-            return -1
+        expected_names = df_meta.name.values.tolist()
+        frame_names = df.columns.tolist()
+        delta = len(frame_names) - len(expected_names)
+        if delta > 0:
+            for _ in range(delta): expected_names.append("")
+        elif delta < 0:
+            for _ in range(-delta): frame_names.append("")
 
-        msgs = []
-
-        # scan the found_names
-        found_names = []
-        for pos, name in enumerate(df.columns):
-            j = find(expected_names, name)            
-            if j < 0:
-                msgs.append(f"Column {pos+1:02d}: {name} is a new column")
-            else:
-                name2 = expected_names[j]
-                if name != name2:
-                    msgs.append(f"Column {pos+1:02d}: {name} case changed")
-                found_names.append((pos, name))
-
-        # scan the expected_names
-        matched_names = []
-        for pos, name in enumerate(expected_names):
-            j = find2(found_names, name)
-            if j < 0:
-                msgs.append(f"Column {pos+1:02d}: {name} is missing")
-            else:
-                matched_names.append((pos,name))
-
-        # check for moved
-        while len(found_names) > 0:
-            pos1, name1 = found_names[0]
-            _, name2 = matched_names[0]
-            if name1.lower() == name2.lower():
-                del found_names[0]
-                del matched_names[0]            
-            else:
-                msgs.append(f"Column {pos1+1:02d}: {name1} has moved")
-                del found_names[0]
-                j = find2(matched_names, name1)
-                del matched_names[j]            
-
-        msgs.sort()
-        return msgs
+        return pd.DataFrame({"current": frame_names, "expected": expected_names})
 
     def remap_names(self, df: pd.DataFrame, df_meta: pd.DataFrame) -> pd.DataFrame:
         """ returns a new frame containing output columns

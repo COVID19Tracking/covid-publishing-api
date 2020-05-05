@@ -61,12 +61,14 @@ class TabWorking(TabBase):
         """Load the working (unpublished) data from google sheets"""
 
         gs = WorksheetWrapper()
-        dev_id = gs.get_sheet_id_by_name("dev")
+        url = gs.get_sheet_url("dev")
 
-        dates = gs.read_as_list(dev_id, "Worksheet 2!W1:AN1", ignore_blank_cells=True, single_row=True)
+        df = gs.download_data(url)
+        
+        dates = gs.read_as_list(df, "W1:AN1", ignore_blank_cells=True, single_row=True)
         self.parse_dates(dates)
 
-        df = gs.read_as_frame(dev_id, "Worksheet 2!A2:BR60", header_rows=1)
+        df = gs.read_as_frame(df, "A2:BR60", header_rows=1)
 
         # cleanup logic
         cleaner = TabCleaner()
@@ -76,16 +78,15 @@ class TabWorking(TabBase):
         if df_meta_data is None:
             raise Exception("Meta-data not available")
 
-        msgs = cleaner.check_names(df, df_meta_data)
-        if not (msgs is None):
-            for m in msgs:
-                logger.error(m)
-            logger.error(f"Column names are:{df.columns}")
+        df_changed = cleaner.find_changes(df, df_meta_data)
+        if not (df_changed is None):
+            pd.set_option('display.max_rows', None)
+            logger.error(f"Names are\n{df_changed}")
             raise Exception("Meta-data is out-of-date")
 
         df = cleaner.remap_names(df, df_meta_data)
 
-        cleaner.convert_types(df, df_meta_data)
+        #cleaner.convert_types(df, df_meta_data)
 
         df = df[ df.state != ""]
         return df

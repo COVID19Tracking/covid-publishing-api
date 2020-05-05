@@ -40,12 +40,13 @@ class TabChecks(TabBase):
         """Load the checks data from google sheet"""
 
         gs = WorksheetWrapper()
-        dev_id = gs.get_sheet_id_by_name("dev")
+        url = gs.get_sheet_url("checks")
 
-        props = gs.get_grid_properties(dev_id, "Checks")
-        nrows = props["rowCount"]
+        df = gs.download_data(url)
 
-        df = gs.read_as_frame(dev_id, "Checks!A2:S" + str(nrows), header_rows=1)
+        nrows = df.shape[0]
+
+        df = gs.read_as_frame(df, "Checks!A2:S" + str(nrows), header_rows=1)
 
         # special case fixes:
         logger.info("special cases:")

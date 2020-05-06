@@ -2,14 +2,15 @@
 Basic Test for V1 of API
 """
 import pytest
-from rest_tester import RestTester
 
-@pytest.fixture
-def endpoint() -> RestTester:
-    return RestTester("http://localhost:5000/api/v1")
+from flask import json, jsonify
 
-def test_get_test(endpoint):
-    x = endpoint.get("/test")
-    assert(x != None)
-    assert("test_data_key" in x)
-    assert(x["test_data_key"] == "test_data_value")
+def test_get_test(client):
+    resp = client.get("/api/v1/test/")
+    assert resp.data != None 
+    assert resp.status_code == 200
+    data = json.loads(resp.data)
+    assert "test_data_key" in data 
+    assert data["test_data_key"] == "test_data_value" 
+
+

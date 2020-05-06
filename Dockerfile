@@ -27,4 +27,4 @@ RUN chmod +x ./boot.sh
 EXPOSE 8000
 
 # Specify entry point script
-ENTRYPOINT ["./boot.sh"]
+CMD ["./boot.sh"]

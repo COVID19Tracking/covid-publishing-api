@@ -4,7 +4,6 @@ application with a specific config file"""
 
 # Flask Imports
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
 from flask import Flask
 
 # Importing configs
@@ -17,8 +16,6 @@ from config import config_dict
 
 # For the database
 db = SQLAlchemy()
-# For database migrations
-migrate = Migrate()
 
 
 def create_app(config_key='local'):
@@ -28,7 +25,6 @@ def create_app(config_key='local'):
     config_dict[config_key].init_app(app)
 
     db.init_app(app)
-    migrate.init_app(app, db)
 
     # Registering the main and the api blueprints here
     from app.main import main as main_blueprint

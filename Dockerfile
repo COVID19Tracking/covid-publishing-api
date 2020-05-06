@@ -4,6 +4,9 @@ FROM python:3.6
 # Set working directory within docker container
 WORKDIR /usr/src/stories
 
+# Needed early by `requirements.txt`
+COPY data_convert ./data_convert
+
 # Copy python reqs
 COPY requirements.txt ./
 
@@ -15,7 +18,6 @@ ENV FLASK_APP=flask_server.py
 
 # Necessary Folders
 COPY app ./app
-COPY migrations ./migrations
 
 # Necessary Files
 COPY .env config.py flask_server.py boot.sh gunicorn.ini ./

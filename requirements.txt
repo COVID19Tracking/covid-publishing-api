@@ -1,6 +1,7 @@
 Flask
 Flask-SQLAlchemy
 Flask-WTF
+gunicorn
 pytest
 python-decouple
 requests

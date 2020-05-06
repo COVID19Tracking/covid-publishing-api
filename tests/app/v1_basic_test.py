@@ -3,7 +3,13 @@ Basic Test for V1 of API
 """
 import pytest
 
+import app
+
 from flask import json, jsonify
+
+@pytest.fixture
+def client():
+    yield app.create_app().test_client()
 
 def test_get_test(client):
     resp = client.get("/api/v1/test/")

@@ -40,12 +40,13 @@ class TabChecks(TabBase):
         """Load the checks data from google sheet"""
 
         gs = WorksheetWrapper()
-        dev_id = gs.get_sheet_id_by_name("dev")
+        url = gs.get_sheet_url("checks")
 
-        props = gs.get_grid_properties(dev_id, "Checks")
-        nrows = props["rowCount"]
+        df = gs.download_data(url)
 
-        df = gs.read_as_frame(dev_id, "Checks!A2:S" + str(nrows), header_rows=1)
+        nrows = df.shape[0]
+
+        df = gs.read_as_frame(df, "Checks!A2:S" + str(nrows), header_rows=1)
 
         # special case fixes:
         logger.info("special cases:")
@@ -61,11 +62,9 @@ class TabChecks(TabBase):
         if df_meta_data is None:
             raise Exception("Meta-data not available")
 
-        msgs = cleaner.check_names(df, df_meta_data)
-        if not (msgs is None):
-            for m in msgs:
-                logger.error(m)
-            logger.error(f"Column names are:{df.columns}")
+        df_changed = cleaner.find_changes(df, df_meta_data)
+        if not (df_changed is None):
+            logger.error(f"Layout has changed\n{df_changed}")
             raise Exception("Meta-data is out-of-date")
 
         df = cleaner.remap_names(df, df_meta_data)

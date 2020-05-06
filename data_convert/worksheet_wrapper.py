@@ -4,132 +4,122 @@ Wrapper around GoogleSheets
 Provides three main functions:
     1. assigns a symbolic name to a worksheet so the rest of the code doesn't depend 
     on a specific address.
-    2.  
-
-----
-
-Credentials are stored in a json file which is encrypted with a preshared key.
-The key is repo for our convenience so we do not have to share any secrets
-to run the code.
-
-This is NOT a security hole because (a) the worksheet is already public
-and (b) the login account is readonly.  However, we may want to move to
-a preshared-secret in the future -- Josh E.
-
+    2. read the content of the URL into a data frame
+    3. extract of region from the frame
 """
 
-from typing import List, Dict
+from typing import List, Dict, Tuple
 from loguru import logger
 import pandas as pd
 import numpy as np
 import re
+import io
 
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
+import requests
 
-from data_convert.encryption import access_encrypted_file, cleanup_encrypted_file
-
-SCOPES = ['https://www.googleapis.com/auth/spreadsheets']
-KEY_PATH = "./credentials-scanner.json"
-KEY_PRESHARED_KEY = "covid"
 
 class WorksheetWrapper():
 
     def __init__(self, debug = True):
-        logger.info("load credentials")
-
-        # pylint: disable=no-member
-        tmp_path = access_encrypted_file(KEY_PRESHARED_KEY, KEY_PATH)
-        try:
-            self.creds = service_account.Credentials.from_service_account_file(
-                tmp_path,
-                scopes=SCOPES)
-        finally:
-            cleanup_encrypted_file(KEY_PATH)
-
-        self.debug = debug
-        if self.debug:
-            logger.info(f"  email {self.creds.service_account_email}")
-            logger.info(f"  project {self.creds.project_id}")
-            logger.info(f"  scope {self.creds._scopes[0]}")
-            logger.info("")
-            logger.warning(" **** The private key for this identity is published in a public Github Repo")
-            logger.warning(" **** DO NOT ALLOW ACCESS TO SENSITIVE/PRIVATE RESOURCES")
-            logger.warning(" **** DO NOT ALLOW WRITE ACCESS ANYTHING")
-            logger.info("")
-
-        if self.debug: logger.info("connect")
-        service = build('sheets', 'v4', credentials=self.creds)
-        self.sheets = service.spreadsheets()
-
-
-    def get_sheet_id_by_name(self, name: str) -> str:
+        pass
+        
+    def get_sheet_url(self, name: str) -> str:
         "get the id for a worksheet by symbolic name"
         items = {
             "dev": {
                 "id": "1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU",
-                "url": "https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/edit#gid=1777138528"
+                "url": "https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/export?format=csv&gid=2335020"
             },
-            "instructions": {
-                "id": "1lGINxyLFuTcCJgVc4NrnAgbvvt09k3OiRizfwZPZItw",
-                "url": "https://docs.google.com/document/d/1lGINxyLFuTcCJgVc4NrnAgbvvt09k3OiRizfwZPZItw/edit"
-            },
-            # don't know how to get to the underlying sheet so using the API - Josh
-            #"published": {
-            #    "id": "i7Tj0pvTf6XVHjDSMIKBdZHXiCGGdNC0ypEU9NbngS8mxea55JuCFuua1MUeOj5",
-            #    "url": "https://docs.google.com/spreadsheets/u/2/d/e/2PACX-1vRwAqp96T9sYYq2-i7Tj0pvTf6XVHjDSMIKBdZHXiCGGdNC0ypEU9NbngS8mxea55JuCFuua1MUeOj5/pubhtml"
-            #}
+            "checks": {
+                "id": "1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU",
+                "url": "https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/export?format=csv&gid=355296281"
+            }
         }
 
         rec = items.get(name)
         if rec == None:
-            raise Exception("Invalid name {name}, should be one of " + ", ".join([x for x in items]))
-        return rec["id"]
+            raise Exception(f"Invalid name {name}, should be one of " + ", ".join([x for x in items]))
+        return rec["url"]
 
-    def get_grid_properties(self, sheet_id: str, tab_name: str) -> int:
-        " get the properties of the tab "
-        result = self.sheets.get(spreadsheetId=sheet_id, ranges=[tab_name], includeGridData=False).execute()
-        return result["sheets"][0]["properties"]["gridProperties"]
+    def generate_column_names(self, cnt: int) -> List[str]:
+        "generate column names of a spreadsheet"
+        n = "A"
+        result = []
+        for _ in range(cnt):
+            result.append(n)
 
-#RL listFeedUrl = worksheets.get(x).getListFeedUrl();
-#ListFeed feed = googleservice.getFeed(listFeedUrl, ListFeed.class);
-#System.out.println("Number of filled rows"+feed_L.getEntries().size()+1);
-#System.out.println("First Empty row"+feed_L.getEntries().size()+2)
+            x = n[-1]
+            if x < "Z":                
+                x = chr(ord(x) + 1)
+                n = n[0] + x if len(n) > 1 else x
+            else:
+                x = chr(ord(n[0])+1) if len(n) > 1 else "A"
+                n = x + "A"
+        return result
 
-    def read_values(self, sheet_id: str, cell_range: str) -> List[List]:
-        """" 
-        read a region of the sheet as a list of lists 
+    def download_data(self, url: str) -> pd.DataFrame:
+        "download content from a url"
+        response = requests.get(url)
+        content = response.content
+
+        f = io.StringIO(content.decode())        
+        df = pd.read_csv(f, sep=",", header=None, dtype=str )
+        df.fillna("", inplace=True)
+        df.columns = self.generate_column_names(df.shape[1])
+        return df
+
+    def parse_range(self, arange: str) -> Tuple[Tuple, Tuple]:
+        " parse a spreadsheet range"
         
-        returns data as a set of rows and cells.
+        if arange == None:
+            raise Exception("Missing arange argument")
+
+        m = re.match(r"([A-Z]+)([0-9]+):([A-Z]+)([0-9]+)", arange)
+        if not m: raise Exception(f"Invalid arange ({arange})")
+
+        xstart = m[1], int(m[2])-1
+        xstop = m[3], int(m[4])-1
+        return xstart, xstop
+
+    def read_values(self, df: pd.DataFrame, cell_range: str) -> pd.DataFrame:
+        """" 
+        read a region of the sheet 
+        
+        returns a data frame
         """
 
-        if self.debug: logger.info(f"read {cell_range}")
-        result = self.sheets.values().get(spreadsheetId=sheet_id, range=cell_range).execute()
-        #if self.debug: logger.info(f"  {result}")
+        xstart, xstop = self.parse_range(cell_range)
 
-        values = result.get('values', [])
-        return values
+        row_filter = (df.index >= xstart[1]) & (df.index <= xstop[1])
+
+        cols = df.columns.tolist()
+        sidx = cols.index(xstart[0])
+        eidx = cols.index(xstop[0])
+        col_filter = df.columns[sidx:eidx+1]
+
+        df = df[row_filter][col_filter]
+        return df
 
 
-
-    def read_as_list(self, sheet_id: str, cell_range: str, ignore_blank_cells=False, single_row=False) -> List:
+    def read_as_list(self, df: pd.DataFrame, cell_range: str, ignore_blank_cells=False, single_row=False) -> List:
         """
         read a region of a sheet as a simple list or a list of list
         
         has an option to ignore blank cells
         has an option to return a single row
         """
-        values = self.read_values(sheet_id, cell_range)
-        if not ignore_blank_cells: return values
-        
+        df = self.read_values(df, cell_range)
+
         result = []
-        for row in values:
-            result.append([x for x in row if x != ""])
-        
-        if single_row: result = result[0]
+        for _, row in df.iterrows():
+            row_list = [x for x in row if x != "" or not ignore_blank_cells]
+            if len(row_list) > 0 or not ignore_blank_cells:
+                result.append(row_list)
+
+        if single_row and len(result) > 0: result = result[0]
         return result
 
-    def read_as_frame(self, sheet_id: str, cell_range: str, header_rows = 1) -> pd.DataFrame:
+    def read_as_frame(self, df: pd.DataFrame, cell_range: str, header_rows = 1) -> pd.DataFrame:
         """
         read a region of a sheet as a data frame
         
@@ -139,11 +129,11 @@ class WorksheetWrapper():
         returns a data frame
         """
 
-        values = self.read_values(sheet_id, cell_range)
+        df = self.read_values(df, cell_range)
 
-        header = values[0]
+        header = df.iloc[0].tolist()
         if header_rows == 2:
-            sub_header = values[1]
+            sub_header = df.iloc[1].tolist()
             prefix = ""
             for i in range(len(sub_header)):
                 if i<len(header):
@@ -155,22 +145,6 @@ class WorksheetWrapper():
         else:
             for i in range(len(header)): header[i] = header[i].strip()
 
-        n_cols = len(header)
-
-        data = [[] for n in header]
-        for r in values[header_rows:]:
-            n_vals = len(r)
-            if n_vals == 0: continue
-            if n_vals < n_cols:
-                #logger.warning(f"fewer columns than expected ({n_cols})")
-                #logger.warning(f"  {r}")
-                pass
-            for i in range(n_vals):
-                data[i].append(r[i])
-            for i in range(n_vals, n_cols):
-                data[i].append('')
-
-        xdict = {}
-        for n, vals in zip(header, data): xdict[n] = vals
-        return pd.DataFrame(xdict)
-
+        df = df[header_rows:].copy().reset_index(drop=True)
+        df.columns = header
+        return df

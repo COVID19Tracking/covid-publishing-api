@@ -24,7 +24,7 @@ def test_cleanup_names():
     assert(df.columns[4] == "a")
     assert(df.columns[5] == "a_1")
 
-def test_check_names():
+def test_find_changes():
 
     cleaner = TabCleaner()
 
@@ -35,37 +35,28 @@ def test_check_names():
         {"name": "d"},
     ])
 
-    # normal
+    # same
     df = pd.DataFrame({"a": [1], "b": [2], "c": [3], "d": [4]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs is None)
+    df_changed = cleaner.find_changes(df, df_meta)
+    assert(df_changed is None)
 
-    # extra
+    # added
     df = pd.DataFrame({"x": [0], "a": [1], "b": [2], "y": [0], "c": [3], "d": [4], "z": [0]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 01: x is a new column', 'Column 04: y is a new column', 'Column 07: z is a new column'])    
+    df_changed = cleaner.find_changes(df, df_meta)
+    assert(not (df_changed is None))
+    assert(df_changed.shape[0] == 7)
+    assert(df_changed.current[0] == 'x')
+    assert(df_changed.expected[0] == 'a')
+    assert(df_changed.expected[6] == '')
 
-    # moved
-    df = pd.DataFrame({"a": [1], "c": [3], "b": [2], "d": [4]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 02: c has moved'])
+    # less
+    df = pd.DataFrame({"b": [2], "c": [3]})
+    df_changed = cleaner.find_changes(df, df_meta)
+    assert(not (df_changed is None))
+    assert(df_changed.shape[0] == 4)
+    assert(df_changed.current[0] == 'b')
+    assert(df_changed.current[3] == '')
 
-    df = pd.DataFrame({"a": [1], "x": [0], "c": [3], "d": [4], "b": [2]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 02: x is a new column', 'Column 03: c has moved', 'Column 04: d has moved'])
-
-    # missing
-    df = pd.DataFrame({"a": [1], "c": [3], "d": [4]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 02: b is missing'])
-
-    df = pd.DataFrame({"a": [1], "c": [3]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 02: b is missing', 'Column 04: d is missing'])
-
-    df = pd.DataFrame({"c": [3], "d": [4]})
-    msgs = cleaner.check_names(df, df_meta)
-    assert(msgs == ['Column 01: a is missing', 'Column 02: b is missing'])
 
 def test_remap_names():
 
@@ -102,7 +93,7 @@ def test_convert_types():
     assert(type(df.a[0]) == str)
     assert(df.a.tolist() == ["x", "y", "z"])
 
-    assert(type(df.b[0]) == np.int64)
+    assert(type(df.b[0]) == np.int64 or type(df.b[0]) == np.int32)
     assert(df.b.tolist() == [0, 1000, -1000])
 
     assert(str(df.c.dtype) == "datetime64[ns, US/Eastern]")

@@ -5,7 +5,19 @@ jobs:
       - image: circleci/python:3.6.9
         environment:
           PIPENV_VENV_IN_PROJECT: true
+          DATABASE_HOST: 127.0.0.1
+          DATABASE_NAME: test
+          DATABASE_PORT: 5432
+          DATABASE_USER: postgres
+          DATABASE_PASS: postgres
     steps:
       - checkout
       - run: pipenv run pip install -r requirements.txt
-      - run: pipenv run python -m pytest
+      - run:
+          name: run pytest
+          command: |
+            mkdir test-results
+            pipenv run python -m pytest --junitxml=test-results/junit.xml
+
+      - store_test_results:
+          path: test-results

@@ -36,19 +36,14 @@ To test your CTP DB connection and list a bunch of batch IDs, go to: http://127.
 Data Convert is a standalone Python module that gets data from the google sheet and converts it into a
 typed and filtered Pandas DataFrame based on a meta-data file.  
 
-To view the JSON for the current worksheet under development, run
-    > python tab_working.py
-To view the JSON for the Checks tab, run
-    > python tab_checks.py
+To view the JSON for the current worksheet under development, run `python tab_working.py`
+To view the JSON for the Checks tab, run `python tab_checks.py`
 
 ## Running the tests
 
 The project contains a tests directory that uses pytest.  
 
-For it to work, the root file of the repo needs be accessible as a Python module.  The easiest way to do this is:
-    > cd tests
-    > export PYTHONPATH=<base path for the repo>
-    > pytests
+You can run the tests with `python -m pytest` once your environemnt is configured
 
 All tests are run automatically by CircleCI when you create a PR that connects to master.  Please make
 sure tests run relatively quickly (seconds, not minutes).

@@ -4,7 +4,6 @@ application with a specific config file"""
 
 # Flask Imports
 from flask_sqlalchemy import SQLAlchemy
-from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from flask import Flask
 
@@ -20,8 +19,6 @@ from config import config_dict
 db = SQLAlchemy()
 # For database migrations
 migrate = Migrate()
-# For HTML bootstrapping
-bootstrap = Bootstrap()
 
 
 def create_app(config_key='local'):
@@ -30,7 +27,6 @@ def create_app(config_key='local'):
     app.config.from_object(config_dict[config_key])
     config_dict[config_key].init_app(app)
 
-    bootstrap.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
 

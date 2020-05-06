@@ -2,6 +2,8 @@
 later on used at the very top level stories.py module to initiate the
 application with a specific config file"""
 
+import sqlalchemy
+
 # Flask Imports
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
@@ -17,8 +19,8 @@ from flask import Flask
 # For the database
 db = SQLAlchemy()
 
-# db is (for now) a psycopg2 connection
-def create_app(db):
+# TODO(asilverstein): This type might be totally wrong.
+def create_app(db: sqlalchemy.engine.Engine):
     app = Flask(__name__)
     # Enabling config initiation
     #app.config.from_object(config_dict[config_key])

@@ -1,5 +1,5 @@
 """
-TabWorking -- Load data from the Worksheet 2 tab
+TabStates -- Load data from the states tab
 """
 
 from typing import List, Dict
@@ -20,55 +20,28 @@ from data_convert.tab_base import TabBase
 from data_convert.tab_cleaner import TabCleaner
 
 
-class TabWorking(TabBase):
+class TabStates(TabBase):
 
     def __init__(self):
-        super(TabWorking, self).__init__()
-
-        # worksheet dates from top row
-        self.last_publish_time = ""
-        self.last_push_time = ""
-        self.current_time = ""
-
-
-    def parse_dates(self, dates: List):
-        if len(dates) != 5:
-            raise Exception("First row layout (containing dates) changed")
-        last_publish_label, last_publish_value, last_push_label, \
-            last_push_value, current_time_field = dates
-
-        if last_publish_label != "Last Publish Time:":
-            raise Exception("Last Publish Time (cells V1:U1) moved")
-        if last_push_label != "Last Push Time:":
-            raise Exception("Last Push Time (cells Z1:AA1) moved")
-        if not current_time_field.startswith("CURRENT TIME: "):
-            raise Exception("CURRENT TIME (cell AG1) moved")
-
-        self.last_publish_time = last_publish_value
-        self.last_push_time = last_push_value
-        self.current_time = current_time_field[current_time_field.index(":")+1:].strip()
+        super(TabStates, self).__init__()
 
 
     def _load_metadata(self) -> pd.DataFrame:
         xdir = os.path.dirname(__file__)
-        xpath = os.path.join(xdir, "meta_working.json")
+        xpath = os.path.join(xdir, "meta_states.json")
         if not os.path.exists(xpath):
             raise Exception(f"Missing meta-data file: {xpath}")
         return pd.read_json(xpath)
 
 
     def _load_content(self) -> pd.DataFrame:
-        """Load the working (unpublished) data from google sheets"""
+        """Load the states tab from google sheets"""
 
         gs = WorksheetWrapper()
-        url = gs.get_sheet_url("working")
+        url = gs.get_sheet_url("states")
 
         df = gs.download_data(url)
-        
-        dates = gs.read_as_list(df, "W1:AN1", ignore_blank_cells=True, single_row=True)
-        self.parse_dates(dates)
-
-        df = gs.read_as_frame(df, "A2:BR60", header_rows=1)
+        df = gs.read_as_frame(df, "A1:L57", header_rows=1)
 
         # cleanup logic
         cleaner = TabCleaner()
@@ -95,7 +68,7 @@ class TabWorking(TabBase):
 # ------------------------------------------------------------
 def main():
 
-    tab = TabWorking()
+    tab = TabStates()
     tab.load()
 
     logger.info(f"working\n{tab.df.to_json(orient='table', indent=2)}")

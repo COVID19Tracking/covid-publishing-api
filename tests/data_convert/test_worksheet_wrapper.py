@@ -74,7 +74,7 @@ def test_working():
     ws = WorksheetWrapper()
 
     # get the information about the working sheet
-    url = ws.get_sheet_url("dev")
+    url = ws.get_sheet_url("working")
     df_raw = ws.download_data(url)
 
     # this values will change if they change the worksheet

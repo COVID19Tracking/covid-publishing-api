@@ -13,6 +13,7 @@ import pandas as pd
 import socket
 
 from data_convert.tab_working import TabWorking
+from data_convert.tab_states import TabStates
 from data_convert.tab_checks import TabChecks
 
 
@@ -20,6 +21,7 @@ class DataSource:
 
     def __init__(self):
         self._working: TabWorking = TabWorking()
+        self._states: TabStates = TabStates()
         self._checks: TabChecks = TabChecks()
 
     @property
@@ -29,6 +31,15 @@ class DataSource:
         df = self._working.df
         if df is None:
             df = self._working.load()
+        return df
+
+    @property
+    def states(self) -> pd.DataFrame:
+        " the states tab from the google sheet"
+
+        df = self._states.df
+        if df is None:
+            df = self._states.load()
         return df
 
     @property

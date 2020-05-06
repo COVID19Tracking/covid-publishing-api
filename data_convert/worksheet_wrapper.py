@@ -26,9 +26,13 @@ class WorksheetWrapper():
     def get_sheet_url(self, name: str) -> str:
         "get the id for a worksheet by symbolic name"
         items = {
-            "dev": {
+            "working": {
                 "id": "1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU",
                 "url": "https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/export?format=csv&gid=2335020"
+            },
+            "states": {
+                "id": "1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU",
+                "url": "https://docs.google.com/spreadsheets/d/1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU/export?format=csv&gid=1208387230"
             },
             "checks": {
                 "id": "1MvvbHfnjF67GnYUDJJiNYUmGco5KQ9PW0ZRnEP9ndlU",

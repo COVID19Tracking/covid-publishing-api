@@ -11,3 +11,14 @@ def test_working():
 
     assert(not (df_working is None))
     assert(len(df_working) == 56)
+
+
+def test_states():
+
+    ds = DataSource()
+
+    df_states = ds.states
+    print(df_states)
+
+    assert(not (df_states is None))
+    assert(len(df_states) == 56)    

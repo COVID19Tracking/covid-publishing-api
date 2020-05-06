@@ -17,8 +17,8 @@ from flask import Flask
 # For the database
 db = SQLAlchemy()
 
-
-def create_app():
+# db is (for now) a psycopg2 connection
+def create_app(db):
     app = Flask(__name__)
     # Enabling config initiation
     #app.config.from_object(config_dict[config_key])

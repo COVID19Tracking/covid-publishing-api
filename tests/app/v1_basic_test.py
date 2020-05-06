@@ -1,7 +1,9 @@
 """
 Basic Test for V1 of API
 """
+import psycopg2
 import pytest
+import testing.postgresql
 
 import app
 
@@ -9,7 +11,14 @@ from flask import json, jsonify
 
 @pytest.fixture
 def client():
-    yield app.create_app().test_client()
+    # Once we define a schema in this repo we can import it to start.
+    #psql = testing.postgresql.Postgresql(copy_data_from='ourschema.sql')
+    psql = testing.postgresql.Postgresql()
+    db = psycopg2.connect(psql.url())
+
+    yield app.create_app(db).test_client()
+
+    psql.stop()
 
 def test_get_test(client):
     resp = client.get("/api/v1/test/")

@@ -11,14 +11,14 @@ COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Specity flask app entry point
-ENV FLASK_APP=stories.py
+ENV FLASK_APP=flask_server.py
 
 # Necessary Folders
 COPY app ./app
 COPY migrations ./migrations
 
 # Necessary Files
-COPY .env config.py stories.py boot.sh gunicorn.ini ./
+COPY .env config.py flask_server.py boot.sh gunicorn.ini ./
 RUN chmod +x ./boot.sh
 
 # Expose port

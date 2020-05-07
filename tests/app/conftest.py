@@ -1,17 +1,31 @@
 import pytest
 from app import create_app, db
-from decouple import config
+
+import testing.postgresql
+
+class TestingPostgresqlConfig:
+    def __init__(self):
+        # TODO(asilverstein): Clean up after ourself
+        self.test_db = testing.postgresql.Postgresql()
+
+    @property
+    def SQLALCHEMY_DATABASE_URI(self):
+        return self.test_db.url()
+
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    @staticmethod
+    def init_app(app):
+        pass
+
 
 @pytest.fixture
 def app():
-    env_config = config("ENV", cast=str, default="unittestpostgresql")
-    app = create_app(env_config);
-    # create the database and load test data
-    # once we're ready to start testing with the db, setup the database
-    # with an initial schema
-#     with app.app_context():
-#         init_db()
-#         get_db().executescript(_data_sql)
+    conf = TestingPostgresqlConfig()
+    app = create_app(conf);
+    with app.app_context():
+       # Let SQLAlchemy do its thing and initialize the database
+       db.create_all()
 
     yield app
 

@@ -5,11 +5,17 @@ to this file, which will pick up the app to run their servers.
 from app import create_app, db
 from decouple import config
 
-# Config to be used is read from the .env file, and then used for initiaing the
-# application with the preconfigured create_app method.
-env_config = config("ENV", cast=str, default="develop")
+import config as configs
 
-app = create_app(env_config)
+# Figure out which config we want based on the `ENV` env variable
+env_config = config("ENV", cast=str, default="develop")
+config_dict = {
+    'localpsql': configs.LocalPSQLConfig,
+    'develop': configs.Develop,
+    'testing': configs.Testing,
+}
+
+app = create_app(config_dict[env_config]())
 
 # More custom commands can be added to flasks CLI here(for running tests and
 # other stuff)

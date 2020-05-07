@@ -6,23 +6,14 @@ application with a specific config file"""
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 
-# Importing configs
-from config import config_dict
-
-# Setup
-
-# We iniate the database and other packages that are going to play together
-# with the app here
-
 # For the database
 db = SQLAlchemy()
 
-
-def create_app(config_key='local'):
+def create_app(config):
     app = Flask(__name__)
-    # Enabling config initiation
-    app.config.from_object(config_dict[config_key])
-    config_dict[config_key].init_app(app)
+
+    app.config.from_object(config)
+    config.init_app(app)
 
     db.init_app(app)
 

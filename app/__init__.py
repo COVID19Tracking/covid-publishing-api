@@ -18,11 +18,11 @@ from config import config_dict
 db = SQLAlchemy()
 
 
-def create_app(config_key='local'):
+def create_app(config):
     app = Flask(__name__)
-    # Enabling config initiation
-    app.config.from_object(config_dict[config_key])
-    config_dict[config_key].init_app(app)
+
+    app.config.from_object(config)
+    config.init_app(app)
 
     db.init_app(app)
 

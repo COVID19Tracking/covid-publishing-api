@@ -5,25 +5,8 @@ database setups."""
 from app.utils.logging import file_logger, client_logger
 from decouple import config as env_conf
 import logging
-import testing.postgresql
-
-class TestingPostgresqlConfig:
-    @property
-    def SQLALCHEMY_DATABASE_URI(self):
-        # TODO(asilverstein): I think we need to figure out how to shut
-        # this down cleanly.
-        return testing.postgresql.Postgresql().url()
-
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    @staticmethod
-    def init_app(app):
-        pass
 
 class LocalPSQLConfig:
-    # To initate the local config. Basically adds bunch of logger handlers with
-    # a postgre sql setup
-
     @property
     def SQLALCHEMY_DATABASE_URI(self):
         DB_USER = env_conf('DATABASE_USER')
@@ -110,7 +93,6 @@ class Develop:
 # Create a config dictionary which is used while initiating the application.
 # Config that is going to be used will be specified in the .env file
 config_dict = {
-    'unittestpostgresql': TestingPostgresqlConfig,
     'localpsql': LocalPSQLConfig,
     'develop': Develop,
     'testing': Testing,

@@ -1,6 +1,14 @@
 version: 2.1
+
+workflows:
+  version: 2.1
+  test:
+    jobs:
+      - unit_test
+      - build_and_test_docker
+
 jobs:
-  build:
+  unit_test:
     docker:
       - image: circleci/python:3.6.9
         environment:
@@ -23,3 +31,20 @@ jobs:
 
       - store_test_results:
           path: test-results
+
+  build_and_test_docker:
+    machine: true
+    steps:
+      - checkout
+      - run: docker build -t covpubapi .
+      - run:
+          # Bring up the container, and touch a file iff it dies cleanly
+          command: docker run covpubapi && touch .docker_exited_cleanly
+          background: true
+      # Give the container some time to come up and hang out
+      # TODO: At some point we should actually _query_ the thing, but this
+      # is a start.
+      - run: sleep 3
+      # Kill it and make sure we see our file
+      - run: docker stop `docker ps | grep covpubapi | awk '{ print $1 }'`
+      - run: "[ -f .docker_exited_cleanly ]"

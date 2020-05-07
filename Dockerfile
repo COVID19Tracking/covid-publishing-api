@@ -20,7 +20,7 @@ ENV FLASK_APP=flask_server.py
 COPY app ./app
 
 # Necessary Files
-COPY .env config.py flask_server.py boot.sh gunicorn.ini ./
+COPY config.py flask_server.py boot.sh gunicorn.ini ./
 RUN chmod +x ./boot.sh
 
 # Expose port

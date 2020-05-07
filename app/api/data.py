@@ -21,6 +21,23 @@ def get_batches():
         'batches': [batch.to_dict() for batch in batches]
     })
 
+@api.route('/data/state/', methods=['GET'])
+def get_states():
+    current_app.logger.info('Retrieving all states')
+    states = States.query.all()
+    return jsonify({
+        'states': [state.to_dict() for state in states]
+    })
+
+@api.route('/data/', methods=['GET'])
+def get_core_data():
+    current_app.logger.info('Retrieving all states')
+    data = CoreData.query.join(Batch).join(State).all()
+    # import pdb; pdb.set_trace()
+    return jsonify({
+        'data': [x.to_dict() for x in data]
+    }) 
+
 @api.route('/data/batch/', methods=['POST'])
 def post_data():
     current_app.logger.info('Got a post request!')

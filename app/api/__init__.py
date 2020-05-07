@@ -7,5 +7,4 @@ api = Blueprint('api', __name__)
 # routes, which are created under the api folder. As you add more routes,
 # you should import them here so the app can pick it up.
 
-from app.api import stories
 from app.api import data

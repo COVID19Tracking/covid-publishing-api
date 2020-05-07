@@ -26,11 +26,8 @@ def create_app(config_key='local'):
 
     db.init_app(app)
 
-    # Registering the main and the api blueprints here
-    from app.main import main as main_blueprint
+    # Register our API blueprint
     from app.api import api as api_blueprint
-
-    app.register_blueprint(main_blueprint)
     app.register_blueprint(api_blueprint, url_prefix='/api/v1')
 
     return app

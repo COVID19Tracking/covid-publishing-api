@@ -88,12 +88,3 @@ class Develop:
         app.logger.setLevel(logging.DEBUG)
         app.logger.addHandler(client_logger)
         app.logger.addHandler(file_logger)
-
-
-# Create a config dictionary which is used while initiating the application.
-# Config that is going to be used will be specified in the .env file
-config_dict = {
-    'localpsql': LocalPSQLConfig,
-    'develop': Develop,
-    'testing': Testing,
-}

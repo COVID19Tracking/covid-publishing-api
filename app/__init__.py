@@ -6,17 +6,8 @@ application with a specific config file"""
 from flask_sqlalchemy import SQLAlchemy
 from flask import Flask
 
-# Importing configs
-from config import config_dict
-
-# Setup
-
-# We iniate the database and other packages that are going to play together
-# with the app here
-
 # For the database
 db = SQLAlchemy()
-
 
 def create_app(config):
     app = Flask(__name__)

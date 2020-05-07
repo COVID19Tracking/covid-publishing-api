@@ -14,13 +14,12 @@ class Batch(db.Model):
     # primary key
     batch_id = db.Column(db.Integer, primary_key=True)
 
-    created_at = db.Column()
-    published_at = db.Column()
-    shift_lead = db.Column()
-    batch_note = db.Column()
-    data_entry_type = db.Column()
-    is_published = db.Column()
-    is_revision = db.Column()    
+    created_at = db.Column(db.DateTime())
+    published_at = db.Column(db.DateTime())
+    shift_lead = db.Column(db.String(255))
+    batch_note = db.Column(db.String(255))
+    is_published = db.Column(db.Boolean)
+    is_revision = db.Column(db.Boolean)
 
     def __init__(self, **kwargs):
         super(Batch, self).__init__(**kwargs)

@@ -11,6 +11,8 @@ jobs:
           DATABASE_USER: postgres
           DATABASE_PASS: postgres
     steps:
+      - run: sudo apt-get update
+      - run: sudo apt-get install postgresql
       - checkout
       - run: pipenv run pip install -r requirements.txt
       - run:

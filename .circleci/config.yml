@@ -37,4 +37,12 @@ jobs:
     steps:
       - checkout
       - run: docker build -t covpubapi .
-      - run: docker run covpubapi
+      - run:
+          # Bring up the container, and touch a file iff it dies cleanly
+          command: docker run covpubapi && touch .docker_exited_cleanly
+          background: true
+      # Give the container some time to come up and hang out
+      - run: sleep 3
+      # Kill it and make sure we see our file
+      - run: docker stop `docker ps | grep covpubapi | awk '{ print $1 }'`
+      - run: "[ -f .docker_exited_cleanly ]"

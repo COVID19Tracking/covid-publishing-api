@@ -9,4 +9,4 @@ while true; do
     sleep 5
 done
 
-exec gunicorn -c gunicorn.ini stories:app
+exec gunicorn -c gunicorn.ini flask_server:app

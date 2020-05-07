@@ -31,6 +31,13 @@ This will start a local server at http://127.0.0.1:5000/. For now, the landing i
 Instead, to test just API routing, you can go to: http://127.0.0.1:5000/api/v1/test/
 To test your CTP DB connection and list a bunch of batch IDs, go to: http://127.0.0.1:5000/api/v1/data/batch/
 
+Finally, to spin up a whole stack using docker:
+```
+docker build -t cvapi .
+docker run -it -p 8000:8000 cvapi
+```
+This is a WIP, but asilverstein@ would like this to be a part of the normal testing flow.
+
 ## Running data_convert
 
 Data Convert is a standalone Python module that gets data from the google sheet and converts it into a

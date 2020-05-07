@@ -4,7 +4,7 @@ from decouple import config
 
 @pytest.fixture
 def app():
-    env_config = config("ENV", cast=str, default="testing")
+    env_config = config("ENV", cast=str, default="unittestpostgresql")
     app = create_app(env_config);
     # create the database and load test data
     # once we're ready to start testing with the db, setup the database

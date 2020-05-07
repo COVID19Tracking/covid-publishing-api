@@ -7,6 +7,7 @@ pytest
 python-decouple
 requests
 six
+testing.postgresql
 
 # install data_convert
 ./data_convert

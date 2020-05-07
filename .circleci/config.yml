@@ -1,6 +1,6 @@
 version: 2.1
 jobs:
-  build:
+  unit_test:
     docker:
       - image: circleci/python:3.6.9
         environment:
@@ -23,3 +23,10 @@ jobs:
 
       - store_test_results:
           path: test-results
+
+  build_and_test_docker:
+    machine: true
+    steps:
+      - checkout
+      - run: docker build -t covpubapi .
+      - run: docker run covpubapi

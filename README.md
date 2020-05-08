@@ -22,7 +22,7 @@ You'll need to edit the database configuration variables in the .env file to use
 
 Assuming you've done the DB setup, you can run like this (for now using the original template files):
 ```shell
-export FLASK_APP=stories.py
+export FLASK_APP=flask_server.py
 flask run
 ```
 

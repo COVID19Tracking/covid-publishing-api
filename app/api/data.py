@@ -24,7 +24,7 @@ def get_batches():
 @api.route('/data/state/', methods=['GET'])
 def get_states():
     current_app.logger.info('Retrieving all states')
-    states = States.query.all()
+    states = State.query.all()
     return jsonify({
         'states': [state.to_dict() for state in states]
     })

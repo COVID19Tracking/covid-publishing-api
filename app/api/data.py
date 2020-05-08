@@ -33,7 +33,6 @@ def get_states():
 def get_core_data():
     current_app.logger.info('Retrieving all states')
     data = CoreData.query.join(Batch).join(State).all()
-    # import pdb; pdb.set_trace()
     return jsonify({
         'data': [x.to_dict() for x in data]
     }) 

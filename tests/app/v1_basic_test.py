@@ -48,6 +48,18 @@ def test_batch_models(app):
     assert "batches" in resp_json
     assert resp_json['batches'][0]['batch_note'] == 'test'
 
+def test_states(app):
+    with app.app_context():
+        nys = State(state_name='NY', full_name="New York")
+        db.session.add(nys)
+        db.session.commit()
+    
+    client = app.test_client()
+    resp_json = client.get("/api/v1/data/state/").json
+    assert "states" in resp_json
+    assert resp_json['states'][0]['full_name'] == 'New York'
+    assert resp_json['states'][0]['state_name'] == 'NY'
+
 def test_core_data(app):
     with app.app_context():
         nys = State(state_name='NY')
@@ -74,3 +86,4 @@ def test_core_data(app):
     # make sure the batch object also represented here, as a parent row
     assert 'batch' in core_data_returned_row
     assert core_data_returned_row['batch_id'] == core_data_returned_row['batch']['batch_id']
+    

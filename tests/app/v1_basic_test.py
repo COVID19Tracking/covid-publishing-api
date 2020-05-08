@@ -36,12 +36,13 @@ def test_post(app):
     assert resp.status_code == 400
 
 def test_models(app):
-    client = app.test_client()
+    # `db` is only valid within an app context, so start one and then shove some test data into it.
     with app.app_context():
         bat = Batch(batch_note='test', created_at=datetime.now(), is_published=False, is_revision=False)
         db.session.add(bat)
         db.session.commit()
 
+    client = app.test_client()
     resp = client.get("/api/v1/data/batch/")
     data = json.loads(resp.data)
     assert "batches" in data

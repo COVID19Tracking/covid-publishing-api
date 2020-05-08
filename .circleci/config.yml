@@ -2,10 +2,20 @@ version: 2.1
 
 workflows:
   version: 2.1
-  test:
+  test-and-deploy:
     jobs:
       - unit_test
       - build_and_test_docker
+      # TODO: add approval step to control when deploys take place
+      # https://circleci.com/docs/2.0/workflows/#holding-a-workflow-for-a-manual-approval
+      - deploy:
+          requires:
+            - unit_test
+            - build_and_test_docker
+          filters:
+            branches:
+              only:
+                - master
 
 jobs:
   unit_test:
@@ -48,3 +58,19 @@ jobs:
       # Kill it and make sure we see our file
       - run: docker stop `docker ps | grep covpubapi | awk '{ print $1 }'`
       - run: "[ -f .docker_exited_cleanly ]"
+      
+  deploy:
+    docker:
+      - image: circleci/python:3.6.9
+    steps:
+      - run: sudo apt-get update
+      - checkout
+      - run:
+          name: Installing deployment dependencies
+          command: sudo pip3 install awsebcli
+      - run:
+          name: Deploying
+          # TODO: in the future, this can use $CIRCLE_BRANCH to deploy to a 
+          # particular EB environment depending on the active branch 
+          command: eb deploy stage
+        

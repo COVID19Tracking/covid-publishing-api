@@ -44,5 +44,4 @@ def test_models(app):
 
     client = app.test_client()
     resp = client.get("/api/v1/data/batch/")
-    data = json.loads(resp.data)
-    assert "batches" in data
+    assert "batches" in resp.json

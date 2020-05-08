@@ -3,9 +3,6 @@ Basic Test for V1 of API
 """
 import pytest
 
-import conftest
-import sqlalchemy
-
 from flask import json, jsonify
 
 from app import db
@@ -41,10 +38,10 @@ def test_post(app):
 def test_models(app):
     client = app.test_client()
     with app.app_context():
-        test_db = db
         bat = Batch(batch_note='test', created_at=datetime.now(), is_published=False, is_revision=False)
-        test_db.session.add(bat)
-        test_db.session.commit()
-        resp = client.get("/api/v1/data/batch/")
-        data = json.loads(resp.data)
-        assert "batches" in data
+        db.session.add(bat)
+        db.session.commit()
+
+    resp = client.get("/api/v1/data/batch/")
+    data = json.loads(resp.data)
+    assert "batches" in data

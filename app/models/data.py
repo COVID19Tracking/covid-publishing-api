@@ -5,42 +5,43 @@ easily
 """
 
 from datetime import datetime
+from dateutil import tz
+
 from app import db
 
-from sqlalchemy.ext.declarative import declared_attr
+# from sqlalchemy.ext.declarative import declared_attr
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relationship
 
 class DataMixin(object):
 
-    @declared_attr
-    def __tablename__(cls):
-        return cls.__name__.lower()
-
     def to_dict(self):
         d = {}
         for column in self.__table__.columns:
-            d[column.name] = str(getattr(self, column.name))
+            attr = getattr(self, column.name)
+            if attr is not None:
+                d[column.name] = attr
         return d
 
 
 class Batch(db.Model, DataMixin):
-    __tablename__ = 'batch'
+    __tablename__ = 'batches'
 
     # primary key
-    batch_id = db.Column(db.Integer, primary_key=True)
+    batchId = db.Column(db.Integer, primary_key=True)
 
-    created_at = db.Column(db.DateTime(timezone=True), nullable=False)
-    published_at = db.Column(db.DateTime(timezone=True))
-    shift_lead = db.Column(db.String(100))
-    batch_note = db.Column(db.String)
-    data_entry_type = db.Column(db.String)
+    createdAt = db.Column(db.DateTime(timezone=True), nullable=False)
+    publishedAt = db.Column(db.DateTime(timezone=True))
+    shiftLead = db.Column(db.String(100))
+    batchNote = db.Column(db.String)
+    dataEntryType = db.Column(db.String)
 
     # false if preview state, true if live
-    is_published = db.Column(db.Boolean, nullable=False)
-    is_revision = db.Column(db.Boolean, nullable=False)
+    isPublished = db.Column(db.Boolean, nullable=False)
+    isRevision = db.Column(db.Boolean, nullable=False)
 
-    core_data_rows = relationship('CoreData', backref='batch')
+    coreDataRows = relationship('CoreData', backref='batch')
 
     def __init__(self, **kwargs):
         super(Batch, self).__init__(**kwargs)
@@ -49,10 +50,8 @@ class Batch(db.Model, DataMixin):
 class State(db.Model, DataMixin):
     __tablename__ = 'states'
 
-    state_name = db.Column(db.String, primary_key=True, nullable=False)
-    full_name = db.Column(db.String)
-
-    core_data_rows = relationship('CoreData', backref='state')
+    state = db.Column(db.String, primary_key=True, nullable=False)
+    fullName = db.Column(db.String)
 
     def __init__(self, **kwargs):
         super(State, self).__init__(**kwargs)
@@ -61,37 +60,63 @@ class State(db.Model, DataMixin):
 class CoreData(db.Model, DataMixin):
     __tablename__ = 'core_data'
 
-    last_update_time = db.Column(db.DateTime(timezone=True), nullable=False)
-    last_check_time = db.Column(db.DateTime(timezone=True), nullable=False)
+    # composite PK: state_name, batch_id
+    state = db.Column(db.String, db.ForeignKey('states.state'), 
+        nullable=False, primary_key=True)
+    batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
+        nullable=False, primary_key=True)
 
-    # the day we mean to report this data for; meant for "states daily" extraction
-    data_date = db.Column(db.Date, nullable=False)
-
-    tests = db.Column(db.Integer)
-    # TODO: additional cols to follow for positives, negatives, hospitalization data, etc.
-
-    checker = db.Column(db.String(100))
-    double_checker = db.Column(db.String(100))
-    public_notes = db.Column(db.String)
+    # data columns
+    positive = db.Column(db.Integer)
+    negative = db.Column(db.Integer)
+    pending = db.Column(db.Integer)
+    hospitalizedCurrently = db.Column(db.Integer)
+    hospitalizedCumulative = db.Column(db.Integer)
+    inIcuCurrently = db.Column(db.Integer)
+    inIcuCumulative = db.Column(db.Integer)
+    onVentilatorCurrently = db.Column(db.Integer)
+    onVentilatorCumulative = db.Column(db.Integer)
+    recovered = db.Column(db.Integer)
+    death = db.Column(db.Integer)
 
     # from worksheet, "Notes" column (made by checker or doublechecker)
-    private_notes = db.Column(db.String)
+    privateNotes = db.Column(db.String)
+    # Public Notes related to state
+    notes = db.Column(db.String)
 
-    # from state matrix: which columns?
-    source_notes = db.Column(db.String)
+    lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
+    lastCheckTime = db.Column(db.DateTime(timezone=True), nullable=False)
 
-    # composite PK: state_name, batch_id
-    state_name = db.Column(db.String, db.ForeignKey('states.state_name'), 
-        nullable=False, primary_key=True)
-    batch_id = db.Column(db.Integer, db.ForeignKey('batch.batch_id'),
-        nullable=False, primary_key=True)
+    # the day we mean to report this data for; meant for "states daily" extraction
+    dataDate = db.Column(db.Date, nullable=False)
+    checker = db.Column(db.String(100))
+    doubleChecker = db.Column(db.String(100))
+    publicNotes = db.Column(db.String)
+
+    # TODO: which columns from state matrix and states? In general, what metadata?
+    # What other columns are we missing?
+    sourceNotes = db.Column(db.String)
 
     def __init__(self, **kwargs):
         super(CoreData, self).__init__(**kwargs)
+
+    @hybrid_property
+    def lastUpdateEt(self):
+        # convert lastUpdateTime (UTC) to ET
+        raise NotImplementedError
+
+    @hybrid_property
+    def checkTimeEt(self):
+        # convert lastCheckTime (UTC) to ET
+        raise NotImplementedError
+
+    @hybrid_property
+    def totalTestResults(self):
+        # Calculated value (positive + negative) of total test results.
+        raise NotImplementedError
 
     # TODO: make a recursive to_dict in the base class to include relationships
     def to_dict(self):
         d = super(CoreData, self).to_dict()
         d['batch'] = self.batch.to_dict()
-        d['state'] = self.state.to_dict()
         return d

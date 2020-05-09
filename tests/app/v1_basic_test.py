@@ -8,6 +8,7 @@ from flask import json, jsonify
 from app import db
 from app.models.data import *
 
+
 def test_get_test(app):
     client = app.test_client()
     resp = client.get("/api/v1/test/")
@@ -16,6 +17,7 @@ def test_get_test(app):
     data = json.loads(resp.data)
     assert "test_data_key" in data 
     assert data["test_data_key"] == "test_data_value" 
+
 
 def test_post(app):
     client = app.test_client()
@@ -35,48 +37,77 @@ def test_post(app):
         content_type='application/json')
     assert resp.status_code == 400
 
+
 def test_batch_models(app):
     # `db` is only valid within an app context, so start one and then shove some test data into it.
     with app.app_context():
-        bat = Batch(batch_note='test', created_at=datetime.now(),
-            is_published=False, is_revision=False)
+        bat = Batch(batchNote='test', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
         db.session.add(bat)
         db.session.commit()
 
     client = app.test_client()
     resp_json = client.get("/api/v1/data/batch/").json
     assert "batches" in resp_json
-    assert resp_json['batches'][0]['batch_note'] == 'test'
+    assert resp_json['batches'][0]['batchNote'] == 'test'
+
 
 def test_states(app):
     with app.app_context():
-        nys = State(state_name='NY', full_name="New York")
+        nys = State(state='NY', fullName="New York")
         db.session.add(nys)
         db.session.commit()
     
     client = app.test_client()
     resp_json = client.get("/api/v1/data/state/").json
     assert "states" in resp_json
-    assert resp_json['states'][0]['full_name'] == 'New York'
-    assert resp_json['states'][0]['state_name'] == 'NY'
+    assert resp_json['states'][0]['fullName'] == 'New York'
+    assert resp_json['states'][0]['state'] == 'NY'
 
-def test_core_data(app):
+
+def _add_test_data(context_db):
+    nys = State(state='NY')
+    bat = Batch(batchNote='test', createdAt=datetime.now(),
+        isPublished=False, isRevision=False)
+    context_db.session.add(bat)
+    context_db.session.add(nys)
+    context_db.session.flush()
+
+    core_data_row = CoreData(
+        lastUpdateTime = datetime.now(), lastCheckTime = datetime.now(),
+        dataDate = datetime.today(), state='NY', batchId=bat.batchId)
+    
+    context_db.session.add(core_data_row)
+    context_db.session.commit()
+
+
+def test_core_data_model(app):
     with app.app_context():
-        nys = State(state_name='NY')
-        bat = Batch(batch_note='test', created_at=datetime.now(),
-            is_published=False, is_revision=False)
-        db.session.add(bat)
-        db.session.flush()
+        _add_test_data(db)
 
-        assert bat.batch_id == 1
-        core_data_row = CoreData(
-            last_update_time = datetime.now(), last_check_time = datetime.now(),
-            data_date = datetime.today(), state_name='NY', batch_id=bat.batch_id)
-        
-        db.session.add(nys)
-        db.session.add(core_data_row)
+        states = State.query.all()
+        assert len(states) == 1
+        state = states[0]
+        assert state.state == 'NY'
+        assert state.to_dict() == {'state': 'NY'}
 
-        db.session.commit()
+        batches = Batch.query.all()
+        assert len(batches) == 1
+        batch = batches[0]
+        assert batch.batchId == 1
+
+        core_data_all = CoreData.query.all()
+        assert len(core_data_all) == 1
+        core_data_row = core_data_all[0]
+        assert core_data_row.batchId == batch.batchId
+        assert core_data_row.state == state.state
+        # check that the Batch object is attached to this CoreData object
+        assert core_data_row.batch == batch
+
+
+def test_core_data_get(app):
+    with app.app_context():
+        _add_test_data(db)
 
     client = app.test_client()
     resp_json = client.get("/api/v1/data/").json
@@ -85,5 +116,4 @@ def test_core_data(app):
 
     # make sure the batch object also represented here, as a parent row
     assert 'batch' in core_data_returned_row
-    assert core_data_returned_row['batch_id'] == core_data_returned_row['batch']['batch_id']
-    
+    assert core_data_returned_row['batchId'] == core_data_returned_row['batch']['batchId']

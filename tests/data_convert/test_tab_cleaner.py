@@ -63,10 +63,10 @@ def test_remap_names():
     cleaner = TabCleaner()
 
     df_meta = pd.DataFrame([
-        {"name": "a", "out_name": "a"},
-        {"name": "b", "out_name": ""},
-        {"name": "c", "out_name": "x"},
-        {"name": "d", "out_name": None},
+        {"name": "a", "outName": "a"},
+        {"name": "b", "outName": ""},
+        {"name": "c", "outName": "x"},
+        {"name": "d", "outName": None},
     ])
 
     df = pd.DataFrame({"a": [1], "b": [2], "c": [3], "d": [4]})
@@ -80,11 +80,11 @@ def test_convert_types():
     cleaner = TabCleaner()
 
     df_meta = pd.DataFrame([
-        {"name": "a", "out_name": "a", "data_type": "str"},
-        {"name": "b", "out_name": "b", "data_type": "int"},
-        {"name": "c", "out_name": "c", "data_type": "datetime"},
-        {"name": "d", "out_name": None, "data_type": None},
-        {"name": "e", "out_name": "", "data_type": None}
+        {"name": "a", "outName": "a", "dataType": "str"},
+        {"name": "b", "outName": "b", "dataType": "int"},
+        {"name": "c", "outName": "c", "dataType": "datetime"},
+        {"name": "d", "outName": None, "dataType": None},
+        {"name": "e", "outName": "", "dataType": None}
     ])
 
     df = pd.DataFrame({"a": ["x", "y", "z"], "b": ["0", "1,000", ""], "c": ["3/1/20", "3/1/20 13:30", "3/1/20 01:20"]})

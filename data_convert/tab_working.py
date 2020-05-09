@@ -81,6 +81,8 @@ class TabWorking(TabBase):
         df_changed = cleaner.find_changes(df, df_meta_data)
         if not (df_changed is None):
             pd.set_option('display.max_rows', None)
+            pd.set_option('display.max_columns', None)
+            pd.set_option('display.width', 200)
             logger.error(f"Names are\n{df_changed}")
             raise Exception("Meta-data is out-of-date")
 

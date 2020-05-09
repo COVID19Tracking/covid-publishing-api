@@ -93,7 +93,9 @@ class TabCleaner:
         elif delta < 0:
             for _ in range(-delta): frame_names.append("")
 
-        return pd.DataFrame({"current": frame_names, "expected": expected_names})
+        df = pd.DataFrame({"current": frame_names, "expected": expected_names})
+        df["matched"] = (df.current == df.expected);
+        return df
 
     def remap_names(self, df: pd.DataFrame, df_meta: pd.DataFrame) -> pd.DataFrame:
         """ returns a new frame containing output columns
@@ -103,14 +105,14 @@ class TabCleaner:
 
         if not "name" in df_meta.columns:
             raise Exception("Expected name in meta-data")
-        if not "out_name" in df_meta.columns:
-            raise Exception("Expected out_name in meta-data")
+        if not "outName" in df_meta.columns:
+            raise Exception("Expected outName in meta-data")
 
         # can't use panda's index easily because of missing values
         lookup = {}
         in_name = df_meta.name.tolist()
-        out_name = df_meta.out_name.tolist()
-        for xin, xout in zip(in_name, out_name):
+        outName = df_meta.outName.tolist()
+        for xin, xout in zip(in_name, outName):
             if xout is None or xout == "": continue
             lookup[xin] = xout
 
@@ -124,21 +126,21 @@ class TabCleaner:
     def convert_types(self, df: pd.DataFrame, df_meta: pd.DataFrame):
         """ change all the types (in place) """
 
-        if not "out_name" in df_meta.columns:
-            raise Exception("Expected out_name in meta-data")
-        if not "data_type" in df_meta.columns:
-            raise Exception("Expected data_type in meta-data")
+        if not "outName" in df_meta.columns:
+            raise Exception("Expected outName in meta-data")
+        if not "dataType" in df_meta.columns:
+            raise Exception("Expected dataType in meta-data")
 
-        df_meta = df_meta[ df_meta.out_name.fillna("") != ""  ]
+        df_meta = df_meta[ df_meta.outName.fillna("") != ""  ]
 
-        df_missing = df_meta[ pd.isnull(df_meta.data_type) ]
+        df_missing = df_meta[ pd.isnull(df_meta.dataType) ]
         if df_missing.shape[0] > 0:
             for i, xrow in df_missing.iterrows():
-                logger.error(f"Missing data type for output column {xrow['out_name']}")
-            raise Exception(f"Missing data_types for {df_missing.shape[0]} output columns")
+                logger.error(f"Missing data type for output column {xrow['outName']}")
+            raise Exception(f"Missing data types for {df_missing.shape[0]} output columns")
 
-        out_vec = df_meta.out_name.values
-        type_vec = df_meta.data_type.values
+        out_vec = df_meta.outName.values
+        type_vec = df_meta.dataType.values
         column_types = { xout: xtype for xout, xtype in zip(out_vec, type_vec) }
 
         for n in df.columns.values:

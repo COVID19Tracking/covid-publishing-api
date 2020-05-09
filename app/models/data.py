@@ -40,7 +40,7 @@ class Batch(db.Model, DataMixin):
     isPublished = db.Column(db.Boolean, nullable=False)
     isRevision = db.Column(db.Boolean, nullable=False)
 
-    coreDataRows = relationship('CoreData', backref='batch')
+    coreData = relationship('CoreData', backref='batch')
 
     def __init__(self, **kwargs):
         super(Batch, self).__init__(**kwargs)
@@ -57,7 +57,7 @@ class State(db.Model, DataMixin):
 
 
 class CoreData(db.Model, DataMixin):
-    __tablename__ = 'core_data'
+    __tablename__ = 'coreData'
 
     # composite PK: state_name, batch_id
     state = db.Column(db.String, db.ForeignKey('states.state'), 
@@ -87,7 +87,7 @@ class CoreData(db.Model, DataMixin):
     lastCheckTime = db.Column(db.DateTime(timezone=True), nullable=False)
 
     # the day we mean to report this data for; meant for "states daily" extraction
-    dataDate = db.Column(db.Date, nullable=False)
+    date = db.Column(db.Date, nullable=False)
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
     publicNotes = db.Column(db.String)

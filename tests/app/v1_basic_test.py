@@ -75,7 +75,7 @@ def _add_test_data(context_db):
 
     core_data_row = CoreData(
         lastUpdateTime = datetime.now(), lastCheckTime = datetime.now(),
-        dataDate = datetime.today(), state='NY', batchId=bat.batchId)
+        date = datetime.today(), state='NY', batchId=bat.batchId)
     
     context_db.session.add(core_data_row)
     context_db.session.commit()
@@ -101,8 +101,12 @@ def test_core_data_model(app):
         core_data_row = core_data_all[0]
         assert core_data_row.batchId == batch.batchId
         assert core_data_row.state == state.state
+        
         # check that the Batch object is attached to this CoreData object
         assert core_data_row.batch == batch
+        # also check the relationship in the other direction, that CoreData is attached to the batch
+        assert len(batch.coreData) == 1
+        assert batch.coreData[0] == core_data_row
 
 
 def test_core_data_get(app):

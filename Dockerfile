@@ -18,6 +18,7 @@ ENV FLASK_APP=flask_server.py
 
 # Necessary Folders
 COPY app ./app
+COPY migrations ./migrations
 
 # Necessary Files
 COPY config.py flask_server.py boot.sh gunicorn.ini ./

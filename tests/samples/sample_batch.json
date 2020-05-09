@@ -13,7 +13,7 @@
       "twitter": "@Alaska_DHSS",
       "notes": "Total tests are taken from the annotations on the charts on the page. \nNegatives = (Totals – Positives)\nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.\nLast Updated (Local Time) = (today's date + time = 00:00)",
       "localNews": "",
-      "stateName": ".Alaska"
+      "stateName": "Alaska"
     },
     {
       "state": "AL",
@@ -22,7 +22,7 @@
       "twitter": "@alpublichealth",
       "notes": "Negatives = (Totals - Positives) \nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.\nLast Updated (Local Time) = (current date + time = 00:00)",
       "localNews": "",
-      "stateName": ".Alabama"
+      "stateName": "Alabama"
     },
     {
       "state": "AR",
@@ -31,7 +31,7 @@
       "twitter": "@adhpio",
       "notes": "",
       "localNews": "",
-      "stateName": ".Arkansas"
+      "stateName": "Arkansas"
     }
   ],
   "coreData": [

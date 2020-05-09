@@ -10,5 +10,5 @@
     {"name": "Comments (Deprecated)", "outName":  ""},
     {"name": "Local news", "outName":  "localNews"},
     {"name": "Population (July 2019)", "outName": "", "dataType": "int"},	
-    {"name": "", "outName":  "stateName"}
+    {"name": "col_1", "outName":  "stateName"}
 ]

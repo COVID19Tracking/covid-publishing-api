@@ -9,7 +9,6 @@ from dateutil import tz
 
 from app import db
 
-# from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
 from sqlalchemy.orm import relationship

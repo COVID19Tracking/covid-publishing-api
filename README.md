@@ -38,6 +38,17 @@ docker run -it -p 8000:8000 cvapi
 ```
 This is a WIP, but asilverstein@ would like this to be a part of the normal testing flow.
 
+## DB setup/migration
+
+This repo has been set up with Alembic migrations through Flask, using `flask init db`. If you're getting started in a development environment and you make a model change that needs a migration, do the following once you update the model code:
+```shell
+flask db migrate -m 'Describe your migration'
+```
+This will make Alembic generate a new file under migrations/versions. The migration is applied to the database specified in your environment by running:
+```shell
+flask db upgrade
+```
+
 ## Running data_convert
 
 Data Convert is a standalone Python module that gets data from the google sheet and converts it into a

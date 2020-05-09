@@ -1,14 +1,14 @@
 [
-    {"name": "State", "out_name": "state", "data_type": "str"},
-    {"name": "COVID-19 site (OLD)", "out_name":  ""},
-    {"name": "COVID-19 site", "out_name":  "primary"},
-    {"name": "COVID-19 site (secondary)", "out_name":  "secondary"},
-    {"name": "Twitter", "out_name":  "twitter"},
-    {"name": "PUI", "out_name":  ""},
-    {"name": "PUM", "out_name":  ""},
-    {"name": "Notes", "out_name":  "notes"},
-    {"name": "Comments (Deprecated)", "out_name":  ""},
-    {"name": "Local news", "out_name":  "localNews"},
-    {"name": "Population (July 2019)", "out_name": "", "data_type": "int"},	
-    {"name": "col_1", "out_name":  "stateName"}
+    {"name": "State", "outName": "state"},
+    {"name": "COVID-19 site (OLD)", "outName":  ""},
+    {"name": "COVID-19 site", "outName":  "primary"},
+    {"name": "COVID-19 site (secondary)", "outName":  "secondary"},
+    {"name": "Twitter", "outName":  "twitter"},
+    {"name": "PUI"},
+    {"name": "PUM"},
+    {"name": "Notes", "outName":  "notes"},
+    {"name": "Comments (Deprecated)", "outName":  ""},
+    {"name": "Local news", "outName":  "localNews"},
+    {"name": "Population (July 2019)", "outName": "", "dataType": "int"},	
+    {"name": "", "outName":  "stateName"}
 ]

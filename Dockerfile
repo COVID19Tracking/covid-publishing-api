@@ -4,9 +4,6 @@ FROM python:3.6
 # Set working directory within docker container
 WORKDIR /usr/src/stories
 
-# Needed early by `requirements.txt`
-COPY data_convert ./data_convert
-
 # Copy python reqs
 COPY requirements.txt ./
 

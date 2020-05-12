@@ -49,14 +49,6 @@ This will make Alembic generate a new file under migrations/versions. The migrat
 flask db upgrade
 ```
 
-## Running data_convert
-
-Data Convert is a standalone Python module that gets data from the google sheet and converts it into a
-typed and filtered Pandas DataFrame based on a meta-data file.  
-
-To view the JSON for the current worksheet under development, run `python tab_working.py`
-To view the JSON for the Checks tab, run `python tab_checks.py`
-
 ## Running the tests
 
 The project contains a tests directory that uses pytest.  

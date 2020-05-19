@@ -129,7 +129,7 @@ class CoreData(db.Model, DataMixin):
     lastCheckTime = db.Column(db.DateTime(timezone=True), nullable=False)
 
     # the day we mean to report this data for; meant for "states daily" extraction
-    date = db.Column(db.Date, nullable=False)
+    dataDate = db.Column(db.Date, nullable=False)
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
     publicNotes = db.Column(db.String)
@@ -165,7 +165,7 @@ class CoreData(db.Model, DataMixin):
         # FOR NOW defaulting lastCheckTime to lastUpdateTime; NEED TO FIX
         # ALSO FOR NOW defaulting "date" to today
         kwargs['lastCheckTime'] = kwargs['lastUpdateTime']
-        kwargs['date'] = date.today()
+        kwargs['dataDate'] = date.today()
 
         mapper = class_mapper(CoreData)
         relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}

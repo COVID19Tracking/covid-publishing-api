@@ -49,6 +49,8 @@ def post_core_data():
     payload = request.json  # this is a dict
 
     # test the input data
+    # TODO: return a status 400 (or maybe 422) with an array of validation errors when assertions
+    # like these fail.
     assert 'context' in payload, "Payload requires 'context' field"
     assert 'states' in payload, "Payload requires 'states' field"
     assert 'coreData' in payload, "Payload requires 'coreData' field"
@@ -63,11 +65,18 @@ def post_core_data():
     # add states
     state_dicts = payload['states']
     state_objects = []
-    for state_dict in state_dicts:
-        current_app.logger.info('Creating new state row from info: %s' % state_dict)
-        state = State(**state_dict)
-        state_objects.append(state)
-        db.session.add(state)
+    for state_dict in state_dicts: 
+        state_pk = state_dict['state']
+        if db.session.query(State).get(state_pk) is not None:
+            current_app.logger.info('Updating state row from info: %s' % state_dict)
+            db.session.query(State).filter_by(state=state_pk).update(state_dict)
+            state_objects.append(db.session.query(State).get(state_pk))  # return updated state
+        else:
+            current_app.logger.info('Creating new state row from info: %s' % state_dict)
+            state = State(**state_dict)
+            db.session.add(state)
+            state_objects.append(state)
+
         db.session.flush()
 
     # add all core data rows

@@ -126,7 +126,7 @@ class CoreData(db.Model, DataMixin):
     notes = db.Column(db.String)
 
     lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
-    lastCheckTime = db.Column(db.DateTime(timezone=True), nullable=False)
+    dateChecked = db.Column(db.DateTime(timezone=True), nullable=False)
 
     # the day we mean to report this data for; meant for "states daily" extraction
     dataDate = db.Column(db.Date, nullable=False)
@@ -138,21 +138,25 @@ class CoreData(db.Model, DataMixin):
     # What other columns are we missing?
     sourceNotes = db.Column(db.String)
 
+    # TODO: add key that ensures (state, batchId, date) is unique in coreData, so there can't be any
+    # ambiguity if there are somehow duplicates in a batch
+
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET
-        return self.lastUpdateTime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
+        return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
     def checkTimeEt(self):
-        # convert lastCheckTime (UTC) to ET
-        return self.lastCheckTime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
+        # convert dateChecked (UTC) to ET
+        return self.dateChecked.astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
     def totalTestResults(self):
         # Calculated value (positive + negative) of total test results.
-        if self.positive is None or self.negative is None:
-            return None
+        # For consistency with public API, treating a negative null as 0
+        if self.negative is None:
+            return self.positive
         return self.positive + self.negative
 
     def __init__(self, **kwargs):
@@ -162,9 +166,9 @@ class CoreData(db.Model, DataMixin):
         # convert lastUpdateIsoUtc to lastUpdateTime
         kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
 
-        # FOR NOW defaulting lastCheckTime to lastUpdateTime; NEED TO FIX
+        # FOR NOW defaulting dateChecked to lastUpdateTime; NEED TO FIX
         # ALSO FOR NOW defaulting "date" to today
-        kwargs['lastCheckTime'] = kwargs['lastUpdateTime']
+        kwargs['dateChecked'] = kwargs['lastUpdateTime']
         kwargs['dataDate'] = date.today()
 
         mapper = class_mapper(CoreData)

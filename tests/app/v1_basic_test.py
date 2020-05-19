@@ -42,3 +42,34 @@ def test_post_core_data(app):
     assert resp.json['batches'][0]['batchId'] == 1
     # assert batch data has rows attached to it
     assert len(resp.json['batches'][0]['coreData']) == 4
+
+def test_post_core_data_updating_state(app):
+    with app.app_context():
+        nys = State(state='AK', name='Alaska')
+        db.session.add(nys)
+        db.session.commit()
+
+        states = State.query.all()
+        assert len(states) == 1
+        state = states[0]
+        assert state.state == 'AK'
+        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska'}
+
+    client = app.test_client()
+    resp = client.get('/api/v1/public/states/info')
+    assert resp.json[0]['state'] == "AK"
+    # we haven't created this value yet
+    assert 'twitter' not in resp.json[0]
+
+    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
+    with open(example_filename) as f:
+        payload_json_str = f.read()
+    resp = client.post(
+        "/api/v1/batches",
+        data=payload_json_str,
+        content_type='application/json')
+
+    # check that the last POST call updated the Alaska info, adding a "twitter" field from test file
+    resp = client.get('/api/v1/public/states/info')
+    assert resp.json[0]['state'] == "AK"
+    assert resp.json[0]['twitter'] == "@Alaska_DHSS"

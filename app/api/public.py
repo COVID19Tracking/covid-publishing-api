@@ -12,6 +12,6 @@ from app import db
 @api.route('/public/states/info', methods=['GET'])
 def get_states():
     states = State.query.all()
-    return jsonify({
+    return jsonify(
         [state.to_dict() for state in states]
-    })
+    )

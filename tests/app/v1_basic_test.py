@@ -32,8 +32,10 @@ def test_post_core_data(app):
     assert resp.status_code == 201
 
     # we should've written 5 states, 4 core data rows, 1 batch
-    resp = client.get('/api/v1/states')
-    assert len(resp.json['states']) == 5
+    resp = client.get('/api/v1/public/states/info')
+    assert len(resp.json) == 5
+    assert resp.json[0]['state'] == "AK"
+    assert resp.json[0]['twitter'] == "@Alaska_DHSS"
 
     resp = client.get('/api/v1/batches')
     assert len(resp.json['batches']) == 1

@@ -144,13 +144,11 @@ class CoreData(db.Model, DataMixin):
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET
-        # return self.lastUpdateTime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
         return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
     def checkTimeEt(self):
         # convert dateChecked (UTC) to ET
-        # return self.dateChecked.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
         return self.dateChecked.astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property

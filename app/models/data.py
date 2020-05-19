@@ -4,23 +4,32 @@ inherited from a SQLAlchemy class so a DB entry with a table can be built
 easily
 """
 
-from datetime import datetime
-from dateutil import tz
+from datetime import datetime, date
+from dateutil import parser
+import pytz
 
 from app import db
+import logging
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import class_mapper, relationship
+
 
 class DataMixin(object):
 
     def to_dict(self):
         d = {}
+        # get column attributes, skip any nulls
         for column in self.__table__.columns:
             attr = getattr(self, column.name)
             if attr is not None:
                 d[column.name] = attr
+        # get derived fields (hybrid_property)
+        for key, prop in inspect(self.__class__).all_orm_descriptors.items():
+            if isinstance(prop, hybrid_property):
+                d[key] = getattr(self, key)
+
         return d
 
 
@@ -42,18 +51,48 @@ class Batch(db.Model, DataMixin):
 
     coreData = relationship('CoreData', backref='batch')
 
+    # This method isn't used when the object is read from the DB; only when a new one is being
+    # created, as from a POST JSON payload.
     def __init__(self, **kwargs):
-        super(Batch, self).__init__(**kwargs)
+        # parse datetime fields
+
+        # if there is no createdAt field, set it to datetime now
+        if 'createdAt' not in kwargs:
+            kwargs['createdAt'] = pytz.utc.localize(datetime.now())
+        else:
+            logging.info(
+                'New batch came in with existing createdAt: %s' % kwargs['createdAt'])
+
+        # setting default values for isPublished, isRevision: mimics preview state
+        kwargs['isPublished'] = False
+        kwargs['isRevision'] = False
+
+        mapper = class_mapper(Batch)
+        relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}
+        super(Batch, self).__init__(**relevant_kwargs)
+
+
+    def to_dict(self):
+        d = super(Batch, self).to_dict()
+        d['coreData'] = [coreData.to_dict() for coreData in self.coreData]
+        return d
 
 
 class State(db.Model, DataMixin):
     __tablename__ = 'states'
 
     state = db.Column(db.String, primary_key=True, nullable=False)
-    fullName = db.Column(db.String)
+    name = db.Column(db.String)
+    covid19Site = db.Column(db.String)
+    covid19SiteOld = db.Column(db.String)
+    covid19SiteSecondary = db.Column(db.String)
+    twitter = db.Column(db.String)
+    notes = db.Column(db.String)
 
     def __init__(self, **kwargs):
-        super(State, self).__init__(**kwargs)
+        mapper = class_mapper(State)
+        relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}
+        super(State, self).__init__(**relevant_kwargs)
 
 
 class CoreData(db.Model, DataMixin):
@@ -96,26 +135,35 @@ class CoreData(db.Model, DataMixin):
     # What other columns are we missing?
     sourceNotes = db.Column(db.String)
 
-    def __init__(self, **kwargs):
-        super(CoreData, self).__init__(**kwargs)
-
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET
-        raise NotImplementedError
+        return self.lastUpdateTime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
     def checkTimeEt(self):
         # convert lastCheckTime (UTC) to ET
-        raise NotImplementedError
+        return self.lastCheckTime.replace(tzinfo=pytz.utc).astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
     def totalTestResults(self):
         # Calculated value (positive + negative) of total test results.
-        raise NotImplementedError
+        if self.positive is None or self.negative is None:
+            return None
+        return self.positive + self.negative
 
-    # TODO: make a recursive to_dict in the base class to include relationships
-    def to_dict(self):
-        d = super(CoreData, self).to_dict()
-        d['batch'] = self.batch.to_dict()
-        return d
+    def __init__(self, **kwargs):
+        # strip any empty string fields from kwargs
+        kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
+
+        # convert lastUpdateIsoUtc to lastUpdateTime
+        kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
+
+        # FOR NOW defaulting lastCheckTime to lastUpdateTime; NEED TO FIX
+        # ALSO FOR NOW defaulting "date" to today
+        kwargs['lastCheckTime'] = kwargs['lastUpdateTime']
+        kwargs['date'] = date.today()
+
+        mapper = class_mapper(CoreData)
+        relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}
+        super(CoreData, self).__init__(**relevant_kwargs)

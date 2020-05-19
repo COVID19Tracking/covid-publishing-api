@@ -6,6 +6,7 @@ gunicorn
 psycopg2
 pytest
 python-decouple
+pytz
 requests
 six
 testing.postgresql

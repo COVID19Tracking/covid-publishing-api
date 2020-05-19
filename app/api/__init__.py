@@ -8,3 +8,4 @@ api = Blueprint('api', __name__)
 # you should import them here so the app can pick it up.
 
 from app.api import data
+from app.api import public

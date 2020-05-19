@@ -19,21 +19,6 @@ def test_get_test(app):
     assert "test_data_key" in data 
     assert data["test_data_key"] == "test_data_value" 
 
-
-def test_get_states(app):
-    client = app.test_client()
-    with app.app_context():
-        nys = State(state='NY', name='New York')
-        wa = State(state='WA', name='Washington')
-        db.session.add(nys)
-        db.session.add(wa)
-        db.session.commit()
-
-    resp = client.get("/api/v1/states")
-    assert resp.status_code == 200
-    assert len(resp.json['states']) == 2
-
-
 def test_post_core_data(app):
     client = app.test_client()
 

@@ -88,6 +88,9 @@ class State(db.Model, DataMixin):
     covid19SiteSecondary = db.Column(db.String)
     twitter = db.Column(db.String)
     notes = db.Column(db.String)
+    pui = db.Column(db.String)
+    pum = db.Column(db.Boolean)
+    fips = db.Column(db.String)
 
     def __init__(self, **kwargs):
         mapper = class_mapper(State)

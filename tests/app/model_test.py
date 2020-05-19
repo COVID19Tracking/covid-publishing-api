@@ -56,8 +56,9 @@ def test_core_data_model(app):
         assert core_data_row.batchId == batch.batchId
         assert core_data_row.state == state.state
 
-        # check derived value
+        # check derived values
         assert core_data_row.totalTestResults == 25
+        assert core_data_row.lastUpdateEt.tzinfo.zone == 'US/Eastern'
         
         # check that the Batch object is attached to this CoreData object
         assert core_data_row.batch == batch

@@ -19,21 +19,6 @@ def test_get_test(app):
     assert "test_data_key" in data 
     assert data["test_data_key"] == "test_data_value" 
 
-
-def test_get_states(app):
-    client = app.test_client()
-    with app.app_context():
-        nys = State(state='NY', name='New York')
-        wa = State(state='WA', name='Washington')
-        db.session.add(nys)
-        db.session.add(wa)
-        db.session.commit()
-
-    resp = client.get("/api/v1/states")
-    assert resp.status_code == 200
-    assert len(resp.json['states']) == 2
-
-
 def test_post_core_data(app):
     client = app.test_client()
 
@@ -47,8 +32,10 @@ def test_post_core_data(app):
     assert resp.status_code == 201
 
     # we should've written 5 states, 4 core data rows, 1 batch
-    resp = client.get('/api/v1/states')
-    assert len(resp.json['states']) == 5
+    resp = client.get('/api/v1/public/states/info')
+    assert len(resp.json) == 5
+    assert resp.json[0]['state'] == "AK"
+    assert resp.json[0]['twitter'] == "@Alaska_DHSS"
 
     resp = client.get('/api/v1/batches')
     assert len(resp.json['batches']) == 1

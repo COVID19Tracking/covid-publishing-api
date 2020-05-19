@@ -12,7 +12,7 @@
          "covid19SiteSecondary":"http://dhss.alaska.gov/dph/Epi/id/Pages/COVID-19/default.aspx",
          "twitter":"@Alaska_DHSS",
          "pui":"All data",
-         "pum":"N",
+         "pum":false,
          "notes":"Total tests are taken from the annotations on the charts on the page. \nNegatives = (Totals – Positives)\nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.\nLast Updated (Local Time) = (today's date + time = 00:00) ",
          "name":".Alaska"
       },
@@ -23,7 +23,7 @@
          "covid19SiteSecondary":"https://dph1.adph.state.al.us/covid-19/",
          "twitter":"@alpublichealth",
          "pui":"No data",
-         "pum":"N",
+         "pum":false,
          "notes":"Negatives = (Totals - Positives) \nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.\nLast Updated (Local Time) = (current date + time = 00:00)",
          "name":".Alabama"
       },
@@ -34,7 +34,7 @@
          "covid19SiteSecondary":"https://adem.maps.arcgis.com/apps/opsdashboard/index.html#/f533ac8a8b6040e5896b05b47b17a647",
          "twitter":"@adhpio",
          "pui":"All data",
-         "pum":"Y",
+         "pum":true,
          "notes":"",
          "name":".Arkansas"
       },
@@ -45,7 +45,7 @@
          "covid19SiteSecondary":"https://www.facebook.com/amsamgov/",
          "twitter":"",
          "pui":"No Data",
-         "pum":"N",
+         "pum":true,
          "notes":"Our data comes from a press release [from 5/1](https://6fe16cc8-c42f-411f-9950-4abb1763c703.filesusr.com/ugd/4bfff9_54e0ecfd113444029f54b7ebbcc92972.pdf) ",
          "name":"American Samoa"
       },
@@ -56,7 +56,7 @@
          "covid19SiteSecondary":"https://www.azdhs.gov/preparedness/epidemiology-disease-control/infectious-disease-epidemiology/index.php#novel-coronavirus-home",
          "twitter":"@azdhs",
          "pui":"All data",
-         "pum":"N",
+         "pum":false,
          "notes":"Dashboard now has a new tab that details total tested. \nNegative = Total - Positive.\nWe do not currently track it, but hospitalization and ICU data is available from [Maricopa County](https://www.maricopa.gov/5460/Coronavirus-Disease-2019) and [Pima County](https://webcms.pima.gov/cms/One.aspx?portalId=169&pageId=527452).",
          "name":".Arizona"
       }
@@ -144,3 +144,4 @@
       }
    ]
 }
+   

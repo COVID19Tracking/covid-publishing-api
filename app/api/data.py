@@ -122,4 +122,3 @@ def post_core_data():
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
         'states': [state.to_dict() for state in state_objects]
     }), 201
-

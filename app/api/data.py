@@ -5,6 +5,10 @@ from app.api import api
 from app.models.data import *
 from app import db
 
+from datetime import datetime
+
+from sqlalchemy import func, and_
+
 ##############################################################################################
 ######################################   Health check      ###################################
 ##############################################################################################
@@ -31,6 +35,29 @@ def get_batches():
     return jsonify({
         'batches': [batch.to_dict() for batch in batches]
     })
+
+
+@api.route('/batches/<int:id>', methods=['GET'])
+def get_batch_by_id(id):
+    batch = Batch.query.get_or_404(id)
+    current_app.logger.info('Returning batch %d' % id)
+    return jsonify(batch.to_dict())
+
+
+@api.route('/batches/<int:id>/publish', methods=['POST'])
+def publish_batch(id):
+    current_app.logger.info('Received request to publish batch %d' % id)
+    batch = Batch.query.get_or_404(id)
+
+    # if batch is already published, fail out
+    if batch.isPublished:
+        return 'Batch %d already published, rejecting double-publish' % id, 422
+
+    batch.isPublished = True
+    batch.publishedAt = datetime.utcnow()   # set publish time to now
+    db.session.add(batch)
+    db.session.commit()
+    return jsonify(batch.to_dict())
 
 
 ##############################################################################################
@@ -95,3 +122,24 @@ def post_core_data():
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
         'states': [state.to_dict() for state in state_objects]
     }), 201
+
+
+@api.route('/public/states/daily', methods=['GET'])
+def get_states_daily():
+    current_app.logger.info('Retrieving States Daily')
+    # first retrieve latest published batch per state
+    latest_state_daily_batches = db.session.query(
+        CoreData.state, CoreData.dataDate, func.max(CoreData.batchId).label('maxBid')
+        ).join(Batch).filter(Batch.dataEntryType=='daily').filter(Batch.isPublished==True
+        ).group_by(CoreData.state, CoreData.dataDate
+        ).subquery('latest_state_daily_batches')
+
+    latest_daily_data = db.session.query(CoreData).join(
+        latest_state_daily_batches,
+        and_(
+            CoreData.batchId == latest_state_daily_batches.c.maxBid,
+            CoreData.state == latest_state_daily_batches.c.state,
+            CoreData.dataDate == latest_state_daily_batches.c.dataDate
+        )).all()
+
+    return jsonify([x.to_dict() for x in latest_daily_data])

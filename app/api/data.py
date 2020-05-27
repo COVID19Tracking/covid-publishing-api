@@ -57,7 +57,7 @@ def publish_batch(id):
     batch.publishedAt = datetime.utcnow()   # set publish time to now
     db.session.add(batch)
     db.session.commit()
-    return jsonify(batch.to_dict())
+    return jsonify(batch.to_dict()), 201
 
 
 ##############################################################################################
@@ -123,23 +123,3 @@ def post_core_data():
         'states': [state.to_dict() for state in state_objects]
     }), 201
 
-
-@api.route('/public/states/daily', methods=['GET'])
-def get_states_daily():
-    current_app.logger.info('Retrieving States Daily')
-    # first retrieve latest published batch per state
-    latest_state_daily_batches = db.session.query(
-        CoreData.state, CoreData.dataDate, func.max(CoreData.batchId).label('maxBid')
-        ).join(Batch).filter(Batch.dataEntryType=='daily').filter(Batch.isPublished==True
-        ).group_by(CoreData.state, CoreData.dataDate
-        ).subquery('latest_state_daily_batches')
-
-    latest_daily_data = db.session.query(CoreData).join(
-        latest_state_daily_batches,
-        and_(
-            CoreData.batchId == latest_state_daily_batches.c.maxBid,
-            CoreData.state == latest_state_daily_batches.c.state,
-            CoreData.dataDate == latest_state_daily_batches.c.dataDate
-        )).all()
-
-    return jsonify([x.to_dict() for x in latest_daily_data])

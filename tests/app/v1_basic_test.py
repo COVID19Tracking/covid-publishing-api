@@ -75,3 +75,57 @@ def test_post_core_data_updating_state(app):
     resp = client.get('/api/v1/public/states/info')
     assert resp.json[0]['state'] == "AK"
     assert resp.json[0]['twitter'] == "@Alaska_DHSS"
+
+def test_get_batches(app):
+    with app.app_context():
+        # write 2 batches
+        bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        bat2 = Batch(batchNote='test2', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        db.session.add(bat1)
+        db.session.add(bat2)
+        db.session.commit()
+
+    client = app.test_client()
+    resp = client.get('/api/v1/batches')
+    assert resp.status_code == 200
+    assert len(resp.json['batches']) == 2
+    batch_notes = {x['batchNote'] for x in resp.json['batches']}
+    assert batch_notes == {'test1', 'test2'}
+
+    # get batch by ID
+    resp = client.get('/api/v1/batches/1')
+    assert resp.status_code == 200
+    assert resp.json['batchId'] == 1
+    assert resp.json['batchNote'] == 'test1'
+
+def test_publish_batch(app):
+    with app.app_context():
+        # write 2 batches
+        bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        bat2 = Batch(batchNote='test2', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        db.session.add(bat1)
+        db.session.add(bat2)
+        db.session.commit()
+
+    client = app.test_client()
+    resp = client.get('/api/v1/batches')
+    assert resp.status_code == 200
+    assert len(resp.json['batches']) == 2
+    # check that both batches not published
+    for batch in resp.json['batches']:
+        assert batch['isPublished'] == False
+
+    # publish the 2nd batch
+    resp = client.post('/api/v1/batches/2/publish')
+    assert resp.status_code == 201
+    # this should've returned the published batch
+    assert resp.json['batchId'] == 2
+    assert resp.json['isPublished'] == True
+
+    # check that the GET requests correctly reflect published status
+    assert client.get('/api/v1/batches/1').json['isPublished'] == False
+    assert client.get('/api/v1/batches/2').json['isPublished'] == True

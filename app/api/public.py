@@ -15,3 +15,25 @@ def get_states():
     return jsonify(
         [state.to_dict() for state in states]
     )
+
+# grabbed this solution from:
+# https://stackoverflow.com/questions/45775724/sqlalchemy-group-by-and-return-max-date?rq=1
+@api.route('/public/states/daily', methods=['GET'])
+def get_states_daily():
+    current_app.logger.info('Retrieving States Daily')
+    # first retrieve latest published batch per state
+    latest_state_daily_batches = db.session.query(
+        CoreData.state, CoreData.dataDate, func.max(CoreData.batchId).label('maxBid')
+        ).join(Batch).filter(Batch.dataEntryType=='daily').filter(Batch.isPublished==True
+        ).group_by(CoreData.state, CoreData.dataDate
+        ).subquery('latest_state_daily_batches')
+
+    latest_daily_data = db.session.query(CoreData).join(
+        latest_state_daily_batches,
+        and_(
+            CoreData.batchId == latest_state_daily_batches.c.maxBid,
+            CoreData.state == latest_state_daily_batches.c.state,
+            CoreData.dataDate == latest_state_daily_batches.c.dataDate
+        )).all()
+
+    return jsonify([x.to_dict() for x in latest_daily_data])

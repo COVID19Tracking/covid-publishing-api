@@ -31,3 +31,9 @@ def getToken_cli(name):
    click.echo(getToken(name))
    
 app.cli.add_command(auth_cli)
+
+@app.cli.command()
+def deploy():
+    """Run deployment tasks"""
+    # e.g. this _used_ to be where a database migration would run via `upgrade()`
+    pass

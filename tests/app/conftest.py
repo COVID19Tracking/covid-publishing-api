@@ -1,5 +1,6 @@
 import pytest
 from app import create_app, db
+from app.auth.auth_cli import getToken
 
 import testing.postgresql
 
@@ -13,6 +14,8 @@ class TestingPostgresqlConfig:
         return self.test_db.url()
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    
+    SECRET_KEY = '12345'
 
     @staticmethod
     def init_app(app):
@@ -28,3 +31,14 @@ def app():
        db.create_all()
 
     yield app
+
+@pytest.fixture
+def headers(app):
+    with app.app_context():
+        auth_token = getToken('testing')
+        
+    headers = {
+        'Authorization': 'Bearer {}'.format(auth_token)
+    }
+    
+    yield headers

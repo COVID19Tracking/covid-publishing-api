@@ -19,7 +19,7 @@ def test_get_test(app):
     assert "test_data_key" in data 
     assert data["test_data_key"] == "test_data_value" 
 
-def test_post_core_data(app):
+def test_post_core_data(app, headers):
     client = app.test_client()
 
     example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
@@ -28,7 +28,8 @@ def test_post_core_data(app):
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,
-        content_type='application/json')
+        content_type='application/json', 
+        headers=headers)
     assert resp.status_code == 201
 
     # we should've written 5 states, 4 core data rows, 1 batch
@@ -43,7 +44,7 @@ def test_post_core_data(app):
     # assert batch data has rows attached to it
     assert len(resp.json['batches'][0]['coreData']) == 4
 
-def test_post_core_data_updating_state(app):
+def test_post_core_data_updating_state(app, headers):
     with app.app_context():
         nys = State(state='AK', name='Alaska')
         db.session.add(nys)
@@ -67,7 +68,9 @@ def test_post_core_data_updating_state(app):
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,
-        content_type='application/json')
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
 
     # check that the last POST call updated the Alaska info, adding a "twitter" field from test file
     resp = client.get('/api/v1/public/states/info')

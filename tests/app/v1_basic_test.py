@@ -31,9 +31,9 @@ def test_post_core_data(app):
         content_type='application/json')
     assert resp.status_code == 201
 
-    # we should've written 5 states, 4 core data rows, 1 batch
+    # we should've written 56 states, 4 core data rows, 1 batch
     resp = client.get('/api/v1/public/states/info')
-    assert len(resp.json) == 5
+    assert len(resp.json) == 56
     assert resp.json[0]['state'] == "AK"
     assert resp.json[0]['twitter'] == "@Alaska_DHSS"
 
@@ -41,7 +41,9 @@ def test_post_core_data(app):
     assert len(resp.json['batches']) == 1
     assert resp.json['batches'][0]['batchId'] == 1
     # assert batch data has rows attached to it
-    assert len(resp.json['batches'][0]['coreData']) == 4
+    assert len(resp.json['batches'][0]['coreData']) == 56
+    assert resp.json['batches'][0]['coreData'][1]['state'] == 'AL'
+    assert resp.json['batches'][0]['coreData'][1]['antibodyTotal'] == 25
 
 def test_post_core_data_updating_state(app):
     with app.app_context():

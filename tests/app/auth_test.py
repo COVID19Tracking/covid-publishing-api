@@ -1,5 +1,5 @@
 """
-Authenticaiton tests
+Authentication tests
 """
 import pytest
 

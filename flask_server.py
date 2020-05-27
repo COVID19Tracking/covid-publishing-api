@@ -23,7 +23,7 @@ app = create_app(config_dict[env_config]())
 # More custom commands can be added to flasks CLI here(for running tests and
 # other stuff)
 
-# register a custom command to get authenticaiton tokens
+# register a custom command to get authentication tokens
 auth_cli = AppGroup('auth')
 @auth_cli.command("getToken")
 @click.argument('name')

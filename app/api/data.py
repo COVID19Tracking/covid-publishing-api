@@ -5,6 +5,10 @@ from app.api import api
 from app.models.data import *
 from app import db
 
+from datetime import datetime
+
+from sqlalchemy import func, and_
+
 ##############################################################################################
 ######################################   Health check      ###################################
 ##############################################################################################
@@ -31,6 +35,29 @@ def get_batches():
     return jsonify({
         'batches': [batch.to_dict() for batch in batches]
     })
+
+
+@api.route('/batches/<int:id>', methods=['GET'])
+def get_batch_by_id(id):
+    batch = Batch.query.get_or_404(id)
+    current_app.logger.info('Returning batch %d' % id)
+    return jsonify(batch.to_dict())
+
+
+@api.route('/batches/<int:id>/publish', methods=['POST'])
+def publish_batch(id):
+    current_app.logger.info('Received request to publish batch %d' % id)
+    batch = Batch.query.get_or_404(id)
+
+    # if batch is already published, fail out
+    if batch.isPublished:
+        return 'Batch %d already published, rejecting double-publish' % id, 422
+
+    batch.isPublished = True
+    batch.publishedAt = datetime.utcnow()   # set publish time to now
+    db.session.add(batch)
+    db.session.commit()
+    return jsonify(batch.to_dict()), 201
 
 
 ##############################################################################################

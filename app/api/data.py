@@ -4,6 +4,7 @@ from flask import jsonify, request, current_app, abort
 from app.api import api
 from app.models.data import *
 from app import db
+from flask_jwt_extended import jwt_required
 
 from datetime import datetime
 
@@ -20,6 +21,11 @@ def get_data():
     current_app.logger.debug('This is a debug log')
     return jsonify({'test_data_key': 'test_data_value'})
 
+
+@api.route('/test_auth', methods=['GET'])
+@jwt_required
+def test_auth():
+    return jsonify({'user': 'authenticated'}),200
 
 ##############################################################################################
 ######################################   Batches      ########################################
@@ -66,6 +72,7 @@ def publish_batch(id):
 
 
 @api.route('/batches', methods=['POST'])
+@jwt_required
 def post_core_data():
     """
     Workhorse POST method for core data

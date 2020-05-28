@@ -58,6 +58,25 @@ You can run the tests with `python -m pytest` once your environemnt is configure
 All tests are run automatically by CircleCI when you create a PR that connects to master.  Please make
 sure tests run relatively quickly (seconds, not minutes).
 
+## Authentication
+
+Endpoints that create/update data are authenticated with a JWT bearer token. 
+
+To obtain a token, run:
+```shell
+flask auth getToken tokenName
+```
+
+The token is secured by the value of `SECRET_KEY`, so tokens generated in one environment will not work elsewhere 
+unless they have the same secret (this value should overridden on any server).
+
+To pass a token to the API, include it as a header:
+```Authorization: Bearer <token>
+```
+
+When writing tests that call authenticated endpoints, use the `headers` fixture to obtain a headers object containing a valid token.
+When writing endpoints that require authentication, use the `@jwt_required` decorator.
+
 ## Documents
 
 Design Doc (https://docs.google.com/document/d/16JVr3aQE18BUEgrjf7UwQ7ssgghrYqN0lnCjzkghLV0/edit#heading=h.ng2qoy23i2hp)

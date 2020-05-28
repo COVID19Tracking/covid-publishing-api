@@ -3,7 +3,10 @@ stuff happens. You will always want to point your applications like Gunicorn
 to this file, which will pick up the app to run their servers.
 """
 from app import create_app, db
+from app.auth.auth_cli import getToken
 from decouple import config
+from flask.cli import AppGroup
+import click
 
 import config as configs
 
@@ -17,9 +20,21 @@ config_dict = {
 
 app = create_app(config_dict[env_config]())
 
+# outside of development or testing, require a real SECRET_KEY to be set
+if env_config != "develop" and env_config != "testing":
+    assert app.config['SECRET_KEY'] != "12345", "You must set a secure SECRET_KEY"
+
 # More custom commands can be added to flasks CLI here(for running tests and
 # other stuff)
 
+# register a custom command to get authentication tokens
+auth_cli = AppGroup('auth')
+@auth_cli.command("getToken")
+@click.argument('name')
+def getToken_cli(name):
+   click.echo(getToken(name))
+   
+app.cli.add_command(auth_cli)
 
 @app.cli.command()
 def deploy():

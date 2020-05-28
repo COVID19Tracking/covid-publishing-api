@@ -10,3 +10,4 @@ pytz
 requests
 six
 testing.postgresql
+flask-jwt-extended

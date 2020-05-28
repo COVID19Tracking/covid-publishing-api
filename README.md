@@ -67,7 +67,7 @@ To obtain a token, run:
 flask auth getToken tokenName
 ```
 
-The token is secured by the value of `FLASK_SECRET`, so tokens generated in one environment will not work elsewhere 
+The token is secured by the value of `SECRET_KEY`, so tokens generated in one environment will not work elsewhere 
 unless they have the same secret (this value should overridden on any server).
 
 To pass a token to the API, include it as a header:

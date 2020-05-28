@@ -20,6 +20,10 @@ config_dict = {
 
 app = create_app(config_dict[env_config]())
 
+# outside of development or testing, require a real SECRET_KEY to be set
+if env_config != "develop" and env_config != "testing":
+    assert app.config['SECRET_KEY'] != "12345", "You must set a secure SECRET_KEY"
+
 # More custom commands can be added to flasks CLI here(for running tests and
 # other stuff)
 

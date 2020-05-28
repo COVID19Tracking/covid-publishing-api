@@ -30,7 +30,7 @@ def test_auth(app, headers):
     """
     client = app.test_client()
     resp = client.get('/api/v1/test_auth')
-    # should fail because this request lacks an authorizaiton header
+    # should fail because this request lacks an authorization header
     assert resp.status_code == 401 
     
     bad_headers = {

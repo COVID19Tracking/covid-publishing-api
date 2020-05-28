@@ -25,6 +25,14 @@ def test_post_core_data(app, headers):
     example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
     with open(example_filename) as f:
         payload_json_str = f.read()
+
+    # attempt to post data without an auth token
+    resp = client.post(
+        "/api/v1/batches",
+        data=payload_json_str,
+        content_type='application/json')
+    assert resp.status_code == 401 # should fail with an authentication error
+
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,

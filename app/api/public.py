@@ -5,6 +5,8 @@ from app.api import api
 from app.models.data import *
 from app import db
 
+from sqlalchemy import func, and_
+
 ##############################################################################################
 ######################################   States      #########################################
 ##############################################################################################
@@ -23,9 +25,9 @@ def get_states_daily():
     current_app.logger.info('Retrieving States Daily')
     # first retrieve latest published batch per state
     latest_state_daily_batches = db.session.query(
-        CoreData.state, CoreData.dataDate, func.max(CoreData.batchId).label('maxBid')
+        CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
         ).join(Batch).filter(Batch.dataEntryType=='daily').filter(Batch.isPublished==True
-        ).group_by(CoreData.state, CoreData.dataDate
+        ).group_by(CoreData.state, CoreData.date
         ).subquery('latest_state_daily_batches')
 
     latest_daily_data = db.session.query(CoreData).join(
@@ -33,7 +35,7 @@ def get_states_daily():
         and_(
             CoreData.batchId == latest_state_daily_batches.c.maxBid,
             CoreData.state == latest_state_daily_batches.c.state,
-            CoreData.dataDate == latest_state_daily_batches.c.dataDate
+            CoreData.date == latest_state_daily_batches.c.date
         )).all()
 
     return jsonify([x.to_dict() for x in latest_daily_data])

@@ -29,6 +29,9 @@ def test_get_states_daily(app):
     # post some test data
     client = app.test_client()
 
+    # TODO: for now, this is one day's worth of data. Need to expand this to multiple days, once
+    # we start passing "date" in the JSON (right now inferring it). Then this test case will be more
+    # meaningful
     example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
     with open(example_filename) as f:
         payload_json_str = f.read()
@@ -39,5 +42,15 @@ def test_get_states_daily(app):
     assert resp.status_code == 201
 
     resp = client.get("/api/v1/public/states/daily")
+    assert resp.status_code == 200
+    # batch hasn't been published
+    assert resp.json == []
 
-    # TODO: finish this test!
+    # publish it, make sure the data comes back
+    resp = client.post('/api/v1/batches/1/publish')
+    assert resp.status_code == 201
+
+    resp = client.get("/api/v1/public/states/daily")
+    assert resp.status_code == 200
+    # check that we returned all states
+    assert len(resp.json) == 56

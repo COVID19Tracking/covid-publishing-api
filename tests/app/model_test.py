@@ -27,7 +27,7 @@ def _add_test_data(context_db):
     context_db.session.flush()
 
     core_data_row = CoreData(
-        lastUpdateIsoUtc=datetime.now().isoformat(),
+        lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
         date=datetime.today(), state='NY', batchId=bat.batchId,
         positive=20, negative=5)
     

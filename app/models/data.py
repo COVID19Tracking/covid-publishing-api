@@ -136,11 +136,11 @@ class CoreData(db.Model, DataMixin):
     # Public Notes related to state
     notes = db.Column(db.String)
 
+    # the day we mean to report this data for; meant for "states daily" extraction
+    date = db.Column(db.Date, nullable=False)
     lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
     dateChecked = db.Column(db.DateTime(timezone=True), nullable=False)
-
-    # the day we mean to report this data for; meant for "states daily" extraction
-    dataDate = db.Column(db.Date, nullable=False)
+    
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
     publicNotes = db.Column(db.String)
@@ -158,11 +158,6 @@ class CoreData(db.Model, DataMixin):
         return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
 
     @hybrid_property
-    def checkTimeEt(self):
-        # convert dateChecked (UTC) to ET
-        return self.dateChecked.astimezone(pytz.timezone('US/Eastern'))
-
-    @hybrid_property
     def totalTestResults(self):
         # Calculated value (positive + negative) of total test results.
         # For consistency with public API, treating a negative null as 0
@@ -176,11 +171,11 @@ class CoreData(db.Model, DataMixin):
 
         # convert lastUpdateIsoUtc to lastUpdateTime
         kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
+        kwargs['dateChecked'] = parser.parse(kwargs['dateChecked'])
 
-        # FOR NOW defaulting dateChecked to lastUpdateTime; NEED TO FIX
-        # ALSO FOR NOW defaulting "date" to today
-        kwargs['dateChecked'] = kwargs['lastUpdateTime']
-        kwargs['dataDate'] = date.today()
+        # FOR NOW defaulting "date" to today
+        if 'date' not in kwargs:
+            kwargs['date'] = date.today()
 
         mapper = class_mapper(CoreData)
         relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}

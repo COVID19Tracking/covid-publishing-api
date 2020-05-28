@@ -111,7 +111,7 @@ def test_get_batches(app):
     assert resp.json['batchId'] == 1
     assert resp.json['batchNote'] == 'test1'
 
-def test_publish_batch(app):
+def test_publish_batch(app, headers):
     with app.app_context():
         # write 2 batches
         bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
@@ -131,7 +131,7 @@ def test_publish_batch(app):
         assert batch['isPublished'] == False
 
     # publish the 2nd batch
-    resp = client.post('/api/v1/batches/2/publish')
+    resp = client.post('/api/v1/batches/2/publish', headers=headers)
     assert resp.status_code == 201
     # this should've returned the published batch
     assert resp.json['batchId'] == 2

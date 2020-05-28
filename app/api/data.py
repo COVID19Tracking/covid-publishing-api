@@ -51,6 +51,7 @@ def get_batch_by_id(id):
 
 
 @api.route('/batches/<int:id>/publish', methods=['POST'])
+@jwt_required
 def publish_batch(id):
     current_app.logger.info('Received request to publish batch %d' % id)
     batch = Batch.query.get_or_404(id)

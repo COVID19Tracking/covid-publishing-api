@@ -25,7 +25,7 @@ def test_get_states(app):
     assert respjson[0]["pum"] == False
     assert respjson[0]["notes"] == 'Testing123'
 
-def test_get_states_daily(app):
+def test_get_states_daily(app, headers):
     # post some test data
     client = app.test_client()
 
@@ -38,7 +38,8 @@ def test_get_states_daily(app):
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,
-        content_type='application/json')
+        content_type='application/json',
+        headers=headers)
     assert resp.status_code == 201
 
     resp = client.get("/api/v1/public/states/daily")
@@ -48,6 +49,8 @@ def test_get_states_daily(app):
 
     # publish it, make sure the data comes back
     resp = client.post('/api/v1/batches/1/publish')
+    assert resp.status_code == 401 # should fail without authentication
+    resp = client.post('/api/v1/batches/1/publish', headers=headers)
     assert resp.status_code == 201
 
     resp = client.get("/api/v1/public/states/daily")

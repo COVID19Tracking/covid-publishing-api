@@ -53,6 +53,8 @@ class Testing:
     SQLALCHEMY_RECORD_QUERIES = True
 
     SECRET_KEY = env_conf("SECRET_KEY", cast=str, default="12345")
+    # by default, access tokens do not expire
+    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
     @staticmethod
     def init_app(app):
@@ -83,6 +85,8 @@ class Develop:
     # DEBUG = True
     # API configurations
     SECRET_KEY = env_conf("SECRET_KEY", cast=str, default="12345")
+    # by default, access tokens do not expire
+    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
     @staticmethod
     def init_app(app):

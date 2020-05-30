@@ -1,6 +1,4 @@
-"""This file is the main module which contains the app, where all the good
-stuff happens. You will always want to point your applications like Gunicorn
-to this file, which will pick up the app to run their servers.
+"""This file is the main module which contains the app.
 """
 from app import create_app, db
 from app.auth.auth_cli import getToken
@@ -10,9 +8,10 @@ import click
 
 import config as configs
 
-# Figure out which config we want based on the `ENV` env variable
-env_config = config("ENV", cast=str, default="develop")
+# Figure out which config we want based on the `ENV` env variable, default to local
+env_config = config("ENV", cast=str, default="localpsql")
 config_dict = {
+    'production': configs.Production,
     'localpsql': configs.LocalPSQLConfig,
     'develop': configs.Develop,
     'testing': configs.Testing,
@@ -20,12 +19,9 @@ config_dict = {
 
 app = create_app(config_dict[env_config]())
 
-# outside of development or testing, require a real SECRET_KEY to be set
-if env_config != "develop" and env_config != "testing":
+# for production, require a real SECRET_KEY to be set
+if env_config == 'production':
     assert app.config['SECRET_KEY'] != "12345", "You must set a secure SECRET_KEY"
-
-# More custom commands can be added to flasks CLI here(for running tests and
-# other stuff)
 
 # register a custom command to get authentication tokens
 auth_cli = AppGroup('auth')

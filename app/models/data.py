@@ -63,9 +63,11 @@ class Batch(db.Model, DataMixin):
             logging.info(
                 'New batch came in with existing createdAt: %s' % kwargs['createdAt'])
 
-        # setting default values for isPublished, isRevision: mimics preview state
-        kwargs['isPublished'] = False
-        kwargs['isRevision'] = False
+        # setting default values for isPublished, isRevision: mimics preview state (if not set)
+        if 'isPublished' not in kwargs:
+            kwargs['isPublished'] = False
+        if 'isRevision' not in kwargs:
+            kwargs['isRevision'] = False
 
         mapper = class_mapper(Batch)
         relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}
@@ -101,11 +103,13 @@ class State(db.Model, DataMixin):
 class CoreData(db.Model, DataMixin):
     __tablename__ = 'coreData'
 
-    # composite PK: state_name, batch_id
+    # composite PK: state_name, batch_id, date
     state = db.Column(db.String, db.ForeignKey('states.state'), 
         nullable=False, primary_key=True)
     batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
         nullable=False, primary_key=True)
+    # the day we mean to report this data for; meant for "states daily" extraction
+    date = db.Column(db.Date, nullable=False, primary_key=True)
 
     # data columns
     positive = db.Column(db.Integer)
@@ -136,8 +140,6 @@ class CoreData(db.Model, DataMixin):
     # Public Notes related to state
     notes = db.Column(db.String)
 
-    # the day we mean to report this data for; meant for "states daily" extraction
-    date = db.Column(db.Date, nullable=False)
     lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
     dateChecked = db.Column(db.DateTime(timezone=True), nullable=False)
     

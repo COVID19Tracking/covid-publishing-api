@@ -3,6 +3,7 @@
 from flask import jsonify, request, current_app, abort
 from app.api import api
 from app.models.data import *
+from app.utils.webhook import notify_webhook
 from app import db
 from flask_jwt_extended import jwt_required
 
@@ -64,6 +65,9 @@ def publish_batch(id):
     batch.publishedAt = datetime.utcnow()   # set publish time to now
     db.session.add(batch)
     db.session.commit()
+
+    notify_webhook()
+
     return jsonify(batch.to_dict()), 201
 
 

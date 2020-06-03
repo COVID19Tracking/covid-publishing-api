@@ -63,9 +63,11 @@ class Batch(db.Model, DataMixin):
             logging.info(
                 'New batch came in with existing createdAt: %s' % kwargs['createdAt'])
 
-        # setting default values for isPublished, isRevision: mimics preview state
-        kwargs['isPublished'] = False
-        kwargs['isRevision'] = False
+        # setting default values for isPublished, isRevision: mimics preview state (if not set)
+        if 'isPublished' not in kwargs:
+            kwargs['isPublished'] = False
+        if 'isRevision' not in kwargs:
+            kwargs['isRevision'] = False
 
         mapper = class_mapper(Batch)
         relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}
@@ -101,43 +103,43 @@ class State(db.Model, DataMixin):
 class CoreData(db.Model, DataMixin):
     __tablename__ = 'coreData'
 
-    # composite PK: state_name, batch_id
+    # composite PK: state_name, batch_id, date
     state = db.Column(db.String, db.ForeignKey('states.state'), 
         nullable=False, primary_key=True)
     batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
         nullable=False, primary_key=True)
+    # the day we mean to report this data for; meant for "states daily" extraction
+    date = db.Column(db.Date, nullable=False, primary_key=True)
 
     # data columns
-    positive = db.Column(db.Integer)
-    negative = db.Column(db.Integer)
-    pending = db.Column(db.Integer)
-    hospitalizedCurrently = db.Column(db.Integer)
-    hospitalizedCumulative = db.Column(db.Integer)
-    inIcuCurrently = db.Column(db.Integer)
-    inIcuCumulative = db.Column(db.Integer)
-    onVentilatorCurrently = db.Column(db.Integer)
-    onVentilatorCumulative = db.Column(db.Integer)
-    recovered = db.Column(db.Integer)
-    death = db.Column(db.Integer)
-    deathConfirmed = db.Column(db.Integer)
-    deathProbable = db.Column(db.Integer)
-    antibodyTotal = db.Column(db.Integer)
-    antibodyPositive = db.Column(db.Integer)
-    antibodyNegative = db.Column(db.Integer)
-    pcrTotalTests = db.Column(db.Integer)
-    pcrPositiveTests = db.Column(db.Integer)
-    pcrNegativeTests = db.Column(db.Integer)
-    pcrPositiveCases = db.Column(db.Integer)
-    totalTestsPeople = db.Column(db.Integer)
-    positiveConfirmed = db.Column(db.Integer)
+    positive = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    pending = db.Column(db.Integer, info={"includeInUSDaily": True})
+    hospitalizedCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})
+    hospitalizedCumulative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    inIcuCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})
+    inIcuCumulative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    onVentilatorCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})
+    onVentilatorCumulative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    recovered = db.Column(db.Integer, info={"includeInUSDaily": True})
+    death = db.Column(db.Integer, info={"includeInUSDaily": True})
+    deathConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
+    deathProbable = db.Column(db.Integer, info={"includeInUSDaily": True})
+    antibodyTotal = db.Column(db.Integer, info={"includeInUSDaily": True})
+    antibodyPositive = db.Column(db.Integer, info={"includeInUSDaily": True})
+    antibodyNegative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    pcrTotalTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    pcrPositiveTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    pcrNegativeTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    pcrPositiveCases = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
 
     # from worksheet, "Notes" column (made by checker or doublechecker)
     privateNotes = db.Column(db.String)
     # Public Notes related to state
     notes = db.Column(db.String)
 
-    # the day we mean to report this data for; meant for "states daily" extraction
-    date = db.Column(db.Date, nullable=False)
     lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
     dateChecked = db.Column(db.DateTime(timezone=True), nullable=False)
     

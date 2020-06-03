@@ -9,6 +9,7 @@ from flask import json, jsonify
 
 from app import db
 from app.models.data import *
+from app.api.public import get_us_daily_column_names
 
 def test_get_states(app):
     client = app.test_client()
@@ -58,6 +59,14 @@ def test_get_states_daily(app, headers):
     assert resp.status_code == 200
     # check that we returned all states
     assert len(resp.json) == 56
+
+
+def test_get_us_daily_column_names(app):
+    colnames = get_us_daily_column_names()
+    assert 'positive' in colnames
+    assert 'checker' not in colnames
+    assert len(colnames) == 22
+
 
 def test_get_us_daily(app, headers):
     with app.app_context():

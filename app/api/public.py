@@ -47,39 +47,26 @@ def get_states_daily():
     return jsonify([x.to_dict() for x in latest_daily_data])
 
 
+# Returns a list of CoreData column names representing numerical data that needs to be summed and
+# served in States Daily.
+def get_us_daily_column_names():
+    colnames = []
+    for column in CoreData.__table__.columns:
+        if column.info.get("includeInUSDaily") == True:
+            colnames.append(column.name)
+
+    return colnames
+
+
 @api.route('/public/us/daily', methods=['GET'])
 def get_us_daily():
     current_app.logger.info('Retrieving US Daily')
-    # get the States Daily data, and for each day add up all the rows
-    # latest_daily_data = get_states_daily_from_db()
-
     states_daily = states_daily_query().subquery('states_daily')
 
-    us_daily = db.session.query(
-        states_daily.c.date,
-        label('positive', func.sum(states_daily.c.positive)),
-        label('negative', func.sum(states_daily.c.negative)),
-        label('pending', func.sum(states_daily.c.pending)),
-        label('hospitalizedCurrently', func.sum(states_daily.c.hospitalizedCurrently)),
-        label('hospitalizedCumulative', func.sum(states_daily.c.hospitalizedCumulative)),
-        label('inIcuCurrently', func.sum(states_daily.c.inIcuCurrently)),
-        label('inIcuCumulative', func.sum(states_daily.c.inIcuCumulative)),
-        label('onVentilatorCurrently', func.sum(states_daily.c.onVentilatorCurrently)),
-        label('onVentilatorCumulative', func.sum(states_daily.c.onVentilatorCumulative)),
-        label('recovered', func.sum(states_daily.c.recovered)),
-        label('death', func.sum(states_daily.c.death)),
-        label('deathConfirmed', func.sum(states_daily.c.deathConfirmed)),
-        label('deathProbable', func.sum(states_daily.c.deathProbable)),
-        label('antibodyTotal', func.sum(states_daily.c.antibodyTotal)),
-        label('antibodyPositive', func.sum(states_daily.c.antibodyPositive)),
-        label('antibodyNegative', func.sum(states_daily.c.antibodyNegative)),
-        label('pcrTotalTests', func.sum(states_daily.c.pcrTotalTests)),
-        label('pcrPositiveTests', func.sum(states_daily.c.pcrPositiveTests)),
-        label('pcrNegativeTests', func.sum(states_daily.c.pcrNegativeTests)),
-        label('pcrPositiveCases', func.sum(states_daily.c.pcrPositiveCases)),
-        label('totalTestsPeople', func.sum(states_daily.c.totalTestsPeople)),
-        label('positiveConfirmed', func.sum(states_daily.c.positiveConfirmed)),
-        ).group_by(states_daily.c.date).all()
+    # get a list of columns to aggregate, sum over those from the states_daily subquery
+    colnames = get_us_daily_column_names()
+    col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
+    us_daily = db.session.query(states_daily.c.date, *col_list).group_by(states_daily.c.date).all()
 
     us_data_by_date = []
     for day in us_daily:

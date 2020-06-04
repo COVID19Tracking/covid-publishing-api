@@ -23,11 +23,6 @@ jobs:
       - image: circleci/python:3.6.9
         environment:
           PIPENV_VENV_IN_PROJECT: true
-          DATABASE_HOST: 127.0.0.1
-          DATABASE_NAME: test
-          DATABASE_PORT: 5432
-          DATABASE_USER: postgres
-          DATABASE_PASS: postgres
     steps:
       - run: sudo apt-get update
       - run: sudo apt-get install postgresql

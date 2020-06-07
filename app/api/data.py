@@ -1,6 +1,7 @@
 """Registers the necessary routes for the core data model. """
+import flask
 
-from flask import jsonify, request, current_app, abort
+from flask import current_app, jsonify
 from app.api import api
 from app.models.data import *
 from app import db
@@ -81,14 +82,15 @@ def post_core_data():
     Requirements: 
     """
     current_app.logger.info('Got a post request!')
-    payload = request.json  # this is a dict
+    payload = flask.request.json  # this is a dict
 
     # test the input data
-    # TODO: return a status 400 (or maybe 422) with an array of validation errors when assertions
-    # like these fail.
-    assert 'context' in payload, "Payload requires 'context' field"
-    assert 'states' in payload, "Payload requires 'states' field"
-    assert 'coreData' in payload, "Payload requires 'coreData' field"
+    if 'context' not in payload:
+        return flask.Response("Payload requires 'context' field", status=400)
+    if 'states' not in payload:
+        return flask.Response("Payload requires 'states' field", status=400)
+    if 'coreData' not in payload:
+        return flask.Response("Payload requires 'coreData' field", status=400)
 
     # we construct the batch from the push context
     context = payload['context']

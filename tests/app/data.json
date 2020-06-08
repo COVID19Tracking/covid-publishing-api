@@ -10,6 +10,7 @@
          "covid19SiteOld":"http://dhss.alaska.gov/dph/Epi/id/Pages/COVID-19/default.aspx",
          "covid19Site":"http://dhss.alaska.gov/dph/Epi/id/Pages/COVID-19/monitoring.aspx",
          "covid19SiteSecondary":"http://dhss.alaska.gov/dph/Epi/id/Pages/COVID-19/default.aspx",
+         "covid19SiteTertiary":"http://example.com/",
          "twitter":"@Alaska_DHSS",
          "pui":"All data",
          "pum":true,

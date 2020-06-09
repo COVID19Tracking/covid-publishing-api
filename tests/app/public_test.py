@@ -2,6 +2,7 @@
 Tests for public API endpoints
 """
 from datetime import date
+from dateutil import parser
 import os
 import pytest
 
@@ -11,7 +12,7 @@ from app import db
 from app.models.data import *
 from app.api.public import get_us_daily_column_names
 
-def test_get_states(app):
+def test_get_state_info(app):
     client = app.test_client()
     with app.app_context():
         nys = State(state='NY', name='New York', pum=False, notes='Testing123')
@@ -27,10 +28,11 @@ def test_get_states(app):
     assert respjson[0]["pum"] == False
     assert respjson[0]["notes"] == 'Testing123'
 
+
 def test_get_states_daily(app, headers):
     # post some test data
     client = app.test_client()
-
+    
     # TODO: for now, this is one day's worth of data. Need to expand this to multiple days, once
     # we start passing "date" in the JSON (right now inferring it). Then this test case will be more
     # meaningful
@@ -68,7 +70,8 @@ def test_get_us_daily_column_names(app):
     assert len(colnames) == 22
 
 
-def test_get_us_daily(app, headers):
+# Test data used for testing US daily and states daily by state
+def test_data_json_with_ny_wa_two_days():
     # TODO: Probably pull out some helpers to make this kind of
     # testing more succinct
     ny = {"state": "NY"}
@@ -121,6 +124,11 @@ def test_get_us_daily(app, headers):
       "coreData": [ny_today, wa_today, ny_yest, wa_yest]
     }
 
+    return test_data
+
+
+def test_get_us_daily(app, headers):
+    test_data = test_data_json_with_ny_wa_two_days()
     client = app.test_client()
 
     # Write a batch containing the above data, two days each of NY and WA
@@ -155,3 +163,38 @@ def test_get_us_daily(app, headers):
         elif day_data['date'] == '20200524':
             assert day_data['positive'] == 24
             assert day_data['negative'] == 12
+
+
+def test_get_states_daily_for_state(app, headers):
+    test_data = test_data_json_with_ny_wa_two_days()
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days each of NY and WA
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(test_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    # publish batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+
+    # shouldn't work for "ZZ", but should work for both "ny" and "NY"
+    resp = client.get("/api/v1/public/states/daily/ZZ")
+    assert resp.status_code == 404
+
+    resp = client.get("/api/v1/public/states/daily/ny")
+    assert len(resp.json) == 2
+    resp = client.get("/api/v1/public/states/daily/NY")
+    assert len(resp.json) == 2
+
+    for day_data in resp.json:
+        day = parser.parse(day_data['date']).day
+        assert day in [24, 25]
+        if day == 25:
+            assert day_data['positive'] == 20
+            assert day_data['negative'] == 5
+        elif day == 24:
+            assert day_data['positive'] == 15
+            assert day_data['negative'] == 4

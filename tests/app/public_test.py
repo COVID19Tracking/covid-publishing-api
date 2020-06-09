@@ -69,44 +69,79 @@ def test_get_us_daily_column_names(app):
 
 
 def test_get_us_daily(app, headers):
-    with app.app_context():
-        # add two states and a daily batch in publish mode
-        db.session.add(State(state='NY'))
-        db.session.add(State(state='WA'))
-        bat = Batch(batchNote='test', createdAt=datetime.now(),
-            isPublished=True, isRevision=False, dataEntryType='daily')
-        db.session.add(bat)
-        db.session.flush()
+    # TODO: Probably pull out some helpers to make this kind of
+    # testing more succinct
+    ny = {"state": "NY"}
+    wa = {"state": "WA"}
 
-        today = date(2020, 5, 25)
-        yesterday = date(2020, 5, 24)
+    today = date(2020, 5, 25)
+    yesterday = date(2020, 5, 24)
 
-        # add rows for today
-        db.session.add(CoreData(
-            lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-            date=today, state='NY', batchId=bat.batchId,
-            positive=20, negative=5))
-        db.session.add(CoreData(
-            lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-            date=today, state='WA', batchId=bat.batchId,
-            positive=10, negative=10))
+    ny_today = {
+      "state": "NY",
+      "lastUpdateIsoUtc": datetime.now().isoformat(),
+      "dateChecked": datetime.now().isoformat(),
+      "date": today,
+      "positive": 20,
+      "negative": 5
+    }
+    wa_today = {
+      "state": "WA",
+      "lastUpdateIsoUtc": datetime.now().isoformat(),
+      "dateChecked": datetime.now().isoformat(),
+      "date": today,
+      "positive": 10,
+      "negative": 10
+    }
+    ny_yest = {
+      "state": "NY",
+      "lastUpdateIsoUtc": datetime.now().isoformat(),
+      "dateChecked": datetime.now().isoformat(),
+      "date": yesterday,
+      "positive": 15,
+      "negative": 4
+    }
+    wa_yest = {
+      "state": "WA",
+      "lastUpdateIsoUtc": datetime.now().isoformat(),
+      "dateChecked": datetime.now().isoformat(),
+      "date": yesterday,
+      "positive": 9,
+      "negative": 8
+    }
 
-        # add rows for yesterday
-        db.session.add(CoreData(
-            lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-            date=yesterday, state='NY', batchId=bat.batchId,
-            positive=15, negative=4))
-        db.session.add(CoreData(
-            lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-            date=yesterday, state='WA', batchId=bat.batchId,
-            positive=9, negative=8))
-
-        db.session.commit()
-
-        assert len(CoreData.query.all()) > 0
-        assert len(Batch.query.all()) > 0
+    ctx = {
+      "dataEntryType": "daily",
+      "shiftLead": "test",
+      "batchNote": "This is a test"
+    }
+    test_data = {
+      "context": ctx,
+      "states": [ny, wa],
+      "coreData": [ny_today, wa_today, ny_yest, wa_yest]
+    }
 
     client = app.test_client()
+
+    # Write a batch containing the above data, two days each of NY and WA
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(test_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+
+    # We haven't published the batch yet, so we shouldn't have any data
+    resp = client.get("/api/v1/public/us/daily")
+    assert resp.status_code == 200
+    assert len(resp.json) == 0
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id),
+                       headers=headers)
+    assert resp.status_code == 201
+
     resp = client.get("/api/v1/public/us/daily")
     assert resp.status_code == 200
     assert len(resp.json) == 2

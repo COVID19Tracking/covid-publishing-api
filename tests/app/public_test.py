@@ -163,6 +163,7 @@ def test_get_us_daily(app, headers):
         elif day_data['date'] == '20200524':
             assert day_data['positive'] == 24
             assert day_data['negative'] == 12
+        assert(day_data['states'] == 2)
 
 
 def test_get_states_daily_for_state(app, headers):

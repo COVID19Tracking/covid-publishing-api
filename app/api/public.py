@@ -83,12 +83,15 @@ def get_us_daily():
     # get a list of columns to aggregate, sum over those from the states_daily subquery
     colnames = get_us_daily_column_names()
     col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
+    # Add a column to count the records contributing to this date. That should
+    # correspond to the number of states, assuming `states_daily` returns
+    # only a single row per state.
+    col_list.append(label('states', func.count()))
     us_daily = db.session.query(states_daily.c.date, *col_list).group_by(states_daily.c.date).all()
 
     us_data_by_date = []
     for day in us_daily:
         result_dict = day._asdict()
-        # TODO: add the number of states
         result_dict.update({
             'dateChecked': day.date.isoformat(),
             'date': day.date.strftime('%Y%m%d'),

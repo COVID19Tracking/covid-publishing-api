@@ -148,6 +148,8 @@ class CoreData(db.Model, DataMixin):
     doubleChecker = db.Column(db.String(100))
     publicNotes = db.Column(db.String)
 
+    dataQualityGrade = db.Column(db.String)
+
     # TODO: which columns from state matrix and states? In general, what metadata?
     # What other columns are we missing?
     sourceNotes = db.Column(db.String)

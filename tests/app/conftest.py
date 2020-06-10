@@ -17,6 +17,8 @@ class TestingPostgresqlConfig:
     
     SECRET_KEY = '12345'
 
+    API_WEBHOOK_URL = None
+
     @staticmethod
     def init_app(app):
         pass

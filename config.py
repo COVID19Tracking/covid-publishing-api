@@ -25,7 +25,9 @@ class LocalPSQLConfig:
 
     SECRET_KEY = env_conf("SECRET_KEY", cast=str, default="12345")
     # by default, access tokens do not expire
-    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False) 
+    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
+
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
 
     @staticmethod
     def init_app(app):
@@ -53,7 +55,9 @@ class Production:
 
     SECRET_KEY = env_conf("SECRET_KEY", cast=str, default="12345")
     # by default, access tokens do not expire
-    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False) 
+    JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
+
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
 
     @staticmethod
     def init_app(app):
@@ -88,6 +92,8 @@ class Testing:
     # by default, access tokens do not expire
     JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
+
     @staticmethod
     def init_app(app):
         # The default Flask logger level is set at ERROR, so if you want to see
@@ -113,6 +119,8 @@ class Develop:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
+
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
 
     # DEBUG = True
     # API configurations

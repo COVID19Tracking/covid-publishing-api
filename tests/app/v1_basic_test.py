@@ -111,7 +111,7 @@ def test_get_batches(app):
     assert resp.json['batchId'] == 1
     assert resp.json['batchNote'] == 'test1'
 
-def test_publish_batch(app, headers):
+def test_publish_batch(app, headers, requests_mock):
     with app.app_context():
         # write 2 batches
         bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
@@ -130,12 +130,18 @@ def test_publish_batch(app, headers):
     for batch in resp.json['batches']:
         assert batch['isPublished'] == False
 
+    # ensure the webhook is called on publish
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
+
     # publish the 2nd batch
     resp = client.post('/api/v1/batches/2/publish', headers=headers)
     assert resp.status_code == 201
     # this should've returned the published batch
     assert resp.json['batchId'] == 2
     assert resp.json['isPublished'] == True
+    assert requests_mock.call_count == 1
 
     # check that the GET requests correctly reflect published status
     assert client.get('/api/v1/batches/1').json['isPublished'] == False

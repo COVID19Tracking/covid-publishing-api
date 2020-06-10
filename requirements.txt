@@ -11,3 +11,5 @@ requests
 six
 testing.postgresql
 flask-jwt-extended
+requests
+requests-mock

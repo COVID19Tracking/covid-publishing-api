@@ -1,6 +1,7 @@
 """Registers the necessary routes for the public API endpoints."""
 
-from flask import jsonify, request, current_app, abort
+import flask
+
 from sqlalchemy import func, and_
 from sqlalchemy.sql import label
 
@@ -12,7 +13,7 @@ from app import db
 @api.route('/public/states/info', methods=['GET'])
 def get_states():
     states = State.query.all()
-    return jsonify(
+    return flask.jsonify(
         [state.to_dict() for state in states]
     )
 
@@ -20,12 +21,17 @@ def get_states():
 # grabbed this solution from:
 # https://stackoverflow.com/questions/45775724/sqlalchemy-group-by-and-return-max-date?rq=1
 #
-# Returns a SQLAlchemy BaseQuery object
-def states_daily_query():
+# Returns a SQLAlchemy BaseQuery object. If input state is not None, will return daily data only
+# for the input state.
+def states_daily_query(state=None):
     # first retrieve latest published batch per state
+    filter_list = [Batch.dataEntryType=='daily', Batch.isPublished==True]
+    if state is not None:
+        filter_list.append(CoreData.state==state)
     latest_state_daily_batches = db.session.query(
         CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
-        ).join(Batch).filter(Batch.dataEntryType=='daily').filter(Batch.isPublished==True
+        ).join(Batch
+        ).filter(*filter_list
         ).group_by(CoreData.state, CoreData.date
         ).subquery('latest_state_daily_batches')
 
@@ -42,9 +48,20 @@ def states_daily_query():
 
 @api.route('/public/states/daily', methods=['GET'])
 def get_states_daily():
-    current_app.logger.info('Retrieving States Daily')
+    flask.current_app.logger.info('Retrieving States Daily')
     latest_daily_data = states_daily_query().all()
-    return jsonify([x.to_dict() for x in latest_daily_data])
+    return flask.jsonify([x.to_dict() for x in latest_daily_data])
+
+
+@api.route('/public/states/<string:state>/daily', methods=['GET'])
+def get_states_daily_for_state(state):
+    flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
+    latest_daily_data_for_state = states_daily_query(state=state.upper()).all()
+    if len(latest_daily_data_for_state) == 0:
+        # likely state not found
+        return flask.Response("States Daily data unavailable for state %s" % state, status=404)
+
+    return flask.jsonify([x.to_dict() for x in latest_daily_data_for_state])
 
 
 # Returns a list of CoreData column names representing numerical data that needs to be summed and
@@ -60,7 +77,7 @@ def get_us_daily_column_names():
 
 @api.route('/public/us/daily', methods=['GET'])
 def get_us_daily():
-    current_app.logger.info('Retrieving US Daily')
+    flask.current_app.logger.info('Retrieving US Daily')
     states_daily = states_daily_query().subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery
@@ -78,5 +95,4 @@ def get_us_daily():
         })
         us_data_by_date.append(result_dict)
 
-    return jsonify(us_data_by_date)
-
+    return flask.jsonify(us_data_by_date)

@@ -181,12 +181,12 @@ def test_get_states_daily_for_state(app, headers):
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
 
     # shouldn't work for "ZZ", but should work for both "ny" and "NY"
-    resp = client.get("/api/v1/public/states/daily/ZZ")
+    resp = client.get("/api/v1/public/states/ZZ/daily")
     assert resp.status_code == 404
 
-    resp = client.get("/api/v1/public/states/daily/ny")
+    resp = client.get("/api/v1/public/states/ny/daily")
     assert len(resp.json) == 2
-    resp = client.get("/api/v1/public/states/daily/NY")
+    resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
 
     for day_data in resp.json:

@@ -53,7 +53,7 @@ def get_states_daily():
     return flask.jsonify([x.to_dict() for x in latest_daily_data])
 
 
-@api.route('/public/states/daily/<string:state>', methods=['GET'])
+@api.route('/public/states/<string:state>/daily', methods=['GET'])
 def get_states_daily_for_state(state):
     flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
     latest_daily_data_for_state = states_daily_query(state=state.upper()).all()

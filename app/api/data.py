@@ -146,3 +146,6 @@ def post_core_data():
     payload = flask.request.json  # this is a dict
 
     return post_core_data_json(payload)
+
+def edit_core_data():
+    flask.current_app.logger.info('Received a CoreData edit request')

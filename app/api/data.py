@@ -109,6 +109,7 @@ def post_core_data_json(payload):
             state_objects.append(state)
 
         db.session.flush()
+        # just adding a comment for no reason
 
     # add all core data rows
     core_data_dicts = payload['coreData']

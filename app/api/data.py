@@ -76,17 +76,8 @@ def publish_batch(id):
 ##############################################################################################
 
 
-@api.route('/batches', methods=['POST'])
-@jwt_required
-def post_core_data():
-    """
-    Workhorse POST method for core data
-
-    Requirements: 
-    """
-    flask.current_app.logger.info('Got a post request!')
-    payload = flask.request.json  # this is a dict
-
+# Expects a dictionary of push context, state info, and core data rows. Writes to DB.
+def post_core_data_json(payload):
     # test the input data
     if 'context' not in payload:
         return flask.Response("Payload requires 'context' field", status=400)
@@ -135,3 +126,17 @@ def post_core_data():
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
         'states': [state.to_dict() for state in state_objects]
     }), 201
+
+
+@api.route('/batches', methods=['POST'])
+@jwt_required
+def post_core_data():
+    """
+    Workhorse POST method for core data
+
+    Requirements: 
+    """
+    flask.current_app.logger.info('Received a CoreData write request')
+    payload = flask.request.json  # this is a dict
+
+    return post_core_data_json(payload)

@@ -141,8 +141,8 @@ class CoreData(db.Model, DataMixin):
     # Public Notes related to state
     notes = db.Column(db.String)
 
-    lastUpdateTime = db.Column(db.DateTime(timezone=True), nullable=False)
-    dateChecked = db.Column(db.DateTime(timezone=True), nullable=False)
+    lastUpdateTime = db.Column(db.DateTime(timezone=True))
+    dateChecked = db.Column(db.DateTime(timezone=True))
     
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
@@ -160,7 +160,10 @@ class CoreData(db.Model, DataMixin):
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET
-        return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
+        if self.lastUpdateTime is not None:
+            return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
+        else:
+            return None
 
     @hybrid_property
     def totalTestResults(self):
@@ -175,11 +178,15 @@ class CoreData(db.Model, DataMixin):
         kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
 
         # convert lastUpdateIsoUtc to lastUpdateTime
-        kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
-        kwargs['dateChecked'] = parser.parse(kwargs['dateChecked'])
+        if 'lastUpdateIsoUtc' in kwargs:
+            kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
+        if 'dateChecked' in kwargs:
+            kwargs['dateChecked'] = parser.parse(kwargs['dateChecked'])
 
         # FOR NOW defaulting "date" to today
-        if 'date' not in kwargs:
+        if 'date' in kwargs:
+            kwargs['date'] = parser.parse(str(kwargs['date']))
+        else:
             kwargs['date'] = date.today()
 
         mapper = class_mapper(CoreData)

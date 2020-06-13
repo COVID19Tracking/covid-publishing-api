@@ -191,11 +191,10 @@ def test_get_states_daily_for_state(app, headers):
     assert len(resp.json) == 2
 
     for day_data in resp.json:
-        day = parser.parse(day_data['date']).day
-        assert day in [24, 25]
-        if day == 25:
+        assert day_data['date'] in ['20200525', '20200524']
+        if day_data['date'] == '20200525':
             assert day_data['positive'] == 20
             assert day_data['negative'] == 5
-        elif day == 24:
+        elif day_data['date'] == '20200524':
             assert day_data['positive'] == 15
             assert day_data['negative'] == 4

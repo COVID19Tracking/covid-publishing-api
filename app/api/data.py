@@ -120,12 +120,18 @@ def post_core_data_json(payload):
         db.session.add(core_data)
         core_data_objects.append(core_data)
 
-    db.session.commit()
-    return flask.jsonify({
+    db.session.flush()
+
+    # construct the JSON before committing the session, since sqlalchemy objects behave weirdly
+    # once the session has been committed
+    json_to_return = {
         'batch': batch.to_dict(),
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
-        'states': [state.to_dict() for state in state_objects]
-    }), 201
+        'states': [state.to_dict() for state in state_objects],
+    }
+
+    db.session.commit()
+    return flask.jsonify(json_to_return), 201
 
 
 @api.route('/batches', methods=['POST'])

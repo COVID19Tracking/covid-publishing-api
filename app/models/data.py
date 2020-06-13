@@ -22,8 +22,11 @@ class DataMixin(object):
         d = {}
         # get column attributes, skip any nulls
         for column in self.__table__.columns:
+            repr_fn = column.info.get("repr")
             attr = getattr(self, column.name)
             if attr is not None:
+                if repr_fn is not None:
+                    attr = repr_fn(attr)
                 d[column.name] = attr
         # get derived fields (hybrid_property)
         for key, prop in inspect(self.__class__).all_orm_descriptors.items():
@@ -110,7 +113,8 @@ class CoreData(db.Model, DataMixin):
     batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
         nullable=False, primary_key=True)
     # the day we mean to report this data for; meant for "states daily" extraction
-    date = db.Column(db.Date, nullable=False, primary_key=True)
+    date = db.Column(db.Date, nullable=False, primary_key=True,
+        info={'repr': lambda x: x.strftime('%Y%m%d')})
 
     # data columns
     positive = db.Column(db.Integer, info={"includeInUSDaily": True})
@@ -154,9 +158,6 @@ class CoreData(db.Model, DataMixin):
     # What other columns are we missing?
     sourceNotes = db.Column(db.String)
 
-    # TODO: add key that ensures (state, batchId, date) is unique in coreData, so there can't be any
-    # ambiguity if there are somehow duplicates in a batch
-
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET
@@ -183,9 +184,9 @@ class CoreData(db.Model, DataMixin):
         if 'dateChecked' in kwargs:
             kwargs['dateChecked'] = parser.parse(kwargs['dateChecked'])
 
-        # FOR NOW defaulting "date" to today
+        # "date" is expected to be a date string, no times or timezones
         if 'date' in kwargs:
-            kwargs['date'] = parser.parse(str(kwargs['date']))
+            kwargs['date'] = parser.parse(str(kwargs['date']), ignoretz=True).date()
         else:
             kwargs['date'] = date.today()
 

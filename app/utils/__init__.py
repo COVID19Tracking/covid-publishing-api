@@ -23,6 +23,15 @@ def backfill(input_file):
 
     with open(input_file) as f:
         payload_json = json.load(f)
-        app.api.data.post_core_data_json(payload_json)
+        json_out = app.api.data.post_core_data_json(payload_json)
+
+        # publish backfill batch
+        batch_id = json_out[0].json['batch']['batchId']
+        flask.current_app.logger.info('Publishing batch %s' % batch_id)
+        batch = Batch.query.get_or_404(batch_id)
+        batch.isPublished = True
+        batch.publishedAt = datetime.utcnow()   # set publish time to now
+        db.session.add(batch)
+        db.session.commit()
 
     flask.current_app.logger.info('Backfilling complete!')

@@ -7,7 +7,9 @@ import pytest
 from flask import json, jsonify
 
 from app import db
+from app.api.data import any_existing_rows
 from app.models.data import *
+from common import *
 
 
 def test_get_test(app):
@@ -146,3 +148,103 @@ def test_publish_batch(app, headers, requests_mock):
     # check that the GET requests correctly reflect published status
     assert client.get('/api/v1/batches/1').json['isPublished'] == False
     assert client.get('/api/v1/batches/2').json['isPublished'] == True
+
+def test_any_existing_rows(app, headers):
+    client = app.test_client()
+
+    # Write a batch containing the above data, one day for NY and WA
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_yesterday()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+
+    # Write a batch for today but don't publish it yet
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_today()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+
+    # there should be existing published rows for yesterday NY and WA, and nothing else
+    with app.app_context():
+        assert any_existing_rows('NY', YESTERDAY.strftime("%Y%m%d"))
+        assert any_existing_rows('WA', YESTERDAY.strftime("%Y%m%d"))
+        assert not any_existing_rows('ZZ', YESTERDAY.strftime("%Y%m%d"))
+        assert not any_existing_rows('NY', TODAY.strftime("%Y%m%d"))
+
+    # Publish today's batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+
+    # there should be existing published rows for yesterday and today NY and WA
+    with app.app_context():
+        assert any_existing_rows('NY', YESTERDAY.strftime("%Y%m%d"))
+        assert any_existing_rows('WA', YESTERDAY.strftime("%Y%m%d"))
+        assert any_existing_rows('NY', TODAY.strftime("%Y%m%d"))
+        assert any_existing_rows('WA', TODAY.strftime("%Y%m%d"))
+        assert not any_existing_rows('ZZ', YESTERDAY.strftime("%Y%m%d"))
+
+def test_edit_core_data(app, headers):
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+
+    # make an edit batch for NY for yesterday
+    resp = client.post(
+        "/api/v1/batches/edit",
+        data=json.dumps(edit_push_ny_yesterday()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+
+    # test that getting the states daily for NY has the UNEDITED data for yesterday
+    resp = client.get("/api/v1/public/states/NY/daily")
+    assert len(resp.json) == 2
+
+    for day_data in resp.json:
+        assert day_data['date'] in ['20200525', '20200524']
+        if day_data['date'] == '20200525':
+            assert day_data['positive'] == 20
+            assert day_data['negative'] == 5
+        elif day_data['date'] == '20200524':
+            assert day_data['positive'] == 15
+            assert day_data['negative'] == 4
+
+    # Publish the edit batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+
+    # test that getting the states daily for NY has the edited data for yesterday
+    resp = client.get("/api/v1/public/states/NY/daily")
+    assert len(resp.json) == 2
+
+    for day_data in resp.json:
+        assert day_data['date'] in ['20200525', '20200524']
+        if day_data['date'] == '20200525':
+            assert day_data['positive'] == 20
+            assert day_data['negative'] == 5
+        elif day_data['date'] == '20200524':
+            assert day_data['positive'] == 16
+            assert day_data['negative'] == 4
+

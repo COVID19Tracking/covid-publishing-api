@@ -146,3 +146,69 @@ def post_core_data():
     payload = flask.request.json  # this is a dict
 
     return post_core_data_json(payload)
+
+def any_existing_rows(state, date):
+    date = CoreData.parse_str_to_date(date)
+    existing_rows = db.session.query(CoreData).join(Batch).filter(
+        Batch.dataEntryType == 'daily',
+        Batch.isPublished == True,
+        CoreData.state == state,
+        CoreData.date == date).all()
+    return len(existing_rows) > 0
+
+@api.route('/batches/edit', methods=['POST'])
+@jwt_required
+def edit_core_data():
+    flask.current_app.logger.info('Received a CoreData edit request')
+    payload = flask.request.json
+
+    # check push context
+    if 'context' not in payload:
+        return flask.Response("Payload requires 'context' field", status=400)
+    if payload['context']['dataEntryType'] != 'edit':
+        return flask.Response(
+            "Payload 'context' must contain data entry type 'edit'", status=400)
+    if not payload['context'].get('batchNote'):
+        return flask.Response(
+            "Payload 'context' must contain a batchNote explaining edit", status=400)
+
+    # check that edit data exists
+    if 'coreData' not in payload:
+        return flask.Response("Payload requires 'coreData' field", status=400)
+
+    # we construct the batch from the push context
+    context = payload['context']
+    flask.current_app.logger.info('Creating new batch from context: %s' % context)
+    batch = Batch(**context)
+    batch.isRevision = True
+    db.session.add(batch)
+    db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
+
+    # check each core data row that the corresponding date/state already exists in published form
+
+    core_data_dicts = payload['coreData']
+    core_data_objects = []
+    for core_data_dict in core_data_dicts:
+        flask.current_app.logger.info('Creating new core data row: %s' % core_data_dict)
+
+        # check that there exists at least one published row for this date/state
+        date = core_data_dict['date']
+        state = core_data_dict['state']
+        if not any_existing_rows(state, date):
+            return flask.Response("No existing published row for state %s on date %s" % (
+                state, date), status=400)
+
+        core_data_dict['batchId'] = batch.batchId
+        core_data = CoreData(**core_data_dict)
+        db.session.add(core_data)
+        core_data_objects.append(core_data)
+
+    db.session.flush()
+
+    json_to_return = {
+        'batch': batch.to_dict(),
+        'coreData': [core_data.to_dict() for core_data in core_data_objects],
+    }
+
+    db.session.commit()
+    return flask.jsonify(json_to_return), 201

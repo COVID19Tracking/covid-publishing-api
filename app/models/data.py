@@ -174,6 +174,11 @@ class CoreData(db.Model, DataMixin):
             return self.positive
         return self.positive + self.negative
 
+    # Converts the input to a string and returns parsed datetime.date object
+    @staticmethod
+    def parse_str_to_date(date_input):
+        return parser.parse(str(date_input), ignoretz=True).date()
+
     def __init__(self, **kwargs):
         # strip any empty string fields from kwargs
         kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
@@ -186,7 +191,7 @@ class CoreData(db.Model, DataMixin):
 
         # "date" is expected to be a date string, no times or timezones
         if 'date' in kwargs:
-            kwargs['date'] = parser.parse(str(kwargs['date']), ignoretz=True).date()
+            kwargs['date'] = self.parse_str_to_date(kwargs['date'])
         else:
             kwargs['date'] = date.today()
 

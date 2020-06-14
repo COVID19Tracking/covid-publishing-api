@@ -12,6 +12,8 @@ from app import db
 from app.models.data import *
 from app.api.public import get_us_daily_column_names
 
+from common import daily_push_ny_wa_two_days
+
 def test_get_state_info(app):
     client = app.test_client()
     with app.app_context():
@@ -70,65 +72,8 @@ def test_get_us_daily_column_names(app):
     assert len(colnames) == 22
 
 
-# Test data used for testing US daily and states daily by state
-def test_data_json_with_ny_wa_two_days():
-    # TODO: Probably pull out some helpers to make this kind of
-    # testing more succinct
-    ny = {"state": "NY"}
-    wa = {"state": "WA"}
-
-    today = date(2020, 5, 25)
-    yesterday = date(2020, 5, 24)
-
-    ny_today = {
-      "state": "NY",
-      "lastUpdateIsoUtc": datetime.now().isoformat(),
-      "dateChecked": datetime.now().isoformat(),
-      "date": today,
-      "positive": 20,
-      "negative": 5
-    }
-    wa_today = {
-      "state": "WA",
-      "lastUpdateIsoUtc": datetime.now().isoformat(),
-      "dateChecked": datetime.now().isoformat(),
-      "date": today,
-      "positive": 10,
-      "negative": 10
-    }
-    ny_yest = {
-      "state": "NY",
-      "lastUpdateIsoUtc": datetime.now().isoformat(),
-      "dateChecked": datetime.now().isoformat(),
-      "date": yesterday,
-      "positive": 15,
-      "negative": 4
-    }
-    wa_yest = {
-      "state": "WA",
-      "lastUpdateIsoUtc": datetime.now().isoformat(),
-      "dateChecked": datetime.now().isoformat(),
-      "date": yesterday,
-      "positive": 9,
-      "negative": 8
-    }
-
-    ctx = {
-      "dataEntryType": "daily",
-      "shiftLead": "test",
-      "batchNote": "This is a test"
-    }
-    test_data = {
-      "context": ctx,
-      "states": [ny, wa],
-      "coreData": [ny_today, wa_today, ny_yest, wa_yest]
-    }
-
-    return test_data
-
-
 def test_get_us_daily(app, headers):
-    test_data = test_data_json_with_ny_wa_two_days()
+    test_data = daily_push_ny_wa_two_days()
     client = app.test_client()
 
     # Write a batch containing the above data, two days each of NY and WA
@@ -167,7 +112,7 @@ def test_get_us_daily(app, headers):
 
 
 def test_get_states_daily_for_state(app, headers):
-    test_data = test_data_json_with_ny_wa_two_days()
+    test_data = daily_push_ny_wa_two_days()
     client = app.test_client()
 
     # Write a batch containing the above data, two days each of NY and WA

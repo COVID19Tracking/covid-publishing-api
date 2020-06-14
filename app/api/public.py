@@ -25,9 +25,9 @@ def get_states():
 # for the input state.
 def states_daily_query(state=None):
     # first retrieve latest published batch per state
-    filter_list = [Batch.dataEntryType=='daily', Batch.isPublished==True]
+    filter_list = [Batch.dataEntryType.in_(['daily', 'edit']), Batch.isPublished == True]
     if state is not None:
-        filter_list.append(CoreData.state==state)
+        filter_list.append(CoreData.state == state)
     latest_state_daily_batches = db.session.query(
         CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
         ).join(Batch

@@ -33,6 +33,8 @@ def states_daily_query(state=None):
         ).join(Batch
         ).filter(*filter_list
         ).group_by(CoreData.state, CoreData.date
+        ).order_by(CoreData.date.desc()
+        ).order_by(CoreData.state
         ).subquery('latest_state_daily_batches')
 
     latest_daily_data_query = db.session.query(CoreData).join(
@@ -87,7 +89,11 @@ def get_us_daily():
     # correspond to the number of states, assuming `states_daily` returns
     # only a single row per state.
     col_list.append(label('states', func.count()))
-    us_daily = db.session.query(states_daily.c.date, *col_list).group_by(states_daily.c.date).all()
+    us_daily = db.session.query(
+        states_daily.c.date, *col_list
+        ).group_by(states_daily.c.date
+        ).order_by(states_daily.c.date.desc()
+        ).all()
 
     us_data_by_date = []
     for day in us_daily:

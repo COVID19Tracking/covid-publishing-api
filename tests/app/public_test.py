@@ -64,6 +64,10 @@ def test_get_states_daily(app, headers):
     # check that we returned all states
     assert len(resp.json) == 56
 
+    # check that the states are sorted alphabetically - test data should be just one date
+    returned_states = [x['state'] for x in resp.json]
+    assert returned_states == sorted(returned_states)
+
 
 def test_get_us_daily_column_names(app):
     colnames = get_us_daily_column_names()
@@ -99,16 +103,14 @@ def test_get_us_daily(app, headers):
     assert resp.status_code == 200
     assert len(resp.json) == 2
 
-    # expect 2 dates
-    for day_data in resp.json:
-        assert day_data['date'] in ['20200525', '20200524']
-        if day_data['date'] == '20200525':
-            assert day_data['positive'] == 30
-            assert day_data['negative'] == 15
-        elif day_data['date'] == '20200524':
-            assert day_data['positive'] == 24
-            assert day_data['negative'] == 12
-        assert(day_data['states'] == 2)
+    # should come back in reverse chronological order
+    assert resp.json[0]['date'] == '20200525'
+    assert resp.json[0]['positive'] == 30
+    assert resp.json[0]['negative'] == 15
+
+    assert resp.json[1]['date'] == '20200524'
+    assert resp.json[1]['positive'] == 24
+    assert resp.json[1]['negative'] == 12
 
 
 def test_get_states_daily_for_state(app, headers):
@@ -135,11 +137,11 @@ def test_get_states_daily_for_state(app, headers):
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
 
-    for day_data in resp.json:
-        assert day_data['date'] in ['20200525', '20200524']
-        if day_data['date'] == '20200525':
-            assert day_data['positive'] == 20
-            assert day_data['negative'] == 5
-        elif day_data['date'] == '20200524':
-            assert day_data['positive'] == 15
-            assert day_data['negative'] == 4
+    # should come back in reverse chronological order
+    assert resp.json[0]['date'] == '20200525'
+    assert resp.json[0]['positive'] == 20
+    assert resp.json[0]['negative'] == 5
+
+    assert resp.json[1]['date'] == '20200524'
+    assert resp.json[1]['positive'] == 15
+    assert resp.json[1]['negative'] == 4

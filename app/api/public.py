@@ -1,6 +1,7 @@
 """Registers the necessary routes for the public API endpoints."""
 
 import flask
+from flask import request
 
 from sqlalchemy import func, and_
 from sqlalchemy.sql import label
@@ -9,6 +10,7 @@ from app.api import api
 from app.models.data import *
 from app import db
 
+from flask_restful import inputs
 
 @api.route('/public/states/info', methods=['GET'])
 def get_states():
@@ -23,11 +25,13 @@ def get_states():
 #
 # Returns a SQLAlchemy BaseQuery object. If input state is not None, will return daily data only
 # for the input state.
-def states_daily_query(state=None):
+def states_daily_query(state=None, preview=False):
     # first retrieve latest published batch per state
-    filter_list = [Batch.dataEntryType.in_(['daily', 'edit']), Batch.isPublished == True]
+    filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
     if state is not None:
         filter_list.append(CoreData.state == state)
+    if not preview:
+        filter_list.append(Batch.isPublished == True)
 
     latest_state_daily_batches = db.session.query(
         CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
@@ -51,14 +55,16 @@ def states_daily_query(state=None):
 @api.route('/public/states/daily', methods=['GET'])
 def get_states_daily():
     flask.current_app.logger.info('Retrieving States Daily')
-    latest_daily_data = states_daily_query().all()
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    latest_daily_data = states_daily_query(preview=include_preview).all()
     return flask.jsonify([x.to_dict() for x in latest_daily_data])
 
 
 @api.route('/public/states/<string:state>/daily', methods=['GET'])
 def get_states_daily_for_state(state):
     flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
-    latest_daily_data_for_state = states_daily_query(state=state.upper()).all()
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    latest_daily_data_for_state = states_daily_query(state=state.upper(), preview=include_preview).all()
     if len(latest_daily_data_for_state) == 0:
         # likely state not found
         return flask.Response("States Daily data unavailable for state %s" % state, status=404)
@@ -80,7 +86,8 @@ def get_us_daily_column_names():
 @api.route('/public/us/daily', methods=['GET'])
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
-    states_daily = states_daily_query().subquery('states_daily')
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    states_daily = states_daily_query(preview=include_preview).subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery
     colnames = get_us_daily_column_names()

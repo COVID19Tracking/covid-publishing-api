@@ -13,3 +13,4 @@ testing.postgresql
 flask-jwt-extended
 requests
 requests-mock
+flask-restful

@@ -53,6 +53,18 @@ def test_get_states_daily(app, headers):
     # batch hasn't been published
     assert resp.json == []
 
+    # should still be no data if we explicitly set preview=false
+    resp = client.get("/api/v1/public/states/daily?preview=false")
+    assert resp.status_code == 200
+    assert resp.json == []
+
+    # set the preview flag to get unpublished data
+    resp = client.get("/api/v1/public/states/daily?preview=true")
+    assert resp.status_code == 200
+    # batch hasn't been published
+    unpublished_version = resp.json
+    assert len(resp.json) == 56
+
     # publish it, make sure the data comes back
     resp = client.post('/api/v1/batches/1/publish')
     assert resp.status_code == 401 # should fail without authentication
@@ -63,6 +75,7 @@ def test_get_states_daily(app, headers):
     assert resp.status_code == 200
     # check that we returned all states
     assert len(resp.json) == 56
+    assert resp.json == unpublished_version
 
     # check that the states are sorted alphabetically - test data should be just one date
     returned_states = [x['state'] for x in resp.json]
@@ -93,6 +106,11 @@ def test_get_us_daily(app, headers):
     resp = client.get("/api/v1/public/us/daily")
     assert resp.status_code == 200
     assert len(resp.json) == 0
+
+    # but it should appear if we ask for preview data
+    resp = client.get("/api/v1/public/us/daily?preview=true")
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
 
     # Publish the new batch
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id),
@@ -125,6 +143,10 @@ def test_get_states_daily_for_state(app, headers):
         headers=headers)
     assert resp.status_code == 201
     batch_id = resp.json['batch']['batchId']
+
+    resp = client.get("/api/v1/public/states/ny/daily?preview=true")
+    assert len(resp.json) == 2
+
     # publish batch
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
 

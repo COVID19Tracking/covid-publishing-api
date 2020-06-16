@@ -28,13 +28,12 @@ def states_daily_query(state=None):
     filter_list = [Batch.dataEntryType.in_(['daily', 'edit']), Batch.isPublished == True]
     if state is not None:
         filter_list.append(CoreData.state == state)
+
     latest_state_daily_batches = db.session.query(
         CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
         ).join(Batch
         ).filter(*filter_list
         ).group_by(CoreData.state, CoreData.date
-        ).order_by(CoreData.date.desc()
-        ).order_by(CoreData.state
         ).subquery('latest_state_daily_batches')
 
     latest_daily_data_query = db.session.query(CoreData).join(
@@ -43,7 +42,8 @@ def states_daily_query(state=None):
             CoreData.batchId == latest_state_daily_batches.c.maxBid,
             CoreData.state == latest_state_daily_batches.c.state,
             CoreData.date == latest_state_daily_batches.c.date
-        ))
+        )).order_by(CoreData.date.desc()
+        ).order_by(CoreData.state)
 
     return latest_daily_data_query
 

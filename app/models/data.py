@@ -203,6 +203,22 @@ class CoreData(db.Model, DataMixin):
             return self.positive
         return self.positive + self.negative
 
+    @hybrid_property
+    def positiveTestsViral(self):
+        return self.pcrPositiveTests
+
+    @hybrid_property
+    def negativeTestsViral(self):
+        return self.pcrNegativeTests
+
+    @hybrid_property
+    def positiveCasesViral(self):
+        return self.pcrPositiveCases
+
+    @hybrid_property
+    def totalTestsViral(self):
+        return self.pcrTotalTests
+
     # Converts the input to a string and returns parsed datetime.date object
     @staticmethod
     def parse_str_to_date(date_input):

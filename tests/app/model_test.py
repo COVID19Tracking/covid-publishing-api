@@ -1,7 +1,9 @@
 """
 Tests for SQLAlchemy models
 """
+from datetime import datetime
 import pytest
+import pytz
 
 from flask import json, jsonify
 
@@ -18,32 +20,29 @@ def test_state_model():
     assert state.name == 'Washington'
 
 
-def _add_test_data(context_db):
-    nys = State(state='NY')
-    bat = Batch(batchNote='test', createdAt=datetime.now(),
-        isPublished=False, isRevision=False)
-    context_db.session.add(bat)
-    context_db.session.add(nys)
-    context_db.session.flush()
-
-    core_data_row = CoreData(
-        lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-        date=datetime.today(), state='NY', batchId=bat.batchId,
-        positive=20, negative=5)
-    
-    context_db.session.add(core_data_row)
-    context_db.session.commit()
-
-
 def test_core_data_model(app):
     with app.app_context():
-        _add_test_data(db)
+        nys = State(state='NY')
+        bat = Batch(batchNote='test', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        db.session.add(bat)
+        db.session.add(nys)
+        db.session.flush()
+
+        now_utc = datetime(2020, 5, 14, 20, 3, tzinfo=pytz.UTC)
+        core_data_row = CoreData(
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
+            date=datetime.today(), state='NY', batchId=bat.batchId,
+            positive=20, negative=5)
+        
+        db.session.add(core_data_row)
+        db.session.commit()
 
         states = State.query.all()
         assert len(states) == 1
         state = states[0]
         assert state.state == 'NY'
-        assert state.to_dict() == {'state': 'NY'}
+        assert state.to_dict() == {'state': 'NY', 'fips': '36', 'pum': False}
 
         batches = Batch.query.all()
         assert len(batches) == 1
@@ -58,7 +57,10 @@ def test_core_data_model(app):
 
         # check derived values
         assert core_data_row.totalTestResults == 25
-        assert core_data_row.lastUpdateEt.tzinfo.zone == 'US/Eastern'
+
+        # doing this crazy thing because the offset between UTC and EST varies depending on the date
+        hour_in_et = now_utc.astimezone(pytz.timezone('US/Eastern')).hour
+        assert core_data_row.lastUpdateEt == '5/14/2020 %d:03' % hour_in_et
         
         # check that the Batch object is attached to this CoreData object
         assert core_data_row.batch == batch

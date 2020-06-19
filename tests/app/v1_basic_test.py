@@ -54,7 +54,7 @@ def test_post_core_data(app, headers):
     # assert batch data has rows attached to it
     assert len(resp.json['batches'][0]['coreData']) == 56
     assert resp.json['batches'][0]['coreData'][1]['state'] == 'AL'
-    assert resp.json['batches'][0]['coreData'][1]['antibodyTotal'] == 25
+    assert resp.json['batches'][0]['coreData'][1]['recovered'] == 15974
 
 def test_post_core_data_updating_state(app, headers):
     with app.app_context():
@@ -66,7 +66,7 @@ def test_post_core_data_updating_state(app, headers):
         assert len(states) == 1
         state = states[0]
         assert state.state == 'AK'
-        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska'}
+        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02'}
 
     client = app.test_client()
     resp = client.get('/api/v1/public/states/info')

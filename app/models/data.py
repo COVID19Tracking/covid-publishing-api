@@ -4,8 +4,10 @@ inherited from a SQLAlchemy class so a DB entry with a table can be built
 easily
 """
 
+import csv
 from datetime import datetime, date
 from dateutil import parser
+import os
 import pytz
 
 from app import db
@@ -83,6 +85,19 @@ class Batch(db.Model, DataMixin):
         return d
 
 
+_FIPS_MAP = None
+def fips_lookup(state):
+    global _FIPS_MAP
+    if _FIPS_MAP is None:
+        # hack: load the fips lookup once
+        path = os.path.join(os.path.dirname(__file__), 'fips-lookup.csv')
+        _FIPS_MAP = {}
+        with open(path) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                _FIPS_MAP[row['state']] = row['fips']
+    return _FIPS_MAP[state]
+
 class State(db.Model, DataMixin):
     __tablename__ = 'states'
 
@@ -97,6 +112,15 @@ class State(db.Model, DataMixin):
     pui = db.Column(db.String)
     pum = db.Column(db.Boolean)
     fips = db.Column(db.String)
+
+    # here for parity with public API, deprecated field
+    @hybrid_property
+    def pum(self):
+        return False
+
+    @hybrid_property
+    def fips(self):
+        return fips_lookup(self.state)
 
     def __init__(self, **kwargs):
         mapper = class_mapper(State)
@@ -145,8 +169,11 @@ class CoreData(db.Model, DataMixin):
     # Public Notes related to state
     notes = db.Column(db.String)
 
-    lastUpdateTime = db.Column(db.DateTime(timezone=True))
-    dateChecked = db.Column(db.DateTime(timezone=True))
+    # these are the source-of-truth time columns in UTC/GMT
+    lastUpdateTime = db.Column(db.DateTime(timezone=True),
+        info={'repr': lambda x: x.strftime("%Y-%m-%dT%H:%M:%SZ")})
+    dateChecked = db.Column(db.DateTime(timezone=True),
+        info={'repr': lambda x: x.strftime("%Y-%m-%dT%H:%M:%SZ")})
     
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
@@ -160,9 +187,11 @@ class CoreData(db.Model, DataMixin):
 
     @hybrid_property
     def lastUpdateEt(self):
-        # convert lastUpdateTime (UTC) to ET
+        # convert lastUpdateTime (UTC) to ET, return a string that matches how we're outputting
+        # in the public API
         if self.lastUpdateTime is not None:
-            return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern'))
+            return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern')).strftime(
+                "%-m/%d/%Y %H:%M")
         else:
             return None
 
@@ -173,6 +202,22 @@ class CoreData(db.Model, DataMixin):
         if self.negative is None:
             return self.positive
         return self.positive + self.negative
+
+    @hybrid_property
+    def positiveTestsViral(self):
+        return self.pcrPositiveTests
+
+    @hybrid_property
+    def negativeTestsViral(self):
+        return self.pcrNegativeTests
+
+    @hybrid_property
+    def positiveCasesViral(self):
+        return self.pcrPositiveCases
+
+    @hybrid_property
+    def totalTestsViral(self):
+        return self.pcrTotalTests
 
     # Converts the input to a string and returns parsed datetime.date object
     @staticmethod

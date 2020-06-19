@@ -3,6 +3,7 @@ Tests for SQLAlchemy models
 """
 from datetime import datetime
 import pytest
+import pytz
 
 from flask import json, jsonify
 
@@ -28,9 +29,9 @@ def test_core_data_model(app):
         db.session.add(nys)
         db.session.flush()
 
-        now = datetime(2020, 5, 14, 12, 3)
+        now_utc = datetime(2020, 5, 14, 20, 3, tzinfo=pytz.UTC)
         core_data_row = CoreData(
-            lastUpdateIsoUtc=now.isoformat(), dateChecked=now.isoformat(),
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
             date=datetime.today(), state='NY', batchId=bat.batchId,
             positive=20, negative=5)
         
@@ -56,7 +57,10 @@ def test_core_data_model(app):
 
         # check derived values
         assert core_data_row.totalTestResults == 25
-        assert core_data_row.lastUpdateEt == '5/14/2020 12:03'
+
+        # doing this crazy thing because the offset between UTC and EST varies depending on the date
+        hour_in_et = now_utc.astimezone(pytz.timezone('US/Eastern')).hour
+        assert core_data_row.lastUpdateEt == '5/14/2020 %d:03' % hour_in_et
         
         # check that the Batch object is attached to this CoreData object
         assert core_data_row.batch == batch

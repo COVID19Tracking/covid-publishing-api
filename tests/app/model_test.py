@@ -19,23 +19,6 @@ def test_state_model():
     assert state.name == 'Washington'
 
 
-# def _add_test_data(context_db):
-#     nys = State(state='NY')
-#     bat = Batch(batchNote='test', createdAt=datetime.now(),
-#         isPublished=False, isRevision=False)
-#     context_db.session.add(bat)
-#     context_db.session.add(nys)
-#     context_db.session.flush()
-
-#     core_data_row = CoreData(
-#         lastUpdateIsoUtc=datetime.now().isoformat(), dateChecked=datetime.now().isoformat(),
-#         date=datetime.today(), state='NY', batchId=bat.batchId,
-#         positive=20, negative=5)
-    
-#     context_db.session.add(core_data_row)
-#     context_db.session.commit()
-
-
 def test_core_data_model(app):
     with app.app_context():
         nys = State(state='NY')

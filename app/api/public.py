@@ -107,7 +107,7 @@ def get_us_daily():
         result_dict = day._asdict()
         result_dict.update({
             'dateChecked': day.date.isoformat(),
-            'date': day.date.strftime('%Y%m%d'),
+            'date': day.date.strftime('%Y-%m-%d'),
         })
         us_data_by_date.append(result_dict)
 

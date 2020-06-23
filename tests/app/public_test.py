@@ -122,11 +122,11 @@ def test_get_us_daily(app, headers):
     assert len(resp.json) == 2
 
     # should come back in reverse chronological order
-    assert resp.json[0]['date'] == '20200525'
+    assert resp.json[0]['date'] == '2020-05-25'
     assert resp.json[0]['positive'] == 30
     assert resp.json[0]['negative'] == 15
 
-    assert resp.json[1]['date'] == '20200524'
+    assert resp.json[1]['date'] == '2020-05-24'
     assert resp.json[1]['positive'] == 24
     assert resp.json[1]['negative'] == 12
 
@@ -160,10 +160,10 @@ def test_get_states_daily_for_state(app, headers):
     assert len(resp.json) == 2
 
     # should come back in reverse chronological order
-    assert resp.json[0]['date'] == '20200525'
+    assert resp.json[0]['date'] == '2020-05-25'
     assert resp.json[0]['positive'] == 20
     assert resp.json[0]['negative'] == 5
 
-    assert resp.json[1]['date'] == '20200524'
+    assert resp.json[1]['date'] == '2020-05-24'
     assert resp.json[1]['positive'] == 15
     assert resp.json[1]['negative'] == 4

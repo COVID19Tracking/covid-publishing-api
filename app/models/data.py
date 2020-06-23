@@ -138,7 +138,7 @@ class CoreData(db.Model, DataMixin):
         nullable=False, primary_key=True)
     # the day we mean to report this data for; meant for "states daily" extraction
     date = db.Column(db.Date, nullable=False, primary_key=True,
-        info={'repr': lambda x: x.strftime('%Y%m%d')})
+        info={'repr': lambda x: x.strftime('%Y-%m-%d')})
 
     # data columns
     positive = db.Column(db.Integer, info={"includeInUSDaily": True})

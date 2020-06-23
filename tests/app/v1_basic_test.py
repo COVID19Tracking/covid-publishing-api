@@ -223,11 +223,11 @@ def test_edit_core_data(app, headers):
     assert len(resp.json) == 2
 
     for day_data in resp.json:
-        assert day_data['date'] in ['20200525', '20200524']
-        if day_data['date'] == '20200525':
+        assert day_data['date'] in ['2020-05-25', '2020-05-24']
+        if day_data['date'] == '2020-05-25':
             assert day_data['positive'] == 20
             assert day_data['negative'] == 5
-        elif day_data['date'] == '20200524':
+        elif day_data['date'] == '2020-05-24':
             assert day_data['positive'] == 15
             assert day_data['negative'] == 4
 
@@ -240,11 +240,11 @@ def test_edit_core_data(app, headers):
     assert len(resp.json) == 2
 
     for day_data in resp.json:
-        assert day_data['date'] in ['20200525', '20200524']
-        if day_data['date'] == '20200525':
+        assert day_data['date'] in ['2020-05-25', '2020-05-24']
+        if day_data['date'] == '2020-05-25':
             assert day_data['positive'] == 20
             assert day_data['negative'] == 5
-        elif day_data['date'] == '20200524':
+        elif day_data['date'] == '2020-05-24':
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
 

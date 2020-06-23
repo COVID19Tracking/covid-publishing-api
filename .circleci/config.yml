@@ -15,7 +15,7 @@ workflows:
           filters:
             branches:
               only:
-                - master
+                - production
 
 jobs:
   unit_test:
@@ -67,5 +67,5 @@ jobs:
           name: Deploying
           # TODO: in the future, this can use $CIRCLE_BRANCH to deploy to a 
           # particular EB environment depending on the active branch 
-          command: eb deploy stage
+          command: eb deploy prod
         

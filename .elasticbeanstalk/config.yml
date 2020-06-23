@@ -2,6 +2,9 @@ branch-defaults:
   master:
     environment: stage
     group_suffix: null
+  production:
+    environment: prod
+    group_suffix: null
 global:
   application_name: covid-publishing-api
   branch: null

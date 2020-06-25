@@ -248,3 +248,15 @@ def test_edit_core_data(app, headers):
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
 
+def test_push_with_validation_error(app, headers):
+    client = app.test_client()
+
+    bad_data = daily_push_ny_wa_today()
+    bad_data["coreData"][0]["negative"] = "this is a string"
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 500
+    assert "invalid input syntax" in str(resp.data)

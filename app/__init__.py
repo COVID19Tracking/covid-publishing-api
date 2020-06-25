@@ -33,4 +33,9 @@ def create_app(config):
     from app.utils import utils as utils_blueprint
     app.register_blueprint(utils_blueprint)
 
+    # register an error handler to return full exceptions for server errors
+    @app.errorhandler(500)
+    def internal_server_error(e):
+        return str(e.original_exception), 500
+
     return app

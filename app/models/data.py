@@ -157,10 +157,10 @@ class CoreData(db.Model, DataMixin):
     antibodyTotal = db.Column(db.Integer, info={"includeInUSDaily": True})
     antibodyPositive = db.Column(db.Integer, info={"includeInUSDaily": True})
     antibodyNegative = db.Column(db.Integer, info={"includeInUSDaily": True})
-    pcrTotalTests = db.Column(db.Integer, info={"includeInUSDaily": True})
-    pcrPositiveTests = db.Column(db.Integer, info={"includeInUSDaily": True})
-    pcrNegativeTests = db.Column(db.Integer, info={"includeInUSDaily": True})
-    pcrPositiveCases = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveCasesViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
 
@@ -202,22 +202,6 @@ class CoreData(db.Model, DataMixin):
         if self.negative is None:
             return self.positive
         return self.positive + self.negative
-
-    @hybrid_property
-    def positiveTestsViral(self):
-        return self.pcrPositiveTests
-
-    @hybrid_property
-    def negativeTestsViral(self):
-        return self.pcrNegativeTests
-
-    @hybrid_property
-    def positiveCasesViral(self):
-        return self.pcrPositiveCases
-
-    @hybrid_property
-    def totalTestsViral(self):
-        return self.pcrTotalTests
 
     # Converts the input to a string and returns parsed datetime.date object
     @staticmethod

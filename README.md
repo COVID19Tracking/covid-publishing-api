@@ -71,7 +71,8 @@ The token is secured by the value of `SECRET_KEY`, so tokens generated in one en
 unless they have the same secret (this value should overridden on any server).
 
 To pass a token to the API, include it as a header:
-```Authorization: Bearer <token>
+```
+Authorization: Bearer <token>
 ```
 
 When writing tests that call authenticated endpoints, use the `headers` fixture to obtain a headers object containing a valid token.

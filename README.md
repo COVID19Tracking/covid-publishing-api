@@ -44,7 +44,11 @@ This repo has been set up with Alembic migrations through Flask, using `flask in
 ```shell
 flask db migrate -m 'Describe your migration'
 ```
-This will make Alembic generate a new file under migrations/versions. The migration is applied to the database specified in your environment by running:
+This will make Alembic generate a new file under migrations/versions.
+
+EXTREMELY IMPORTANT: Flask-Migrate (and Alembic's `autogenerate` which backs it) does not automatically detect renamed columns, instead turning them into a column deletion and a column addition. See [Alembic's docs](https://alembic.sqlalchemy.org/en/latest/autogenerate.html#what-does-autogenerate-detect-and-what-does-it-not-detect) for more details on what will be auto-detected. If you're creating a migration, you _must_ open it up and confirm that, unless you're completely sure you intended to delete a column, there are no `drop_column` instances. e.g. [this is bad](https://github.com/COVID19Tracking/covid-publishing-api/commit/bfe649e9c0bde36910ba3719be304d22e2f29f74), [this is good](https://github.com/COVID19Tracking/covid-publishing-api/commit/555b731920cb02395d382a6cfc676887d4954a0d). This is important enough that I wonder if we should have a presubmit check for column deletions?
+
+Once you're happy with the migration and someone else has signed off on it, you can apply it to the database specified in your environment by running:
 ```shell
 flask db upgrade
 ```

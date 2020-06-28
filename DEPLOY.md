@@ -2,7 +2,7 @@
 
 We run two parallel stacks, a staging stack and a production stack. New versions are automatically deployed to Staging on every commit as part of CI.
 
-DONOTSUBMIT: Can someone confirm whether you need to manually run the alembic migration, or whether it gets auto-run as part of deploys?
+Note that you don't need to run database migrations manually for the Elastic Beanstalk environments. They happen automatically. See [this ebextension](https://github.com/COVID19Tracking/covid-publishing-api/blob/master/.ebextensions/00_post_migrate.config) for details.
 
 ## Pushing to production
 

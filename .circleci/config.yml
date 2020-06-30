@@ -6,8 +6,6 @@ workflows:
     jobs:
       - unit_test
       - build_and_test_docker
-      # TODO: add approval step to control when deploys take place
-      # https://circleci.com/docs/2.0/workflows/#holding-a-workflow-for-a-manual-approval
       - deploy:
           requires:
             - unit_test
@@ -65,7 +63,8 @@ jobs:
           command: sudo pip3 install awsebcli
       - run:
           name: Deploying
-          # TODO: in the future, this can use $CIRCLE_BRANCH to deploy to a 
-          # particular EB environment depending on the active branch 
+          # Create a new application version and deploy it to staging.
+          # See https://github.com/COVID19Tracking/covid-publishing-api/blob/master/DEPLOY.md for more details.
+          # Note that if we ever want more control, e.g. the ability to create a new application version without pushing to staging, we can't use the `eb` CLI anymore: https://stackoverflow.com/questions/43261949/elastic-beanstalk-cli-upload-version-without-deployingt
           command: eb deploy stage
         

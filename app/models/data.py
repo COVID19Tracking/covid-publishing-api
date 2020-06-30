@@ -191,7 +191,7 @@ class CoreData(db.Model, DataMixin):
         # in the public API
         if self.lastUpdateTime is not None:
             return self.lastUpdateTime.astimezone(pytz.timezone('US/Eastern')).strftime(
-                "%-m/%d/%Y %H:%M")
+                "%-m/%-d/%Y %H:%M")
         else:
             return None
 

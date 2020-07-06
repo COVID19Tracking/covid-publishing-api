@@ -81,6 +81,11 @@ def test_get_states_daily(app, headers):
     returned_states = [x['state'] for x in resp.json]
     assert returned_states == sorted(returned_states)
 
+    # check that the "preview" request now returns nothing, since we've published the batch
+    resp = client.get("/api/v1/public/states/daily?preview=true")
+    assert resp.status_code == 200
+    assert resp.json == []
+
 
 def test_get_us_daily_column_names(app):
     colnames = get_us_daily_column_names()

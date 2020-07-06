@@ -30,7 +30,10 @@ def states_daily_query(state=None, preview=False):
     filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
     if state is not None:
         filter_list.append(CoreData.state == state)
-    if not preview:
+
+    if preview:
+        filter_list.append(Batch.isPublished == False)
+    else:
         filter_list.append(Batch.isPublished == True)
 
     latest_state_daily_batches = db.session.query(
@@ -64,7 +67,8 @@ def get_states_daily():
 def get_states_daily_for_state(state):
     flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    latest_daily_data_for_state = states_daily_query(state=state.upper(), preview=include_preview).all()
+    latest_daily_data_for_state = states_daily_query(
+        state=state.upper(), preview=include_preview).all()
     if len(latest_daily_data_for_state) == 0:
         # likely state not found
         return flask.Response("States Daily data unavailable for state %s" % state, status=404)

@@ -1,9 +1,6 @@
 """
 Basic Test for V1 of API
 """
-import os
-import pytest
-
 from flask import json, jsonify
 
 from app import db
@@ -221,6 +218,7 @@ def test_edit_core_data(app, headers):
     # test that getting the states daily for NY has the UNEDITED data for yesterday
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
+    unedited = resp.json
 
     for day_data in resp.json:
         assert day_data['date'] in ['2020-05-25', '2020-05-24']
@@ -231,6 +229,20 @@ def test_edit_core_data(app, headers):
             assert day_data['positive'] == 15
             assert day_data['negative'] == 4
 
+    # test that getting the preview data has the EDITED data for yesterday
+    resp = client.get("/api/v1/public/states/NY/daily?preview=true")
+    assert len(resp.json) == 2
+    edited_preview = resp.json
+    assert resp.json != unedited
+    for day_data in resp.json:
+        assert day_data['date'] in ['2020-05-25', '2020-05-24']
+        if day_data['date'] == '2020-05-25':
+            assert day_data['positive'] == 20
+            assert day_data['negative'] == 5
+        elif day_data['date'] == '2020-05-24':
+            assert day_data['positive'] == 16
+            assert day_data['negative'] == 4
+
     # Publish the edit batch
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
     assert resp.status_code == 201
@@ -238,6 +250,7 @@ def test_edit_core_data(app, headers):
     # test that getting the states daily for NY has the edited data for yesterday
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
+    assert resp.json == edited_preview
 
     for day_data in resp.json:
         assert day_data['date'] in ['2020-05-25', '2020-05-24']

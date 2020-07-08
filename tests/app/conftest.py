@@ -1,4 +1,6 @@
 import pytest
+from unittest import mock
+from unittest.mock import MagicMock
 from app import create_app, db
 from app.auth.auth_cli import getToken
 
@@ -18,6 +20,10 @@ class TestingPostgresqlConfig:
     SECRET_KEY = '12345'
 
     API_WEBHOOK_URL = None
+
+    # the actual Slack SDK is mocked out below, so these don't matter as long as they exist
+    SLACK_API_TOKEN = 'dummy_token'
+    SLACK_CHANNEL = 'some_channel'
 
     @staticmethod
     def init_app(app):
@@ -44,3 +50,10 @@ def headers(app):
     }
     
     yield headers
+
+# autouse=True ensures that Slack is mocked out in the entire test suite and not actually called
+@pytest.fixture(autouse=True)
+def slack_mock():
+    client_mock = MagicMock()
+    with mock.patch('app.utils.slacknotifier.WebClient', return_value=client_mock) as _fixture:
+        yield client_mock

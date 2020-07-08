@@ -6,8 +6,8 @@ from app.models.data import *
 from app.utils.webhook import notify_webhook
 from app import db
 from flask_jwt_extended import jwt_required
-
 from datetime import datetime
+from app.utils.slacknotifier import notify_slack, exceptions_to_slack
 
 from sqlalchemy import func, and_
 
@@ -53,6 +53,7 @@ def get_batch_by_id(id):
 
 @api.route('/batches/<int:id>/publish', methods=['POST'])
 @jwt_required
+@exceptions_to_slack
 def publish_batch(id):
     flask.current_app.logger.info('Received request to publish batch %d' % id)
     batch = Batch.query.get_or_404(id)
@@ -67,6 +68,9 @@ def publish_batch(id):
     db.session.commit()
 
     notify_webhook()
+
+    notify_slack(f"*Published batch #{id}* (type: {batch.dataEntryType})\n"
+                 f"{batch.batchNote}")
 
     return flask.jsonify(batch.to_dict()), 201
 
@@ -136,6 +140,7 @@ def post_core_data_json(payload):
 
 @api.route('/batches', methods=['POST'])
 @jwt_required
+@exceptions_to_slack
 def post_core_data():
     """
     Workhorse POST method for core data
@@ -145,7 +150,13 @@ def post_core_data():
     flask.current_app.logger.info('Received a CoreData write request')
     payload = flask.request.json  # this is a dict
 
-    return post_core_data_json(payload)
+    post_result = post_core_data_json(payload)
+
+    batch_info = post_result[0].json['batch']
+    notify_slack(f"*Pushed batch #{batch_info['batchId']}* (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
+                 f"{batch_info['batchNote']}")
+
+    return post_result
 
 def any_existing_rows(state, date):
     date = CoreData.parse_str_to_date(date)
@@ -158,6 +169,7 @@ def any_existing_rows(state, date):
 
 @api.route('/batches/edit', methods=['POST'])
 @jwt_required
+@exceptions_to_slack
 def edit_core_data():
     flask.current_app.logger.info('Received a CoreData edit request')
     payload = flask.request.json
@@ -211,4 +223,9 @@ def edit_core_data():
     }
 
     db.session.commit()
+
+    notify_slack(
+        f"*Pushed batch #{batch.batchId}* (type: {batch.dataEntryType}, user: {batch.shiftLead})\n"
+        f"{batch.batchNote}")
+
     return flask.jsonify(json_to_return), 201

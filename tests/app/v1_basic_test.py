@@ -1,9 +1,6 @@
 """
 Basic Test for V1 of API
 """
-import os
-import pytest
-
 from flask import json, jsonify
 
 from app import db
@@ -193,7 +190,7 @@ def test_any_existing_rows(app, headers):
         assert any_existing_rows('WA', TODAY.strftime("%Y%m%d"))
         assert not any_existing_rows('ZZ', YESTERDAY.strftime("%Y%m%d"))
 
-def test_edit_core_data(app, headers):
+def test_edit_core_data(app, headers, slack_mock):
     client = app.test_client()
 
     # Write a batch containing the above data, two days for NY and WA, publish it
@@ -204,10 +201,12 @@ def test_edit_core_data(app, headers):
         headers=headers)
     assert resp.status_code == 201
     batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
 
     # Publish the new batch
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
     assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
 
     # make an edit batch for NY for yesterday
     resp = client.post(
@@ -216,11 +215,13 @@ def test_edit_core_data(app, headers):
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 3
     batch_id = resp.json['batch']['batchId']
 
     # test that getting the states daily for NY has the UNEDITED data for yesterday
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
+    unedited = resp.json
 
     for day_data in resp.json:
         assert day_data['date'] in ['2020-05-25', '2020-05-24']
@@ -248,7 +249,7 @@ def test_edit_core_data(app, headers):
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
 
-def test_push_with_validation_error(app, headers):
+def test_push_with_validation_error(app, headers, slack_mock):
     client = app.test_client()
 
     bad_data = daily_push_ny_wa_today()
@@ -260,3 +261,4 @@ def test_push_with_validation_error(app, headers):
         headers=headers)
     assert resp.status_code == 500
     assert "invalid input syntax" in str(resp.data)
+    assert slack_mock.files_upload.call_count == 1 # slack notifier exception handler triggered

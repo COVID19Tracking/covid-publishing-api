@@ -259,6 +259,33 @@ def test_push_with_validation_error(app, headers, slack_mock):
         data=json.dumps(bad_data),
         content_type='application/json',
         headers=headers)
-    assert resp.status_code == 500
-    assert "invalid input syntax" in str(resp.data)
-    assert slack_mock.files_upload.call_count == 1 # slack notifier exception handler triggered
+    assert resp.status_code == 400
+    assert "Non-numeric value for field" in resp.json
+    assert 'NY ' in resp.json
+    assert slack_mock.files_upload.call_count == 1
+
+    bad_data = daily_push_ny_wa_today()
+    bad_data["coreData"][0]["negative"] = -3
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 400
+    assert "Negative value for field" in resp.json
+    assert 'NY ' in resp.json
+    assert slack_mock.files_upload.call_count == 2
+
+def test_push_missing_context(app, headers, slack_mock):
+    client = app.test_client()
+
+    bad_data = daily_push_ny_wa_today()
+    bad_data.pop("context")
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 400
+    assert "Payload requires 'context' field" in resp.json
+    assert slack_mock.files_upload.call_count == 1

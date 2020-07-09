@@ -10,9 +10,9 @@ from flask import json, jsonify
 
 from app import db
 from app.models.data import *
-from app.api.public import get_us_daily_column_names
 
 from common import daily_push_ny_wa_two_days
+
 
 def test_get_state_info(app):
     client = app.test_client()
@@ -88,7 +88,7 @@ def test_get_states_daily(app, headers):
 
 
 def test_get_us_daily_column_names(app):
-    colnames = get_us_daily_column_names()
+    colnames = CoreData.numeric_fields()
     assert 'positive' in colnames
     assert 'checker' not in colnames
     assert len(colnames) == 22

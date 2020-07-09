@@ -76,17 +76,6 @@ def get_states_daily_for_state(state):
     return flask.jsonify([x.to_dict() for x in latest_daily_data_for_state])
 
 
-# Returns a list of CoreData column names representing numerical data that needs to be summed and
-# served in States Daily.
-def get_us_daily_column_names():
-    colnames = []
-    for column in CoreData.__table__.columns:
-        if column.info.get("includeInUSDaily") == True:
-            colnames.append(column.name)
-
-    return colnames
-
-
 @api.route('/public/us/daily', methods=['GET'])
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
@@ -94,7 +83,7 @@ def get_us_daily():
     states_daily = states_daily_query(preview=include_preview).subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery
-    colnames = get_us_daily_column_names()
+    colnames = CoreData.numeric_fields()
     col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
     # Add a column to count the records contributing to this date. That should
     # correspond to the number of states, assuming `states_daily` returns

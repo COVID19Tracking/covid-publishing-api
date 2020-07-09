@@ -7,7 +7,7 @@ from app.utils.webhook import notify_webhook
 from app import db
 from flask_jwt_extended import jwt_required
 from datetime import datetime
-from app.utils.slacknotifier import notify_slack, exceptions_to_slack
+from app.utils.slacknotifier import notify_slack, notify_slack_error, exceptions_to_slack
 from app.utils.validation import validate_core_data_payload, validate_edit_data_payload
 
 from sqlalchemy import func, and_
@@ -61,7 +61,7 @@ def publish_batch(id):
 
     # if batch is already published, fail out
     if batch.isPublished:
-        return 'Batch %d already published, rejecting double-publish' % id, 422
+        return flask.jsonify('Batch %d already published, rejecting double-publish' % id), 422
 
     batch.isPublished = True
     batch.publishedAt = datetime.utcnow()   # set publish time to now
@@ -86,6 +86,7 @@ def post_core_data_json(payload):
     try:
         validate_core_data_payload(payload)
     except ValueError as e:
+        notify_slack_error(str(e), 'post_core_data_json')
         return flask.jsonify(str(e)), 400
 
     # we construct the batch from the push context
@@ -157,9 +158,6 @@ def post_core_data():
         notify_slack(f"*Pushed batch #{batch_info['batchId']}* (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
                      f"{batch_info['batchNote']}")
 
-    else:
-        notify_slack("Something went wrong on push!")
-
     return post_result
 
 def any_existing_rows(state, date):
@@ -198,6 +196,7 @@ def edit_core_data():
     try:
         validate_edit_data_payload(payload)
     except ValueError as e:
+        notify_slack_error(str(e), 'edit_core_data')
         return flask.jsonify(str(e)), 400
 
     # we construct the batch from the push context

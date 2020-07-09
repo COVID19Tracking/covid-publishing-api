@@ -261,6 +261,7 @@ def test_push_with_validation_error(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 400
     assert "Non-numeric value for field" in resp.json
+    assert slack_mock.files_upload.call_count == 1
 
     bad_data = daily_push_ny_wa_today()
     bad_data["coreData"][0]["negative"] = -3
@@ -271,8 +272,9 @@ def test_push_with_validation_error(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 400
     assert "Negative value for field" in resp.json
+    assert slack_mock.files_upload.call_count == 2
 
-def test_push_missing_context(app, headers):
+def test_push_missing_context(app, headers, slack_mock):
     client = app.test_client()
 
     bad_data = daily_push_ny_wa_today()
@@ -284,3 +286,4 @@ def test_push_missing_context(app, headers):
         headers=headers)
     assert resp.status_code == 400
     assert "Payload requires 'context' field" in resp.json
+    assert slack_mock.files_upload.call_count == 1

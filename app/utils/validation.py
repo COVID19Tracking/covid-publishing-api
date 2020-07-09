@@ -10,15 +10,16 @@ def validate_numeric_fields(payload):
     for core_data_dict in core_data_dicts:
         for field in numeric_fields:
             value = core_data_dict.get(field)
+            state = core_data_dict.get('state')
             if value is not None:
                 # if not an integer, error out
                 try:
                     int_value = int(value)
                 except ValueError:
-                    raise ValueError(f"Non-numeric value for field '{field}': {value}")
+                    raise ValueError(f"Non-numeric value for field '{state} {field}': {value}")
                 # if negative integer, error out
                 if int_value < 0:
-                    raise ValueError(f"Negative value for field '{field}': {value}")
+                    raise ValueError(f"Negative value for field '{state} {field}': {value}")
 
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.
 def validate_core_data_payload(payload):

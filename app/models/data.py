@@ -185,6 +185,17 @@ class CoreData(db.Model, DataMixin):
     # What other columns are we missing?
     sourceNotes = db.Column(db.String)
 
+    # Returns a list of CoreData column names representing numerical data that needs to be summed
+    # and served in States Daily.
+    @classmethod
+    def numeric_fields(cls):
+        colnames = []
+        for column in cls.__table__.columns:
+            if column.info.get("includeInUSDaily") == True:
+                colnames.append(column.name)
+
+        return colnames
+
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET, return a string that matches how we're outputting

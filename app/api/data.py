@@ -8,6 +8,7 @@ from app import db
 from flask_jwt_extended import jwt_required
 from datetime import datetime
 from app.utils.slacknotifier import notify_slack, exceptions_to_slack
+from app.utils.validation import validate_core_data_payload, validate_edit_data_payload
 
 from sqlalchemy import func, and_
 
@@ -79,16 +80,13 @@ def publish_batch(id):
 ######################################   Core data      ######################################
 ##############################################################################################
 
-
 # Expects a dictionary of push context, state info, and core data rows. Writes to DB.
 def post_core_data_json(payload):
     # test the input data
-    if 'context' not in payload:
-        return flask.Response("Payload requires 'context' field", status=400)
-    if 'states' not in payload:
-        return flask.Response("Payload requires 'states' field", status=400)
-    if 'coreData' not in payload:
-        return flask.Response("Payload requires 'coreData' field", status=400)
+    try:
+        validate_core_data_payload(payload)
+    except ValueError as e:
+        return flask.jsonify(str(e)), 400
 
     # we construct the batch from the push context
     context = payload['context']
@@ -135,6 +133,8 @@ def post_core_data_json(payload):
     }
 
     db.session.commit()
+
+    # this returns a tuple of flask response and status code: (flask.Response, int)
     return flask.jsonify(json_to_return), 201
 
 
@@ -151,10 +151,14 @@ def post_core_data():
     payload = flask.request.json  # this is a dict
 
     post_result = post_core_data_json(payload)
+    status_code = post_result[1]
+    if status_code == 201:
+        batch_info = post_result[0].json['batch']
+        notify_slack(f"*Pushed batch #{batch_info['batchId']}* (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
+                     f"{batch_info['batchNote']}")
 
-    batch_info = post_result[0].json['batch']
-    notify_slack(f"*Pushed batch #{batch_info['batchId']}* (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
-                 f"{batch_info['batchNote']}")
+    else:
+        notify_slack("Something went wrong on push!")
 
     return post_result
 
@@ -167,6 +171,22 @@ def any_existing_rows(state, date):
         CoreData.date == date).all()
     return len(existing_rows) > 0
 
+# Returns a string with any errors if the payload is invalid, otherwise returns empty string.
+def edit_data_payload_error(payload):
+    # check push context
+    if 'context' not in payload:
+        return "Payload requires 'context' field"
+    if payload['context']['dataEntryType'] != 'edit':
+        return "Payload 'context' must contain data entry type 'edit'"
+    if not payload['context'].get('batchNote'):
+        return "Payload 'context' must contain a batchNote explaining edit"
+
+    # check that edit data exists
+    if 'coreData' not in payload:
+        return "Payload requires 'coreData' field"
+
+    return ''
+
 @api.route('/batches/edit', methods=['POST'])
 @jwt_required
 @exceptions_to_slack
@@ -174,19 +194,11 @@ def edit_core_data():
     flask.current_app.logger.info('Received a CoreData edit request')
     payload = flask.request.json
 
-    # check push context
-    if 'context' not in payload:
-        return flask.Response("Payload requires 'context' field", status=400)
-    if payload['context']['dataEntryType'] != 'edit':
-        return flask.Response(
-            "Payload 'context' must contain data entry type 'edit'", status=400)
-    if not payload['context'].get('batchNote'):
-        return flask.Response(
-            "Payload 'context' must contain a batchNote explaining edit", status=400)
-
-    # check that edit data exists
-    if 'coreData' not in payload:
-        return flask.Response("Payload requires 'coreData' field", status=400)
+    # test input data
+    try:
+        validate_edit_data_payload(payload)
+    except ValueError as e:
+        return flask.jsonify(str(e)), 400
 
     # we construct the batch from the push context
     context = payload['context']
@@ -207,8 +219,8 @@ def edit_core_data():
         date = core_data_dict['date']
         state = core_data_dict['state']
         if not any_existing_rows(state, date):
-            return flask.Response("No existing published row for state %s on date %s" % (
-                state, date), status=400)
+            return flask.jsonify("No existing published row for state %s on date %s" % (
+                state, date)), 400
 
         core_data_dict['batchId'] = batch.batchId
         core_data = CoreData(**core_data_dict)

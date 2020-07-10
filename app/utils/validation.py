@@ -3,6 +3,17 @@
 from app.models.data import *
 
 
+def validate_non_empty_fields(payload):
+    # check non-empty fields
+    core_data_dicts = payload['coreData']
+    required_fields = ['state', 'date']
+    for core_data_dict in core_data_dicts:
+        for field in required_fields:
+            # should fail if missing field or empty string
+            if not core_data_dict.get(field):
+                raise ValueError(f"Missing value for '{field}' in row: {core_data_dict}")
+
+
 def validate_numeric_fields(payload):
     # validate data fields: check that all numeric fields, if not null, are numeric and non-negative
     numeric_fields = CoreData.numeric_fields()
@@ -21,6 +32,7 @@ def validate_numeric_fields(payload):
                 if int_value < 0:
                     raise ValueError(f"Negative value for field '{state} {field}': {value}")
 
+
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.
 def validate_core_data_payload(payload):
     # test the input data
@@ -32,6 +44,7 @@ def validate_core_data_payload(payload):
         raise ValueError("Payload requires 'coreData' field")
 
     validate_numeric_fields(payload)
+    validate_non_empty_fields(payload)    
 
 
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.
@@ -49,3 +62,4 @@ def validate_edit_data_payload(payload):
         raise ValueError("Payload requires 'coreData' field")
 
     validate_numeric_fields(payload)
+    validate_non_empty_fields(payload)

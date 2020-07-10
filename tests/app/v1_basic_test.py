@@ -252,6 +252,7 @@ def test_edit_core_data(app, headers, slack_mock):
 def test_push_with_validation_error(app, headers, slack_mock):
     client = app.test_client()
 
+    # string in a numeric field
     bad_data = daily_push_ny_wa_today()
     bad_data["coreData"][0]["negative"] = "this is a string"
     resp = client.post(
@@ -264,6 +265,7 @@ def test_push_with_validation_error(app, headers, slack_mock):
     assert 'NY ' in resp.json
     assert slack_mock.files_upload.call_count == 1
 
+    # negative number in a numeric field
     bad_data = daily_push_ny_wa_today()
     bad_data["coreData"][0]["negative"] = -3
     resp = client.post(
@@ -275,6 +277,18 @@ def test_push_with_validation_error(app, headers, slack_mock):
     assert "Negative value for field" in resp.json
     assert 'NY ' in resp.json
     assert slack_mock.files_upload.call_count == 2
+
+    # empty value for non-nullable field
+    bad_data = daily_push_ny_wa_today()
+    bad_data["coreData"][0]["state"] = None
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 400
+    assert "Missing value for 'state' in row" in resp.json
+    assert slack_mock.files_upload.call_count == 3
 
 def test_push_missing_context(app, headers, slack_mock):
     client = app.test_client()

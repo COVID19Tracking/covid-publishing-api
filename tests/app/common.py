@@ -63,7 +63,7 @@ def daily_push_ny_wa_two_days():
     return {
       "context": ctx,
       "states": [NY, WA],
-      "coreData": [NY_TODAY, WA_TODAY, NY_YESTERDAY, WA_YESTERDAY]
+      "coreData": [NY_TODAY.copy(), WA_TODAY.copy(), NY_YESTERDAY.copy(), WA_YESTERDAY.copy()]
     }
 
 def daily_push_ny_wa_yesterday():
@@ -76,7 +76,7 @@ def daily_push_ny_wa_yesterday():
     return {
       "context": ctx,
       "states": [NY, WA],
-      "coreData": [NY_YESTERDAY, WA_YESTERDAY]
+      "coreData": [NY_YESTERDAY.copy(), WA_YESTERDAY.copy()]
     }
 
 def daily_push_ny_wa_today():
@@ -89,7 +89,7 @@ def daily_push_ny_wa_today():
     return {
       "context": ctx,
       "states": [NY, WA],
-      "coreData": [NY_TODAY, WA_TODAY]
+      "coreData": [NY_TODAY.copy(), WA_TODAY.copy()]
     }
 
 def edit_push_ny_yesterday():
@@ -101,5 +101,5 @@ def edit_push_ny_yesterday():
 
     return {
       "context": ctx,
-      "coreData": [NY_YESTERDAY_EDITED]
+      "coreData": [NY_YESTERDAY_EDITED.copy()]
     }

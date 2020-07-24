@@ -110,8 +110,6 @@ class State(db.Model, DataMixin):
     twitter = db.Column(db.String)
     notes = db.Column(db.String)
     pui = db.Column(db.String)
-    pum = db.Column(db.Boolean)
-    fips = db.Column(db.String)
 
     # here for parity with public API, deprecated field
     @hybrid_property

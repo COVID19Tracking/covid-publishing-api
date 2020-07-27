@@ -110,8 +110,6 @@ class State(db.Model, DataMixin):
     twitter = db.Column(db.String)
     notes = db.Column(db.String)
     pui = db.Column(db.String)
-    pum = db.Column(db.Boolean)
-    fips = db.Column(db.String)
 
     # here for parity with public API, deprecated field
     @hybrid_property
@@ -154,15 +152,25 @@ class CoreData(db.Model, DataMixin):
     death = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathProbable = db.Column(db.Integer, info={"includeInUSDaily": True})
-    antibodyTotal = db.Column(db.Integer, info={"includeInUSDaily": True})
-    antibodyPositive = db.Column(db.Integer, info={"includeInUSDaily": True})
-    antibodyNegative = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     negativeTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveCasesViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalAntibodyTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveAntibodyTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeAntibodyTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalAntibodyTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveAntibodyTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeAntibodyTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    probableCases = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalTestEncountersViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalAntigenTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveAntigenTestsPeople = db.Column(db.Integer, info={"includeInUSDaily": True})
+    totalAntigenTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveAntigenTests = db.Column(db.Integer, info={"includeInUSDaily": True})
+
 
     # from worksheet, "Notes" column (made by checker or doublechecker)
     privateNotes = db.Column(db.String)

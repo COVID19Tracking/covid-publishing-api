@@ -91,7 +91,6 @@ def test_get_us_daily_column_names(app):
     colnames = CoreData.numeric_fields()
     assert 'positive' in colnames
     assert 'checker' not in colnames
-    assert len(colnames) == 22
 
 
 def test_get_us_daily(app, headers):

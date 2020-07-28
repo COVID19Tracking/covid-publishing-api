@@ -270,6 +270,7 @@ def edit_core_data_from_states_daily():
     # TODO: if there's any other info that should go into a batch note, put it there
     batch = Batch(**context)
     batch.isRevision = True
+    batch.isPublished = True  # edit batches are published by default
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 

@@ -12,7 +12,8 @@ NY_TODAY = {
     "dateChecked": datetime.now().isoformat(),
     "date": TODAY,
     "positive": 20,
-    "negative": 5
+    "negative": 5,
+    "inIcuCurrently": 33
 }
 
 WA_TODAY = {
@@ -30,7 +31,8 @@ NY_YESTERDAY = {
     "dateChecked": datetime.now().isoformat(),
     "date": YESTERDAY,
     "positive": 15,
-    "negative": 4
+    "negative": 4,
+    "inIcuCurrently": 37
 }
 
 WA_YESTERDAY = {

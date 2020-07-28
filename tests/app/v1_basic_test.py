@@ -7,6 +7,7 @@ from app import db
 from app.api.data import any_existing_rows
 from app.models.data import *
 from common import *
+import datetime
 
 
 def test_get_test(app):
@@ -92,9 +93,9 @@ def test_post_core_data_updating_state(app, headers):
 def test_get_batches(app):
     with app.app_context():
         # write 2 batches
-        bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
+        bat1 = Batch(batchNote='test1', createdAt=datetime.datetime.now() ,
             isPublished=False, isRevision=False)
-        bat2 = Batch(batchNote='test2', createdAt=datetime.now(),
+        bat2 = Batch(batchNote='test2', createdAt=datetime.datetime.now() ,
             isPublished=False, isRevision=False)
         db.session.add(bat1)
         db.session.add(bat2)
@@ -117,9 +118,9 @@ def test_get_batches(app):
 def test_publish_batch(app, headers, requests_mock):
     with app.app_context():
         # write 2 batches
-        bat1 = Batch(batchNote='test1', createdAt=datetime.now(),
+        bat1 = Batch(batchNote='test1', createdAt=datetime.datetime.now() ,
             isPublished=False, isRevision=False)
-        bat2 = Batch(batchNote='test2', createdAt=datetime.now(),
+        bat2 = Batch(batchNote='test2', createdAt=datetime.datetime.now() ,
             isPublished=False, isRevision=False)
         db.session.add(bat1)
         db.session.add(bat2)
@@ -284,6 +285,13 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert slack_mock.chat_postMessage.call_count == 3
     batch_id = resp.json['batch']['batchId']
 
+    # confirm that the edit batch only contains one row with yesterday's data
+    with app.app_context():
+        batch_obj = Batch.query.get(batch_id)
+        assert len(batch_obj.coreData) == 1
+        assert batch_obj.coreData[0].date == datetime.date(2020,5,24)
+        assert batch_obj.coreData[0].state == 'NY'
+
     # test that getting the states daily for NY has the UNEDITED data for yesterday
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
@@ -294,9 +302,11 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         if day_data['date'] == '2020-05-25':
             assert day_data['positive'] == 20
             assert day_data['negative'] == 5
+            assert day_data['inIcuCurrently'] == 33
         elif day_data['date'] == '2020-05-24':
             assert day_data['positive'] == 15
             assert day_data['negative'] == 4
+            assert day_data['inIcuCurrently'] == 37
 
     # Publish the edit batch
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
@@ -311,9 +321,12 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         if day_data['date'] == '2020-05-25':
             assert day_data['positive'] == 20
             assert day_data['negative'] == 5
+            assert day_data['inIcuCurrently'] == 33
         elif day_data['date'] == '2020-05-24':
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
+            # this value was blanked out in the edit, so it should be removed now
+            assert 'inIcuCurrently' not in day_data
 
     # test that sending an edit batch with multiple states fails
     resp = client.post(

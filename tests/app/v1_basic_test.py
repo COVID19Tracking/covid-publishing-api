@@ -292,27 +292,8 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         assert batch_obj.coreData[0].date == datetime.date(2020,5,24)
         assert batch_obj.coreData[0].state == 'NY'
 
-    # test that getting the states daily for NY has the UNEDITED data for yesterday
-    resp = client.get("/api/v1/public/states/NY/daily")
-    assert len(resp.json) == 2
-    unedited = resp.json
-
-    for day_data in resp.json:
-        assert day_data['date'] in ['2020-05-25', '2020-05-24']
-        if day_data['date'] == '2020-05-25':
-            assert day_data['positive'] == 20
-            assert day_data['negative'] == 5
-            assert day_data['inIcuCurrently'] == 33
-        elif day_data['date'] == '2020-05-24':
-            assert day_data['positive'] == 15
-            assert day_data['negative'] == 4
-            assert day_data['inIcuCurrently'] == 37
-
-    # Publish the edit batch
-    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
-    assert resp.status_code == 201
-
-    # getting the states daily for NY has the edited data for yesterday and unchanged for today
+    # getting the states daily for NY has the edited data for yesterday and unchanged for today,
+    # and the last batch should've been published as part of the "edit from states daily" endpoint
     resp = client.get("/api/v1/public/states/NY/daily")
     assert len(resp.json) == 2
 

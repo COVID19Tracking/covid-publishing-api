@@ -12,7 +12,8 @@ NY_TODAY = {
     "dateChecked": datetime.now().isoformat(),
     "date": TODAY,
     "positive": 20,
-    "negative": 5
+    "negative": 5,
+    "inIcuCurrently": 33
 }
 
 WA_TODAY = {
@@ -30,7 +31,8 @@ NY_YESTERDAY = {
     "dateChecked": datetime.now().isoformat(),
     "date": YESTERDAY,
     "positive": 15,
-    "negative": 4
+    "negative": 4,
+    "inIcuCurrently": 37
 }
 
 WA_YESTERDAY = {
@@ -102,4 +104,31 @@ def edit_push_ny_yesterday():
     return {
       "context": ctx,
       "coreData": [NY_YESTERDAY_EDITED.copy()]
+    }
+
+# Simulate a States Daily push where we may receive unedited rows. Include state in context
+def edit_push_ny_yesterday_unchanged_today():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "This is an edit test, incrementing NY count by 1, leaving NY today alone"
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [NY_YESTERDAY_EDITED.copy(), NY_TODAY.copy()]
+    }
+
+def edit_push_multiple_states():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "This is an edit test that should fail because it contains >1 state"
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [NY_YESTERDAY_EDITED.copy(), WA_YESTERDAY.copy()]
     }

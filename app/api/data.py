@@ -1,16 +1,19 @@
 """Registers the necessary routes for the core data model. """
-import flask
 
-from app.api import api
-from app.models.data import *
-from app.utils.webhook import notify_webhook
-from app import db
-from flask_jwt_extended import jwt_required
 from datetime import datetime
+
+import flask
+from flask_jwt_extended import jwt_required
+from sqlalchemy import func, and_
+
+from app import db
+from app.api import api
+from app.api.common import states_daily_query
+from app.models.data import *
 from app.utils.slacknotifier import notify_slack, notify_slack_error, exceptions_to_slack
 from app.utils.validation import validate_core_data_payload, validate_edit_data_payload
+from app.utils.webhook import notify_webhook
 
-from sqlalchemy import func, and_
 
 ##############################################################################################
 ######################################   Health check      ###################################
@@ -163,7 +166,6 @@ def post_core_data():
 def any_existing_rows(state, date):
     date = CoreData.parse_str_to_date(date)
     existing_rows = db.session.query(CoreData).join(Batch).filter(
-        Batch.dataEntryType == 'daily',
         Batch.isPublished == True,
         CoreData.state == state,
         CoreData.date == date).all()
@@ -208,7 +210,6 @@ def edit_core_data():
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
     # check each core data row that the corresponding date/state already exists in published form
-
     core_data_dicts = payload['coreData']
     core_data_objects = []
     for core_data_dict in core_data_dicts:
@@ -237,6 +238,105 @@ def edit_core_data():
 
     notify_slack(
         f"*Pushed batch #{batch.batchId}* (type: {batch.dataEntryType}, user: {batch.shiftLead})\n"
+        f"{batch.batchNote}")
+
+    return flask.jsonify(json_to_return), 201
+
+@api.route('/batches/edit_states_daily', methods=['POST'])
+@jwt_required
+@exceptions_to_slack
+def edit_core_data_from_states_daily():
+    flask.current_app.logger.info('Received a CoreData States Daily edit request')
+    payload = flask.request.json
+
+    # test input data
+    try:
+        validate_edit_data_payload(payload)
+    except ValueError as e:
+        notify_slack_error(str(e), 'edit_core_data_from_states_daily')
+        return flask.jsonify(str(e)), 400
+
+    # we construct the batch from the push context
+    context = payload['context']
+
+    # check that the state is set
+    state_to_edit = context.get('state')
+    if not state_to_edit:
+        notify_slack_error(
+            'No state specified in batch edit context', 'edit_core_data_from_states_daily')
+        return flask.jsonify('No state specified in batch edit context'), 400
+
+    flask.current_app.logger.info('Creating new batch from context: %s' % context)
+    # TODO: if there's any other info that should go into a batch note, put it there
+    batch = Batch(**context)
+    batch.isRevision = True
+    db.session.add(batch)
+    db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
+
+    latest_daily_data_for_state = states_daily_query(state=state_to_edit).all()
+
+    # split up by date for easier lookup/comparison with input edit rows
+    date_to_data = {}
+    for state_daily_data in latest_daily_data_for_state:
+        date_to_data[state_daily_data.date] = state_daily_data
+
+    # check each core data row that the corresponding date/state already exists in published form
+    core_data_dicts = payload['coreData']
+    core_data_objects = []
+    for core_data_dict in core_data_dicts:
+        # this state has to be identical to the state from the context
+        state = core_data_dict['state']
+        if state != state_to_edit:
+            error = 'Context state %s does not match JSON data state %s' % (state_to_edit, state)
+            notify_slack_error(error, 'edit_core_data_from_states_daily')
+            return flask.jsonify(error), 400
+        
+        # is there a date for this?
+        # check that there exists at least one published row for this date/state
+        date = CoreData.parse_str_to_date(core_data_dict['date'])
+        data_for_date = date_to_data.get(date)
+
+        # check all numeric and States Grades rows in existing data vs edit data
+        any_different = False
+        fields_to_check = CoreData.numeric_fields().copy()
+        fields_to_check.append('dataQualityGrade')
+
+        if not data_for_date:
+            # TODO: uncomment these 3 lines if we want to enforce editing only existing date rows
+            # error = 'Attempting to edit a nonexistent date: %s' % core_data_dict['date']
+            # flask.current_app.logger.error(error)
+            # return flask.jsonify(error), 400
+
+            # right now, this situation will by default be treated as a change
+            flask.current_app.logger.info('Row for date not found: %s' % date)
+            any_different = True
+
+        else:
+            for field in fields_to_check:
+                if getattr(data_for_date, field) != core_data_dict.get(field):
+                    any_different = True
+                    break
+
+        # if any value in the row is different, make an edit batch
+        if any_different:
+            core_data_dict['batchId'] = batch.batchId
+            core_data = CoreData(**core_data_dict)
+            db.session.add(core_data)
+            core_data_objects.append(core_data)
+            flask.current_app.logger.info('Change detected in row: %s' % core_data_dict)
+        else:
+            flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
+
+    db.session.flush()
+
+    json_to_return = {
+        'batch': batch.to_dict(),
+        'coreData': [core_data.to_dict() for core_data in core_data_objects],
+    }
+
+    db.session.commit()
+    notify_slack(
+        f"*Pushed edit batch #{batch.batchId}* (user: {batch.shiftLead})\n"
         f"{batch.batchNote}")
 
     return flask.jsonify(json_to_return), 201

@@ -3,7 +3,9 @@
 from datetime import datetime
 
 import flask
+from flask import render_template
 from flask_jwt_extended import jwt_required
+import pandas as pd
 from sqlalchemy import func, and_
 
 from app import db
@@ -341,3 +343,25 @@ def edit_core_data_from_states_daily():
         f"{batch.batchNote}")
 
     return flask.jsonify(json_to_return), 201
+
+
+def list_history_for_state_and_date(state, date):
+    return db.session.query(CoreData).join(Batch).filter(
+        Batch.isPublished == True,
+        CoreData.state == state,
+        CoreData.date == date
+        ).order_by(CoreData.batchId.desc()).all()
+
+
+@api.route('/public/state-date-history/<string:state>/<string:date>', methods=['GET'])
+def get_state_date_history(state, date):
+    flask.current_app.logger.info('Retrieving state date history')
+
+    rows = list_history_for_state_and_date(state.upper(), date)
+    row_dicts = pd.DataFrame(x.to_dict() for x in rows).to_dict('records')
+    return render_template(
+        'state_date_history.html',
+        title='State Date History',
+        state=state,
+        date=date,
+        data=row_dicts)

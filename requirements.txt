@@ -1,8 +1,10 @@
 Flask
+flask-bootstrap
 Flask-Migrate
 Flask-SQLAlchemy
 Flask-WTF
 gunicorn
+pandas
 psycopg2
 pytest
 python-decouple

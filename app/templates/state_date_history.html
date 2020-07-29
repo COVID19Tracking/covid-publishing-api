@@ -1,0 +1,33 @@
+{% extends "bootstrap/base.html" %}
+{{super()}}
+
+<head>
+<title>State Date History</title>
+</head>
+
+
+<body>
+{% block content %}
+<div class="container-fluid">
+
+<h2>{{state}} history table for {{date}}</h2>
+<div class="table-responsive-md">
+<table class="table table-striped">
+    <tr>
+     {% for key in data[0] %}
+     <th> {{ key }} </th>
+     {% endfor %}
+  </tr>
+{% for dict_item in data %}
+  <tr>
+     {% for value in dict_item.values() %}
+     <td> {{ value }} </td>
+     {% endfor %}
+  </tr>
+  {% endfor %}
+</table>
+</div>
+
+</div>
+{% endblock %}
+</body>

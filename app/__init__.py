@@ -4,6 +4,7 @@ application with a specific config file"""
 
 # Flask Imports
 from flask import Flask
+from flask_bootstrap import Bootstrap
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -11,6 +12,7 @@ from flask_jwt_extended import JWTManager
 # For the database
 db = SQLAlchemy()
 migrate = Migrate()
+bootstrap = Bootstrap()
 
 def create_app(config):
     app = Flask(__name__)
@@ -18,6 +20,7 @@ def create_app(config):
     app.config.from_object(config)
     config.init_app(app)
 
+    bootstrap.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     

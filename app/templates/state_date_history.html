@@ -21,7 +21,18 @@
 {% for dict_item in data %}
   <tr>
      {% for value in dict_item.values() %}
-     <td> {{ value }} </td>
+         {%  if loop.index == 2 %}
+             <td><a tabindex="0" role="button" data-toggle="popover"
+                    data-batchId="{{ value }}"
+                    data-link="{{ dict_item.batch.link }}"
+                    data-logCategory="{{ dict_item.batch.logCategory }}"
+                    data-user="{{ dict_item.batch.user }}"
+                    data-batchNote="{{ dict_item.batch.batchNote }}"
+                    data-shiftLead="{{ dict_item.batch.shiftLead }}"
+                    data-createdAt="{{ dict_item.batch.createdAt.strftime("%Y-%m-%d %H:%M") }}">{{ value }}</a></td>
+         {%  else %}
+            <td> {{ value }} </td>
+         {%  endif %}
      {% endfor %}
   </tr>
   {% endfor %}
@@ -29,5 +40,37 @@
 </div>
 
 </div>
+
 {% endblock %}
+
+{% block scripts %}
+  {{super()}}
+
+  <style>
+    .popover {
+         max-width: 35%;
+    }
+  </style>
+  <script>
+    $(function () {
+
+
+      $('[data-toggle="popover"]').each(function() {
+
+          const link_block = $(this).attr('data-link') ? `<a href="${$(this).attr('data-link')}">link</a>` : '';
+        $(this).popover({
+          container: 'body',
+          trigger: 'focus',
+          html: true,
+          content: `Batch #${$(this).attr('data-batchId')} (${$(this).attr('data-shiftLead')})<br />
+            ${$(this).attr('data-createdAt') }<br />
+            ${$(this).attr('data-logCategory') ? $(this).attr('data-logCategory') : ''}<br />
+            ${link_block}<br /><br />
+            ${$(this).attr('data-batchNote')}`,
+        });
+      });
+    });
+  </script>
+{% endblock %}
+
 </body>

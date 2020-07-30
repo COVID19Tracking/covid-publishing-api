@@ -50,6 +50,10 @@ class Batch(db.Model, DataMixin):
     batchNote = db.Column(db.String)
     dataEntryType = db.Column(db.String)
 
+    logCategory = db.Column(db.String)
+    link = db.Column(db.String)
+    user = db.Column(db.String)
+
     # false if preview state, true if live
     isPublished = db.Column(db.Boolean, nullable=False)
     isRevision = db.Column(db.Boolean, nullable=False)

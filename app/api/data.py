@@ -4,7 +4,7 @@ from datetime import datetime
 
 import flask
 from flask import render_template
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 import pandas as pd
 from sqlalchemy import func, and_
 
@@ -98,6 +98,7 @@ def post_core_data_json(payload):
     context = payload['context']
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
     batch = Batch(**context)
+    batch.user = get_jwt_identity()
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
@@ -207,6 +208,7 @@ def edit_core_data():
     context = payload['context']
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
     batch = Batch(**context)
+    batch.user = get_jwt_identity()
     batch.isRevision = True
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
@@ -269,10 +271,11 @@ def edit_core_data_from_states_daily():
         return flask.jsonify('No state specified in batch edit context'), 400
 
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
-    # TODO: if there's any other info that should go into a batch note, put it there
     batch = Batch(**context)
+    batch.user = get_jwt_identity()
     batch.isRevision = True
     batch.isPublished = True  # edit batches are published by default
+    batch.publishedAt = datetime.utcnow()
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
@@ -359,6 +362,9 @@ def get_state_date_history(state, date):
 
     rows = list_history_for_state_and_date(state.upper(), date)
     row_dicts = pd.DataFrame(x.to_dict() for x in rows).to_dict('records')
+    for idx, row in enumerate(row_dicts):  # copy in the associated batch data
+        row['batch'] = rows[idx].batch
+
     return render_template(
         'state_date_history.html',
         title='State Date History',

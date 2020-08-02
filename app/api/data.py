@@ -30,7 +30,7 @@ def get_data():
 @api.route('/test_auth', methods=['GET'])
 @jwt_required
 def test_auth():
-    return flask.jsonify({'user': 'authenticated'}),200
+    return flask.jsonify({'user': 'authenticated'}), 200
 
 ##############################################################################################
 ######################################   Batches      ########################################
@@ -341,3 +341,17 @@ def edit_core_data_from_states_daily():
         f"{batch.batchNote}")
 
     return flask.jsonify(json_to_return), 201
+
+
+# Get all published rows for this state and date, in reverse chronological order
+@api.route('/state-date-history/<string:state>/<string:date>', methods=['GET'])
+def get_state_date_history(state, date):
+    flask.current_app.logger.info('Retrieving state date history')
+
+    history = db.session.query(CoreData).join(Batch).filter(
+        Batch.isPublished == True,
+        CoreData.state == state.upper(),
+        CoreData.date == date
+        ).order_by(CoreData.batchId.desc()).all()
+
+    return flask.jsonify([x.to_dict() for x in history])

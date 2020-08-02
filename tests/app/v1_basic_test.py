@@ -373,3 +373,37 @@ def test_push_missing_context(app, headers, slack_mock):
     assert resp.status_code == 400
     assert "Payload requires 'context' field" in resp.json
     assert slack_mock.files_upload.call_count == 1
+
+
+def test_get_state_date_history(app, headers):
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    first_batch_id = resp.json['batch']['batchId']
+    resp = client.post("/api/v1/batches/{}/publish".format(first_batch_id), headers=headers)
+
+    # make (and implicitly publish) an edit batch for NY for yesterday, and leave today alone
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_push_ny_yesterday_unchanged_today()),
+        content_type='application/json',
+        headers=headers)
+    second_batch_id = resp.json['batch']['batchId']
+
+    # get history for NY yesterday, should have two rows
+    resp = client.get("/api/v1/state-date-history/NY/2020-05-24")
+    assert len(resp.json) == 2
+    assert resp.json[0]['batchId'] == second_batch_id  # most recent first
+    assert resp.json[0]['positive'] == 16
+
+    assert resp.json[1]['batchId'] == first_batch_id
+    assert resp.json[1]['positive'] == 15
+
+    # history for NY today should have just one row
+    resp = client.get("/api/v1/state-date-history/NY/2020-05-25")
+    assert len(resp.json) == 1

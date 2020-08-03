@@ -112,7 +112,9 @@ def edit_push_ny_yesterday_unchanged_today():
       "dataEntryType": "edit",
       "shiftLead": "test",
       "state": "NY",
-      "batchNote": "This is an edit test, incrementing NY count by 1, leaving NY today alone"
+      "batchNote": "This is an edit test, incrementing NY count by 1, leaving NY today alone",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
     }
 
     return {

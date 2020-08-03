@@ -354,4 +354,11 @@ def get_state_date_history(state, date):
         CoreData.date == date
         ).order_by(CoreData.batchId.desc()).all()
 
-    return flask.jsonify([x.to_dict() for x in history])
+    return_history = []
+    for elem in history:
+        return_elem = elem.to_dict()
+        return_elem['batch'] = elem.batch.to_dict()
+        del return_elem['batch']['coreData']
+        return_history.append(return_elem)
+
+    return flask.jsonify(return_history)

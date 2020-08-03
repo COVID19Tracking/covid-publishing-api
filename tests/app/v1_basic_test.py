@@ -50,6 +50,7 @@ def test_post_core_data(app, headers):
     resp = client.get('/api/v1/batches')
     assert len(resp.json['batches']) == 1
     assert resp.json['batches'][0]['batchId'] == 1
+    assert resp.json['batches'][0]['user'] == 'testing'
     # assert batch data has rows attached to it
     assert len(resp.json['batches'][0]['coreData']) == 56
     assert resp.json['batches'][0]['coreData'][1]['state'] == 'AL'
@@ -224,6 +225,7 @@ def test_edit_core_data(app, headers, slack_mock):
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
     batch_id = resp.json['batch']['batchId']
+    assert resp.json['batch']['user'] == 'testing'
 
     # test that getting the states daily for NY has the UNEDITED data for yesterday
     resp = client.get("/api/v1/public/states/NY/daily")
@@ -284,6 +286,7 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
     batch_id = resp.json['batch']['batchId']
+    assert resp.json['batch']['user'] == 'testing'
 
     # confirm that the edit batch only contains one row with yesterday's data
     with app.app_context():

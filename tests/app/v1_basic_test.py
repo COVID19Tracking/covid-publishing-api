@@ -294,6 +294,9 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         assert len(batch_obj.coreData) == 1
         assert batch_obj.coreData[0].date == datetime.date(2020,5,24)
         assert batch_obj.coreData[0].state == 'NY'
+        assert batch_obj.link == 'https://example.com'
+        assert batch_obj.user == 'testing'
+        assert batch_obj.logCategory == 'State Updates'
 
     # getting the states daily for NY has the edited data for yesterday and unchanged for today,
     # and the last batch should've been published as part of the "edit from states daily" endpoint

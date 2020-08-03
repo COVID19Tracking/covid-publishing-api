@@ -400,6 +400,8 @@ def test_get_state_date_history(app, headers):
     assert len(resp.json) == 2
     assert resp.json[0]['batchId'] == second_batch_id  # most recent first
     assert resp.json[0]['positive'] == 16
+    assert resp.json[0]['batch']['shiftLead'] == 'test'
+    assert 'coreData' not in resp.json[0]['batch']
 
     assert resp.json[1]['batchId'] == first_batch_id
     assert resp.json[1]['positive'] == 15

@@ -38,10 +38,10 @@ def validate_core_data_payload(payload):
     # test the input data
     if 'context' not in payload:
         raise ValueError("Payload requires 'context' field")
-    if 'states' not in payload:
-        raise ValueError("Payload requires 'states' field")
-    if 'coreData' not in payload:
-        raise ValueError("Payload requires 'coreData' field")
+    if 'states' not in payload or not payload['states']:
+        raise ValueError("Payload requires 'states' field with at least one entry")
+    if 'coreData' not in payload or not payload['coreData']:
+        raise ValueError("Payload requires 'coreData' field with at least one entry")
 
     validate_numeric_fields(payload)
     validate_non_empty_fields(payload)    
@@ -57,9 +57,9 @@ def validate_edit_data_payload(payload):
     if not payload['context'].get('batchNote'):
         raise ValueError("Payload 'context' must contain a batchNote explaining edit")
 
-    # check that edit data exists
-    if 'coreData' not in payload:
-        raise ValueError("Payload requires 'coreData' field")
+    # check that edit data exists and that there's at least one row
+    if 'coreData' not in payload or not payload['coreData']:
+        raise ValueError("Payload requires 'coreData' field with at least one entry")
 
     validate_numeric_fields(payload)
     validate_non_empty_fields(payload)

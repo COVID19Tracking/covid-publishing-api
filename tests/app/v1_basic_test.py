@@ -323,6 +323,16 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 400
 
+    # test that sending an edit batch with no CoreData rows fails
+    bad_data = edit_push_multiple_states()
+    bad_data['coreData'] = []
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 400
+
 
 def test_push_with_validation_error(app, headers, slack_mock):
     client = app.test_client()

@@ -89,6 +89,7 @@ def post_core_data_json(payload):
     try:
         validate_core_data_payload(payload)
     except ValueError as e:
+        flask.current_app.logger.error('Data post failed: %s' % str(e))
         notify_slack_error(str(e), 'post_core_data_json')
         return flask.jsonify(str(e)), 400
 
@@ -199,6 +200,7 @@ def edit_core_data():
     try:
         validate_edit_data_payload(payload)
     except ValueError as e:
+        flask.current_app.logger.error("Edit data failed validation: %s" % str(e))
         notify_slack_error(str(e), 'edit_core_data')
         return flask.jsonify(str(e)), 400
 
@@ -255,6 +257,7 @@ def edit_core_data_from_states_daily():
     try:
         validate_edit_data_payload(payload)
     except ValueError as e:
+        flask.current_app.logger.error("Edit data failed validation: %s" % str(e))
         notify_slack_error(str(e), 'edit_core_data_from_states_daily')
         return flask.jsonify(str(e)), 400
 
@@ -264,6 +267,7 @@ def edit_core_data_from_states_daily():
     # check that the state is set
     state_to_edit = context.get('state')
     if not state_to_edit:
+        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(e))
         notify_slack_error(
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
         return flask.jsonify('No state specified in batch edit context'), 400
@@ -293,6 +297,7 @@ def edit_core_data_from_states_daily():
         state = core_data_dict['state']
         if state != state_to_edit:
             error = 'Context state %s does not match JSON data state %s' % (state_to_edit, state)
+            flask.current_app.logger.error(error)
             notify_slack_error(error, 'edit_core_data_from_states_daily')
             return flask.jsonify(error), 400
         

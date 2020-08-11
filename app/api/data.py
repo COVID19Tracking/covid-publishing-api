@@ -292,6 +292,8 @@ def edit_core_data_from_states_daily():
     # check each core data row that the corresponding date/state already exists in published form
     core_data_dicts = payload['coreData']
     core_data_objects = []
+    changed_fields = set()
+    changed_dates = []
     for core_data_dict in core_data_dicts:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
@@ -307,10 +309,10 @@ def edit_core_data_from_states_daily():
         data_for_date = date_to_data.get(date)
 
         # check all numeric and States Grades rows in existing data vs edit data
-        any_different = False
         fields_to_check = CoreData.numeric_fields().copy()
         fields_to_check.append('dataQualityGrade')
-
+        
+        changed_fields_for_date = set()
         if not data_for_date:
             # TODO: uncomment these 3 lines if we want to enforce editing only existing date rows
             # error = 'Attempting to edit a nonexistent date: %s' % core_data_dict['date']
@@ -319,28 +321,36 @@ def edit_core_data_from_states_daily():
 
             # right now, this situation will by default be treated as a change
             flask.current_app.logger.info('Row for date not found: %s' % date)
-            any_different = True
+            changed_dates.append(date)  # we treat new rows as changed dates
 
         else:
             for field in fields_to_check:
                 if getattr(data_for_date, field) != core_data_dict.get(field):
-                    any_different = True
-                    break
+                    changed_fields_for_date.add(field)
 
         # if any value in the row is different, make an edit batch
-        if any_different:
+        if len(changed_fields_for_date) > 0:
+            changed_dates.append(date)
             core_data_dict['batchId'] = batch.batchId
             core_data = CoreData(**core_data_dict)
             db.session.add(core_data)
             core_data_objects.append(core_data)
             flask.current_app.logger.info('Change detected in row: %s' % core_data_dict)
+            changed_fields.update(changed_fields_for_date)
         else:
             flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
 
     db.session.flush()
 
+    # which dates got changed?
+    start = sorted(changed_dates)[0].strftime('%-m/%-d/%y')
+    end = sorted(changed_dates)[-1].strftime('%-m/%-d/%y')
+    changed_dates_str = start if start == end else '%s - %s (%d rows)' % (start, end, len(changed_dates))
+
     json_to_return = {
         'batch': batch.to_dict(),
+        'changedFields': list(changed_fields),
+        'changedDates': changed_dates_str,
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
     }
 

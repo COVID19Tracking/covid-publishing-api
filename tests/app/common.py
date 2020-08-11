@@ -1,5 +1,6 @@
 from datetime import datetime, date
 
+BEFORE_YESTERDAY = date(2020, 5, 20)
 YESTERDAY = date(2020, 5, 24)
 TODAY = date(2020, 5, 25)
 
@@ -52,6 +53,25 @@ NY_YESTERDAY_EDITED = {
     "date": YESTERDAY,
     "positive": 16,
     "negative": 4
+}
+
+NY_TODAY_EDITED = {
+    "state": "NY",
+    "lastUpdateIsoUtc": datetime.now().isoformat(),
+    "dateChecked": datetime.now().isoformat(),
+    "date": TODAY,
+    "positive": 20,
+    "negative": 5,
+    "inIcuCurrently": 35
+}
+
+NY_BEFORE_YESTERDAY = {
+    "state": "NY",
+    "lastUpdateIsoUtc": datetime.now().isoformat(),
+    "dateChecked": datetime.now().isoformat(),
+    "date": BEFORE_YESTERDAY,
+    "positive": 10,
+    "negative": 2
 }
 
 # Test data used for testing US daily and states daily by state
@@ -121,6 +141,22 @@ def edit_push_ny_yesterday_unchanged_today():
       "context": ctx,
       "coreData": [NY_YESTERDAY_EDITED.copy(), NY_TODAY.copy()]
     }
+
+def edit_push_ny_today_and_before_yesterday():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "This is an edit test with two dates",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [NY_TODAY_EDITED.copy(), NY_BEFORE_YESTERDAY.copy()]
+    }
+
 
 def edit_push_multiple_states():
     ctx = {

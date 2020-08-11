@@ -287,6 +287,11 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert slack_mock.chat_postMessage.call_count == 3
     batch_id = resp.json['batch']['batchId']
     assert resp.json['batch']['user'] == 'testing'
+    # we've changed positive and removed inIcuCurrently, so both should count as changed
+    assert len(resp.json['changedFields']) == 2
+    assert 'positive' in resp.json['changedFields']
+    assert 'inIcuCurrently' in resp.json['changedFields']
+    assert resp.json['changedDates'] == '5/24/20'
 
     # confirm that the edit batch only contains one row with yesterday's data
     with app.app_context():
@@ -314,6 +319,15 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
             assert day_data['negative'] == 4
             # this value was blanked out in the edit, so it should be removed now
             assert 'inIcuCurrently' not in day_data
+
+    # test editing 2 non-consecutive dates
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_push_ny_today_and_before_yesterday()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.json['changedFields'] == ['inIcuCurrently']
+    assert resp.json['changedDates'] == '5/20/20 - 5/25/20 (2 rows)'
 
     # test that sending an edit batch with multiple states fails
     resp = client.post(

@@ -156,14 +156,14 @@ class CoreData(db.Model, DataMixin):
     death = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathProbable = db.Column(db.Integer, info={"includeInUSDaily": True})
-    totalTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
-    positiveTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
-    negativeTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
-    positiveCasesViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
     probableCases = db.Column(db.Integer, info={"includeInUSDaily": True})
 
     # PCR/viral fields
+    totalTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeTestsViral = db.Column(db.Integer, info={"includeInUSDaily": True})
+    positiveCasesViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestEncountersViral = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestsPeopleViral = db.Column(db.Integer, info={"includeInUSDaily": True})
 

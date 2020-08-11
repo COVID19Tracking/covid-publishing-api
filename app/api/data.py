@@ -343,9 +343,9 @@ def edit_core_data_from_states_daily():
     db.session.flush()
 
     # which dates got changed?
-    start = sorted(changed_dates)[0].strftime('%m/%d/%y')
-    end = sorted(changed_dates)[-1].strftime('%m/%d/%y')
-    changed_dates_str = start if start == end else '%s - %s' % (start, end)
+    start = sorted(changed_dates)[0].strftime('%-m/%-d/%y')
+    end = sorted(changed_dates)[-1].strftime('%-m/%-d/%y')
+    changed_dates_str = start if start == end else '%s - %s (%d rows)' % (start, end, len(changed_dates))
 
     json_to_return = {
         'batch': batch.to_dict(),

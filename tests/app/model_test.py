@@ -68,4 +68,19 @@ def test_core_data_model(app):
         assert len(batch.coreData) == 1
         assert batch.coreData[0] == core_data_row
 
+def test_total_test_results(app):
+    with app.app_context():
+        now_utc = datetime(2020, 5, 4, 20, 3, tzinfo=pytz.UTC)
+        core_data_row = CoreData(
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
+            date=datetime.today(), state='NY')
 
+        assert core_data_row.totalTestResults == 0
+
+        core_data_row.positive = 25
+        assert core_data_row.totalTestResults == 25
+        core_data_row.positive = None
+        core_data_row.negative = 5
+        assert core_data_row.totalTestResults == 5
+        core_data_row.positive = 25
+        assert core_data_row.totalTestResults == 30

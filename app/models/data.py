@@ -228,7 +228,9 @@ class CoreData(db.Model, DataMixin):
         # Calculated value (positive + negative) of total test results.
         # For consistency with public API, treating a negative null as 0
         if self.negative is None:
-            return self.positive
+            return self.positive or 0
+        if self.positive is None:
+            return self.negative or 0
         return self.positive + self.negative
 
     # Converts the input to a string and returns parsed datetime.date object

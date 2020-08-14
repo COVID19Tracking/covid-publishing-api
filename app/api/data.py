@@ -345,12 +345,15 @@ def edit_core_data_from_states_daily():
     # which dates got changed?
     start = sorted(changed_dates)[0].strftime('%-m/%-d/%y')
     end = sorted(changed_dates)[-1].strftime('%-m/%-d/%y')
-    changed_dates_str = start if start == end else '%s - %s (%d rows)' % (start, end, len(changed_dates))
+    changed_dates_str = start if start == end else '%s - %s' % (start, end)
 
     json_to_return = {
         'batch': batch.to_dict(),
         'changedFields': list(changed_fields),
         'changedDates': changed_dates_str,
+        'numRowsEdited': len(changed_dates),
+        'user': get_jwt_identity(),
+        'shiftLead': batch.shiftLead,
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
     }
 

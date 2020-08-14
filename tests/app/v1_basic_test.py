@@ -330,7 +330,6 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert resp.json['changedDates'] == '5/20/20 - 5/25/20'
     assert resp.json['numRowsEdited'] == 2
     assert resp.json['user'] == 'testing'
-    assert resp.json['shiftLead'] == 'test'
 
     # test that sending an edit batch with multiple states fails
     resp = client.post(

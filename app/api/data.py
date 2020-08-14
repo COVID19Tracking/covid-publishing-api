@@ -353,7 +353,6 @@ def edit_core_data_from_states_daily():
         'changedDates': changed_dates_str,
         'numRowsEdited': len(changed_dates),
         'user': get_jwt_identity(),
-        'shiftLead': batch.shiftLead,
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
     }
 

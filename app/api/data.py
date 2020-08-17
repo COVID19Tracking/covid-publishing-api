@@ -293,7 +293,7 @@ def edit_core_data_from_states_daily():
     core_data_dicts = payload['coreData']
     core_data_objects = []
     changed_fields = set()
-    changed_dates = []
+    changed_dates = set()
     for core_data_dict in core_data_dicts:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
@@ -313,24 +313,31 @@ def edit_core_data_from_states_daily():
         fields_to_check.append('dataQualityGrade')
         
         changed_fields_for_date = set()
+        should_add_to_edit_batch = False
+
         if not data_for_date:
+            # this is a new row: we treat this as a changed date
+
             # TODO: uncomment these 3 lines if we want to enforce editing only existing date rows
             # error = 'Attempting to edit a nonexistent date: %s' % core_data_dict['date']
             # flask.current_app.logger.error(error)
             # return flask.jsonify(error), 400
 
-            # right now, this situation will by default be treated as a change
             flask.current_app.logger.info('Row for date not found: %s' % date)
-            changed_dates.append(date)  # we treat new rows as changed dates
+            should_add_to_edit_batch = True
+            changed_dates.add(date)
 
         else:
+            # this row already exists, but check each value to see if anything changed
             for field in fields_to_check:
                 if getattr(data_for_date, field) != core_data_dict.get(field):
+                    # at least one field is different, treat this as a changed date
                     changed_fields_for_date.add(field)
+                    changed_dates.add(date)
+                    should_add_to_edit_batch = True
 
         # if any value in the row is different, make an edit batch
-        if len(changed_fields_for_date) > 0:
-            changed_dates.append(date)
+        if should_add_to_edit_batch:
             core_data_dict['batchId'] = batch.batchId
             core_data = CoreData(**core_data_dict)
             db.session.add(core_data)

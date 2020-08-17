@@ -332,6 +332,15 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert resp.json['numRowsEdited'] == 2
     assert resp.json['user'] == 'testing'
 
+    # check to see if the row for the new date (BEFORE_YESTERDAY) was added
+    resp = client.get("/api/v1/public/states/NY/daily")
+    found_new_date = False
+    for day_data in resp.json:
+        if day_data['date'] == '2020-05-20':
+            assert day_data['positive'] == 10
+            assert day_data['negative'] == 2
+    assert found_new_date is True
+
     # test that sending an edit batch with multiple states fails
     resp = client.post(
         "/api/v1/batches/edit_states_daily",

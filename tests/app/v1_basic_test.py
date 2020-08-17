@@ -285,6 +285,7 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
+    assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
     batch_id = resp.json['batch']['batchId']
     assert resp.json['batch']['user'] == 'testing'
     # we've changed positive and removed inIcuCurrently, so both should count as changed

@@ -1,4 +1,5 @@
 """Notify Slack about errors and publishing events"""
+import traceback
 
 from slack import WebClient
 from slack.errors import SlackApiError
@@ -58,6 +59,6 @@ def exceptions_to_slack(function):
         try:
             return function(*args, **kwargs)
         except Exception as e:
-            notify_slack_error(str(e), function.__name__)
+            notify_slack_error(traceback.format_exc(), function.__name__)
             raise e  # raise the original exception again
     return wrapper

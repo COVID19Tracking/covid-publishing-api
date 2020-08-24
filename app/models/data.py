@@ -244,9 +244,18 @@ class CoreData(db.Model, DataMixin):
 
         # convert lastUpdateIsoUtc to lastUpdateTime
         if 'lastUpdateIsoUtc' in kwargs:
-            kwargs['lastUpdateTime'] = parser.parse(kwargs['lastUpdateIsoUtc'])
+            last_update_time = parser.parse(kwargs['lastUpdateIsoUtc'])
+            if last_update_time.tzinfo is None:
+                raise ValueError(
+                    'Expected a timezone with lastUpdateIsoUtc: %s' % kwargs['lastUpdateIsoUtc'])
+            kwargs['lastUpdateTime'] = last_update_time
+
         if 'dateChecked' in kwargs:
-            kwargs['dateChecked'] = parser.parse(kwargs['dateChecked'])
+            date_checked = parser.parse(kwargs['dateChecked'])
+            if date_checked.tzinfo is None:
+                raise ValueError(
+                    'Expected a timezone with dateChecked: %s' % kwargs['dateChecked'])
+            kwargs['dateChecked'] = date_checked
 
         # "date" is expected to be a date string, no times or timezones
         if 'date' in kwargs:

@@ -1,16 +1,18 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
+import pytz
 
 BEFORE_YESTERDAY = date(2020, 5, 20)
 YESTERDAY = date(2020, 5, 24)
 TODAY = date(2020, 5, 25)
+NOW = pytz.utc.localize(datetime.now())
 
 NY = {"state": "NY"}
 WA = {"state": "WA"}
 
 NY_TODAY = {
     "state": "NY",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": TODAY,
     "positive": 20,
     "negative": 5,
@@ -19,8 +21,8 @@ NY_TODAY = {
 
 WA_TODAY = {
     "state": "WA",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": TODAY,
     "positive": 10,
     "negative": 10
@@ -28,8 +30,8 @@ WA_TODAY = {
 
 NY_YESTERDAY = {
     "state": "NY",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": YESTERDAY,
     "positive": 15,
     "negative": 4,
@@ -38,8 +40,8 @@ NY_YESTERDAY = {
 
 WA_YESTERDAY = {
     "state": "WA",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": YESTERDAY,
     "positive": 9,
     "negative": 8
@@ -48,8 +50,8 @@ WA_YESTERDAY = {
 # edit to increase positive count by 1
 NY_YESTERDAY_EDITED = {
     "state": "NY",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": YESTERDAY,
     "positive": 16,
     "negative": 4
@@ -57,8 +59,8 @@ NY_YESTERDAY_EDITED = {
 
 NY_TODAY_EDITED = {
     "state": "NY",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": TODAY,
     "positive": 20,
     "negative": 5,
@@ -67,8 +69,8 @@ NY_TODAY_EDITED = {
 
 NY_BEFORE_YESTERDAY = {
     "state": "NY",
-    "lastUpdateIsoUtc": datetime.now().isoformat(),
-    "dateChecked": datetime.now().isoformat(),
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
     "date": BEFORE_YESTERDAY,
     "positive": 10,
     "negative": 2
@@ -141,6 +143,25 @@ def edit_push_ny_yesterday_unchanged_today():
       "context": ctx,
       "coreData": [NY_YESTERDAY_EDITED.copy(), NY_TODAY.copy()]
     }
+
+def edit_push_ny_yesterday_change_only_timestamp():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "This is an edit test changing only the timestamp",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
+    }
+
+    edit_data = NY_TODAY.copy()
+    edit_data['lastUpdateIsoUtc'] = (NOW - timedelta(days=1)).isoformat()
+
+    return {
+      "context": ctx,
+      "coreData": [edit_data]
+    }
+
 
 def edit_push_ny_today_and_before_yesterday():
     ctx = {

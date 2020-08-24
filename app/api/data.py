@@ -250,8 +250,8 @@ def edit_core_data():
 @jwt_required
 @exceptions_to_slack
 def edit_core_data_from_states_daily():
-    flask.current_app.logger.info('Received a CoreData States Daily edit request')
     payload = flask.request.json
+    flask.current_app.logger.info('Received a CoreData States Daily edit request: %s' % payload)
 
     # test input data
     try:
@@ -290,11 +290,10 @@ def edit_core_data_from_states_daily():
         date_to_data[state_daily_data.date] = state_daily_data
 
     # check each core data row that the corresponding date/state already exists in published form
-    core_data_dicts = payload['coreData']
     core_data_objects = []
     changed_fields = set()
     changed_dates = set()
-    for core_data_dict in core_data_dicts:
+    for core_data_dict in payload['coreData']:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
         if state != state_to_edit:
@@ -307,13 +306,13 @@ def edit_core_data_from_states_daily():
         # check that there exists at least one published row for this date/state
         date = CoreData.parse_str_to_date(core_data_dict['date'])
         data_for_date = date_to_data.get(date)
-
-        # check all numeric and States Grades rows in existing data vs edit data
-        fields_to_check = CoreData.numeric_fields().copy()
-        fields_to_check.append('dataQualityGrade')
         
         changed_fields_for_date = set()
-        should_add_to_edit_batch = False
+        is_edited = False
+
+        # make a new CoreData object, which we will add if we determine it represents an edited row
+        core_data_dict['batchId'] = batch.batchId
+        edited_core_data = CoreData(**core_data_dict)
 
         if not data_for_date:
             # this is a new row: we treat this as a changed date
@@ -323,27 +322,29 @@ def edit_core_data_from_states_daily():
             # flask.current_app.logger.error(error)
             # return flask.jsonify(error), 400
 
-            flask.current_app.logger.info('Row for date not found: %s' % date)
-            should_add_to_edit_batch = True
-            changed_dates.add(date)
+            flask.current_app.logger.info('Row for date not found, making new edit row: %s' % date)
+            is_edited = True
 
         else:
-            # this row already exists, but check each value to see if anything changed
-            for field in fields_to_check:
-                if getattr(data_for_date, field) != core_data_dict.get(field):
-                    # at least one field is different, treat this as a changed date
+            # this row already exists, but check each value to see if anything changed. Easiest way
+            # to do this is to make a new CoreData and compare it to the existing one
+            
+            for field in CoreData.__table__.columns.keys():
+                # we expect batch IDs to be different, skip comparing those
+                if field == 'batchId':
+                    continue
+                # for any other field, compare away
+                if getattr(data_for_date, field) != getattr(edited_core_data, field):
                     changed_fields_for_date.add(field)
-                    changed_dates.add(date)
-                    should_add_to_edit_batch = True
+                    is_edited = True
 
         # if any value in the row is different, make an edit batch
-        if should_add_to_edit_batch:
-            core_data_dict['batchId'] = batch.batchId
-            core_data = CoreData(**core_data_dict)
-            db.session.add(core_data)
-            core_data_objects.append(core_data)
-            flask.current_app.logger.info('Change detected in row: %s' % core_data_dict)
+        if is_edited:
+            db.session.add(edited_core_data)
+            core_data_objects.append(edited_core_data)
+            flask.current_app.logger.info('Adding new edit row: %s' % edited_core_data.to_dict())
             changed_fields.update(changed_fields_for_date)
+            changed_dates.add(date)
         else:
             flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
 

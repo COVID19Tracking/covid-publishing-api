@@ -1,7 +1,9 @@
 """Registers the necessary routes for the public API endpoints."""
+import collections
+from io import StringIO
 
 import flask
-from flask import request
+from flask import request, make_response
 
 from sqlalchemy import func, and_
 from sqlalchemy.sql import label
@@ -21,6 +23,27 @@ def get_states():
         [state.to_dict() for state in states]
     )
 
+@api.route('/public/states/info.csv', methods=['GET'])
+def get_states_csv():
+    states = State.query.order_by(State.state.asc()).all()
+    Column = collections.namedtuple('Column', 'label model_column')
+    columns = [Column(label="State", model_column="state"),
+               Column(label="COVID-19 site", model_column="covid19Site"),
+               Column(label="COVID-19 site (secondary)", model_column="covid19SiteSecondary"),
+               Column(label="COVID-19 site (tertiary)", model_column="covid19SiteTertiary"),
+               Column(label="Twitter", model_column="twitter"),
+               Column(label="Notes", model_column="notes")]
+
+    si = StringIO()
+    writer = csv.writer(si)
+    # write a header row
+    writer.writerow([column.label for column in columns])
+    # write data rows
+    for state in states:
+        writer.writerow([state.__getattribute__(column.model_column) for column in columns])
+    output = make_response(si.getvalue())
+    output.headers["Content-type"] = "text/csv"
+    return output
 
 @api.route('/public/states/daily', methods=['GET'])
 def get_states_daily():

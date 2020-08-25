@@ -18,7 +18,7 @@ def test_get_state_info(app):
     client = app.test_client()
     with app.app_context():
         nys = State(state='NY', name='New York', pum=False, notes='Testing123')
-        wa = State(state='WA', name='Washington', pum=False, notes='Testing123')
+        wa = State(state='WA', name='Washington', pum=False, notes='Testing321')
         db.session.add(nys)
         db.session.add(wa)
         db.session.commit()
@@ -29,6 +29,19 @@ def test_get_state_info(app):
     assert len(respjson) == 2
     assert respjson[0]["pum"] == False
     assert respjson[0]["notes"] == 'Testing123'
+
+    resp = client.get("/api/v1/public/states/info.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    reader = csv.DictReader(lines, delimiter=',')
+    cnt = 0
+    for row in reader:
+        cnt += 1
+        assert row["State"] in ["NY", "WA"]
+        assert row["Notes"] in ["Testing123", "Testing321"]
+    assert cnt == 2
+
+
 
 
 def test_get_states_daily(app, headers):

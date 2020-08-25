@@ -15,7 +15,7 @@ def make_csv_response(columns, data):
 
     # write data rows
     for datum in data:
-        writer.writerow([datum.__getattribute__(column.model_column) for column in columns])
+        writer.writerow([datum.get(column.model_column) for column in columns])
     output = make_response(si.getvalue())
     output.headers["Content-type"] = "text/csv"
 

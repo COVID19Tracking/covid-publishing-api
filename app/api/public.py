@@ -9,7 +9,7 @@ from sqlalchemy import func, and_
 from sqlalchemy.sql import label
 
 from app.api import api
-from app.api.common import states_daily_query
+from app.api.common import states_daily_query, us_daily_query
 from app.api.csvcommon import CSVColumn, make_csv_response
 from app.models.data import *
 from app import db
@@ -61,28 +61,28 @@ def get_states_daily_for_state(state):
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    states_daily = states_daily_query(preview=include_preview).subquery('states_daily')
-
-    # get a list of columns to aggregate, sum over those from the states_daily subquery
-    colnames = CoreData.numeric_fields()
-    col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
-    # Add a column to count the records contributing to this date. That should
-    # correspond to the number of states, assuming `states_daily` returns
-    # only a single row per state.
-    col_list.append(label('states', func.count()))
-    us_daily = db.session.query(
-        states_daily.c.date, *col_list
-        ).group_by(states_daily.c.date
-        ).order_by(states_daily.c.date.desc()
-        ).all()
-
-    us_data_by_date = []
-    for day in us_daily:
-        result_dict = day._asdict()
-        result_dict.update({
-            'dateChecked': day.date.isoformat(),
-            'date': day.date.strftime('%Y-%m-%d'),
-        })
-        us_data_by_date.append(result_dict)
+    us_data_by_date = us_daily_query(preview=include_preview)
 
     return flask.jsonify(us_data_by_date)
+
+@api.route('/public/us/daily.csv', methods=['GET'])
+def get_us_daily_csv():
+    flask.current_app.logger.info('Retrieving US Daily')
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    us_data_by_date = us_daily_query(preview=include_preview, date_format="%Y%m%d")
+
+    columns = [CSVColumn(label="Date", model_column="date"),
+               CSVColumn(label="States", model_column="states"),
+               CSVColumn(label="Positive", model_column="positive"),
+               CSVColumn(label="Negative", model_column="negative"),
+               CSVColumn(label="Pending", model_column="pending"),
+               CSVColumn(label="Hospitalized – Currently", model_column="hospitalizedCurrently"),
+               CSVColumn(label="Hospitalized – Cumulative", model_column="hospitalizedCumulative"),
+               CSVColumn(label="In ICU – Currently", model_column="inIcuCurrently"),
+               CSVColumn(label="In ICU – Cumulative", model_column="inIcuCumulative"),
+               CSVColumn(label="On Ventilator – Currently", model_column="onVentilatorCurrently"),
+               CSVColumn(label="On Ventilator – Cumulative", model_column="onVentilatorCumulative"),
+               CSVColumn(label="Recovered", model_column="recovered"),
+               CSVColumn(label="Deaths", model_column="death")]
+
+    return make_csv_response(columns, us_data_by_date)

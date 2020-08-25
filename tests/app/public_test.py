@@ -42,8 +42,6 @@ def test_get_state_info(app):
     assert cnt == 2
 
 
-
-
 def test_get_states_daily(app, headers):
     # post some test data
     client = app.test_client()
@@ -146,6 +144,20 @@ def test_get_us_daily(app, headers):
     assert resp.json[1]['date'] == '2020-05-24'
     assert resp.json[1]['positive'] == 24
     assert resp.json[1]['negative'] == 12
+
+    resp = client.get("/api/v1/public/us/daily.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    assert len(lines) == 3
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert data[0]["Date"] == '20200525'
+    assert data[0]["Positive"] == "30"
+    assert data[0]["Negative"] == "15"
+
+    assert data[1]["Date"] == '20200524'
+    assert data[1]["Positive"] == "24"
+    assert data[1]["Negative"] == "12"
 
 
 def test_get_states_daily_for_state(app, headers):

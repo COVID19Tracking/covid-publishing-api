@@ -41,3 +41,30 @@ def states_daily_query(state=None, preview=False):
         ).order_by(CoreData.state)
 
     return latest_daily_data_query
+
+def us_daily_query(preview=False, date_format='%Y-%m-%d'):
+    states_daily = states_daily_query(preview=preview).subquery('states_daily')
+
+    # get a list of columns to aggregate, sum over those from the states_daily subquery
+    colnames = CoreData.numeric_fields()
+    col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
+    # Add a column to count the records contributing to this date. That should
+    # correspond to the number of states, assuming `states_daily` returns
+    # only a single row per state.
+    col_list.append(label('states', func.count()))
+    us_daily = db.session.query(
+        states_daily.c.date, *col_list
+        ).group_by(states_daily.c.date
+        ).order_by(states_daily.c.date.desc()
+        ).all()
+
+    us_data_by_date = []
+    for day in us_daily:
+        result_dict = day._asdict()
+        result_dict.update({
+            'dateChecked': day.date.isoformat(),
+            'date': day.date.strftime(date_format),
+        })
+        us_data_by_date.append(result_dict)
+
+    return us_data_by_date

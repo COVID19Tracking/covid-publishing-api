@@ -10,6 +10,7 @@ from sqlalchemy.sql import label
 
 from app.api import api
 from app.api.common import states_daily_query
+from app.api.csvcommon import CSVColumn, make_csv_response
 from app.models.data import *
 from app import db
 
@@ -26,24 +27,14 @@ def get_states():
 @api.route('/public/states/info.csv', methods=['GET'])
 def get_states_csv():
     states = State.query.order_by(State.state.asc()).all()
-    Column = collections.namedtuple('Column', 'label model_column')
-    columns = [Column(label="State", model_column="state"),
-               Column(label="COVID-19 site", model_column="covid19Site"),
-               Column(label="COVID-19 site (secondary)", model_column="covid19SiteSecondary"),
-               Column(label="COVID-19 site (tertiary)", model_column="covid19SiteTertiary"),
-               Column(label="Twitter", model_column="twitter"),
-               Column(label="Notes", model_column="notes")]
+    columns = [CSVColumn(label="State", model_column="state"),
+               CSVColumn(label="COVID-19 site", model_column="covid19Site"),
+               CSVColumn(label="COVID-19 site (secondary)", model_column="covid19SiteSecondary"),
+               CSVColumn(label="COVID-19 site (tertiary)", model_column="covid19SiteTertiary"),
+               CSVColumn(label="Twitter", model_column="twitter"),
+               CSVColumn(label="Notes", model_column="notes")]
 
-    si = StringIO()
-    writer = csv.writer(si)
-    # write a header row
-    writer.writerow([column.label for column in columns])
-    # write data rows
-    for state in states:
-        writer.writerow([state.__getattribute__(column.model_column) for column in columns])
-    output = make_response(si.getvalue())
-    output.headers["Content-type"] = "text/csv"
-    return output
+    return make_csv_response(columns, states)
 
 @api.route('/public/states/daily', methods=['GET'])
 def get_states_daily():

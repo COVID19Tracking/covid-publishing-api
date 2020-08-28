@@ -43,6 +43,57 @@ def get_states_daily():
     latest_daily_data = states_daily_query(preview=include_preview).all()
     return flask.jsonify([x.to_dict() for x in latest_daily_data])
 
+@api.route('/public/states/daily.csv', methods=['GET'])
+def get_states_daily_csv():
+    flask.current_app.logger.info('Retrieving States Daily')
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    latest_daily_data = states_daily_query(preview=include_preview).all()
+
+    # rewrite date to %Y%m%d format to match the old public sheet
+    reformatted_data = []
+    for data in latest_daily_data:
+        result_dict = data.to_dict()
+        result_dict.update({
+            'date': data.date.strftime("%Y%m%d"),
+        })
+        reformatted_data.append(result_dict)
+
+    columns = [CSVColumn(label="Date", model_column="date"),
+               CSVColumn(label="State", model_column="state"),
+               CSVColumn(label="Positive", model_column="positive"),
+               CSVColumn(label="Negative", model_column="negative"),
+               CSVColumn(label="Pending", model_column="pending"),
+               CSVColumn(label="Hospitalized – Currently", model_column="hospitalizedCurrently"),
+               CSVColumn(label="Hospitalized – Cumulative", model_column="hospitalizedCumulative"),
+               CSVColumn(label="In ICU – Currently", model_column="inIcuCurrently"),
+               CSVColumn(label="In ICU – Cumulative", model_column="inIcuCumulative"),
+               CSVColumn(label="On Ventilator – Currently", model_column="onVentilatorCurrently"),
+               CSVColumn(label="On Ventilator – Cumulative", model_column="onVentilatorCumulative"),
+               CSVColumn(label="Recovered", model_column="recovered"),
+               CSVColumn(label="Deaths", model_column="death"),
+               CSVColumn(label="Data Quality Grade", model_column="dataQualityGrade"),
+               CSVColumn(label="Last Update ET", model_column="lastUpdateEt"),
+               CSVColumn(label="Total Antibody Tests", model_column="totalTestsAntibody"),
+               CSVColumn(label="Positive Antibody Tests", model_column="positiveTestsAntibody"),
+               CSVColumn(label="Negative Antibody Tests", model_column="negativeTestsAntibody"),
+               CSVColumn(label="Total Tests (PCR)", model_column="totalTestsViral"),
+               CSVColumn(label="Positive Tests (PCR)", model_column="positiveTestsViral"),
+               CSVColumn(label="Negative Tests (PCR)", model_column="negativeTestsViral"),
+               CSVColumn(label="Positive Cases (PCR)", model_column="positiveCasesViral"),
+               CSVColumn(label="Deaths (confirmed)", model_column="deathConfirmed"),
+               CSVColumn(label="Deaths (probable)", model_column="deathProbable"),
+               CSVColumn(label="Total PCR Tests (People)", model_column="totalTestsPeopleViral"),
+               CSVColumn(label="Total Test Encounters (PCR)", model_column="totalTestEncountersViral"),
+               CSVColumn(label="Total Antibody Tests (People)", model_column="totalTestsPeopleAntibody"),
+               CSVColumn(label="Positive Antibody Tests (People)", model_column="positiveTestsPeopleAntibody"),
+               CSVColumn(label="Negative Antibody Tests (People)", model_column="negativeTestsPeopleAntibody"),
+               CSVColumn(label="Total Antigen Tests (People)", model_column="totalTestsPeopleAntigen"),
+               CSVColumn(label="Positive Antigen Tests (People)", model_column="positiveTestsPeopleAntigen"),
+               CSVColumn(label="Total Antigen Tests", model_column="totalTestsAntigen"),
+               CSVColumn(label="Positive Antigen Tests", model_column="positiveTestsAntigen")
+               ]
+
+    return make_csv_response(columns, reformatted_data)
 
 @api.route('/public/states/<string:state>/daily', methods=['GET'])
 def get_states_daily_for_state(state):

@@ -97,6 +97,16 @@ def test_get_states_daily(app, headers):
     assert resp.status_code == 200
     assert resp.json == []
 
+    resp = client.get("/api/v1/public/states/daily.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    assert len(lines) == 57
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert data[0]["Date"] == '20200618'
+    assert data[0]["Positive"] == "708"
+    assert data[0]["Negative"] == "80477"
+
 
 def test_get_us_daily_column_names(app):
     colnames = CoreData.numeric_fields()

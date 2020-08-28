@@ -180,8 +180,10 @@ class CoreData(db.Model, DataMixin):
     # Antigen testing
     totalTestsPeopleAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveTestsPeopleAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeTestsPeopleAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
     totalTestsAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
     positiveTestsAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
+    negativeTestsAntigen = db.Column(db.Integer, info={"includeInUSDaily": True})
 
     # from worksheet, "Notes" column (made by checker or doublechecker)
     privateNotes = db.Column(db.String)

@@ -289,3 +289,42 @@ def test_get_state_date_history(app, headers):
     # history for NY today should have just one row
     resp = client.get("/api/v1/state-date-history/NY/2020-05-25")
     assert len(resp.json) == 1
+
+
+def test_edit_state_metadata(app, headers):
+    client = app.test_client()
+
+    # write some initial data
+    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
+    with open(example_filename) as f:
+        payload_json_str = f.read()
+
+    resp = client.post(
+        "/api/v1/batches",
+        data=payload_json_str,
+        content_type='application/json', 
+        headers=headers)
+    assert resp.status_code == 201
+
+    # we should've written 56 states, 4 core data rows, 1 batch
+    resp = client.get('/api/v1/public/states/info')
+    assert len(resp.json) == 56
+    assert resp.json[0]['state'] == "AK"
+    assert resp.json[0]['twitter'] == "@Alaska_DHSS"
+
+    # make a states metadata edit request updating the twitter account for AK
+    state_data = {
+        'states': [{
+            'state': 'AK',
+            'twitter': 'AlaskaNewTwitter'
+        }]
+    }
+    resp = client.post(
+        "/api/v1/states/edit",
+        data=json.dumps(state_data),
+        content_type='application/json', 
+        headers=headers)
+    assert resp.status_code == 201
+    assert len(resp.json['states']) == 1
+    assert resp.json['states'][0]['state'] == "AK"
+    assert resp.json['states'][0]['twitter'] == "AlaskaNewTwitter"

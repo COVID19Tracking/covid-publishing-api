@@ -80,6 +80,53 @@ def publish_batch(id):
 
 
 ##############################################################################################
+#######################################     States      ######################################
+##############################################################################################
+
+
+@api.route('/states/edit', methods=['POST'])
+@jwt_required
+@exceptions_to_slack
+def edit_state_metadata():
+    payload = flask.request.json
+    flask.current_app.logger.info('Received a states edit request: %s' % payload)
+
+    # we expect the payload to contain states
+    if 'states' not in payload:
+        err = '/states/edit payload must contain "states" field'
+        flask.current_app.logger.error(err)
+        notify_slack_error(err, 'edit_state_metadata')
+        return flask.jsonify(err), 400
+
+    state_dicts = payload['states']
+    state_objects = []
+    for state_dict in state_dicts: 
+        state_pk = state_dict['state']
+        if db.session.query(State).get(state_pk) is None:
+            err = '/states/edit payload trying to edit nonexistent state: %s' % state_pk
+            flask.current_app.logger.error(err)
+            notify_slack_error(err, 'edit_state_metadata')
+            return flask.jsonify(err), 400
+
+        flask.current_app.logger.info('Updating state row from info: %s' % state_dict)
+        db.session.query(State).filter_by(state=state_pk).update(state_dict)
+        state_objects.append(db.session.query(State).get(state_pk))  # return updated state
+
+    db.session.flush()
+
+    # construct the JSON before committing the session, since sqlalchemy objects behave weirdly
+    # once the session has been committed
+    json_to_return = {
+        'states': [state.to_dict() for state in state_objects],
+    }
+
+    db.session.commit()
+
+    # this returns a tuple of flask response and status code: (flask.Response, int)
+    return flask.jsonify(json_to_return), 201
+
+
+##############################################################################################
 ######################################   Core data      ######################################
 ##############################################################################################
 

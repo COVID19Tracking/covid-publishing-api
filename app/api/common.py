@@ -42,7 +42,21 @@ def states_daily_query(state=None, preview=False):
 
     return latest_daily_data_query
 
+
 def us_daily_query(preview=False, date_format='%Y-%m-%d'):
+    """Query US Daily Data
+
+    Sums up the numeric columns from the data for all states to provide an aggregate for the whole country.
+
+    Args:
+        preview (bool, optional): return data in the preview state or only published data. Optional, defaults to False
+        date_format: (str, optional): optional strftime format string.
+            If provided, the `date` property of the output will be formatted in the specified fashion
+            (default '%Y-%m-%d')
+
+    Returns:
+        dict: Dictionary of US daily data, one row per date
+    """
     states_daily = states_daily_query(preview=preview).subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery

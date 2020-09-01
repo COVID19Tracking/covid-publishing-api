@@ -57,23 +57,25 @@ def get_states_daily_csv():
 
     # rewrite date formats to match the old public sheet
     reformatted_data = []
-    seen_states = set()
+    state_latest_dates = {}
     eastern_time = tz.gettz('EST')
     for data in latest_daily_data:
         result_dict = data.to_dict()
-
-        # for the /current endpoint, don't add the row if it's not the first occurrence of the state
-        if request.endpoint == 'api.states_current':
-            if data.state in seen_states:
-                continue
-            seen_states.add(data.state)
-
         result_dict.update({
             'date': data.date.strftime("%Y%m%d"),
             # due to DST issues, this time needs to be advanced forward one hour to match the old output
-            'dateChecked': (data.dateChecked.astimezone(eastern_time) + timedelta(hours=1)).strftime("%-m/%d/%Y %H:%M") if data.dateChecked else ""
+            'dateChecked': (data.dateChecked.astimezone(eastern_time) + timedelta(hours=1)).strftime(
+                "%-m/%d/%Y %H:%M") if data.dateChecked else ""
         })
 
+        # for the /current endpoint, only add the row if it's the latest data for the state
+        if request.endpoint == 'api.states_current':
+            # if we've seen this state before and the one we saw is newer, skip this row
+            if data.state in state_latest_dates and state_latest_dates[data.state] > data.date:
+                continue
+            state_latest_dates[data.state] = data.date
+
+        # add the row to the output
         reformatted_data.append(result_dict)
 
     columns = []

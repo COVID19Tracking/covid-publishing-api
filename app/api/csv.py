@@ -12,12 +12,16 @@ from app.api import api
 from app.api.common import us_daily_query, states_daily_query, State
 
 CSVColumn = collections.namedtuple('Column', 'label model_column blank')
+# set default value of the blank parameter to false, all other params are required
 CSVColumn.__new__.__defaults__ = (False, )
 """Represents the recipe to generate a column of CSV output data. 
 
 This maps a model column name to a CSV column name. An ordered list of CSVColumns can be passed to `make_csv_response`
 to generate CSV output
 Example: ``CSVColumn(label="State", model_column="state")``
+
+Columns that have ``blank=True`` will always be blank in the CSV output, used for deprecated columns
+Example: ``CSVColumn(label="State", model_column=None, blank=True)``
 """
 
 

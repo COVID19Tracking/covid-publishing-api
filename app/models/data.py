@@ -37,9 +37,6 @@ class DataMixin(object):
 
         return d
 
-    def get(self, key):
-        return self.__getattribute__(key)
-
 
 class Batch(db.Model, DataMixin):
     __tablename__ = 'batches'

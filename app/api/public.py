@@ -2,16 +2,11 @@
 
 import flask
 from flask import request
-
-from sqlalchemy import func, and_
-from sqlalchemy.sql import label
+from flask_restful import inputs
 
 from app.api import api
-from app.api.common import states_daily_query
+from app.api.common import states_daily_query, us_daily_query
 from app.models.data import *
-from app import db
-
-from flask_restful import inputs
 
 
 @api.route('/public/states/info', methods=['GET'])
@@ -47,28 +42,6 @@ def get_states_daily_for_state(state):
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    states_daily = states_daily_query(preview=include_preview).subquery('states_daily')
-
-    # get a list of columns to aggregate, sum over those from the states_daily subquery
-    colnames = CoreData.numeric_fields()
-    col_list = [label(colname, func.sum(getattr(states_daily.c, colname))) for colname in colnames]
-    # Add a column to count the records contributing to this date. That should
-    # correspond to the number of states, assuming `states_daily` returns
-    # only a single row per state.
-    col_list.append(label('states', func.count()))
-    us_daily = db.session.query(
-        states_daily.c.date, *col_list
-        ).group_by(states_daily.c.date
-        ).order_by(states_daily.c.date.desc()
-        ).all()
-
-    us_data_by_date = []
-    for day in us_daily:
-        result_dict = day._asdict()
-        result_dict.update({
-            'dateChecked': day.date.isoformat(),
-            'date': day.date.strftime('%Y-%m-%d'),
-        })
-        us_data_by_date.append(result_dict)
+    us_data_by_date = us_daily_query(preview=include_preview)
 
     return flask.jsonify(us_data_by_date)

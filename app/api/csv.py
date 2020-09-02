@@ -11,7 +11,8 @@ from flask_restful import inputs
 from app.api import api
 from app.api.common import us_daily_query, states_daily_query, State
 
-CSVColumn = collections.namedtuple('Column', 'label model_column')
+CSVColumn = collections.namedtuple('Column', 'label model_column blank')
+CSVColumn.__new__.__defaults__ = (False, )
 """Represents the recipe to generate a column of CSV output data. 
 
 This maps a model column name to a CSV column name. An ordered list of CSVColumns can be passed to `make_csv_response`
@@ -39,7 +40,9 @@ def make_csv_response(columns, data):
     writer.writerow([column.label for column in columns])
 
     # data may come in the form of sqlalchemy query results or a dict
-    def get_data(datum, key):
+    def get_data(datum, key, blank):
+        if blank is True:
+            return ""
         if isinstance(datum, dict):
             return datum.get(key)
         else:
@@ -47,7 +50,7 @@ def make_csv_response(columns, data):
 
     # write data rows
     for datum in data:
-        writer.writerow([get_data(datum, column.model_column) for column in columns])
+        writer.writerow([get_data(datum, column.model_column, column.blank) for column in columns])
     output = make_response(si.getvalue())
     output.headers["Content-type"] = "text/csv"
 
@@ -138,14 +141,18 @@ def get_states_daily_csv():
             CSVColumn(label="Deaths (confirmed)", model_column="deathConfirmed"),
             CSVColumn(label="Deaths (probable)", model_column="deathProbable"),
             CSVColumn(label="Total PCR Tests (People)", model_column="totalTestsPeopleViral"),
+            CSVColumn(label="Total Test Results", model_column=None, blank=True),
+            CSVColumn(label="Probable Cases", model_column="probableCases"),
             CSVColumn(label="Total Test Encounters (PCR)", model_column="totalTestEncountersViral"),
             CSVColumn(label="Total Antibody Tests (People)", model_column="totalTestsPeopleAntibody"),
             CSVColumn(label="Positive Antibody Tests (People)", model_column="positiveTestsPeopleAntibody"),
             CSVColumn(label="Negative Antibody Tests (People)", model_column="negativeTestsPeopleAntibody"),
             CSVColumn(label="Total Antigen Tests (People)", model_column="totalTestsPeopleAntigen"),
             CSVColumn(label="Positive Antigen Tests (People)", model_column="positiveTestsPeopleAntigen"),
+            CSVColumn(label="Negative Antigen Tests (People)", model_column="negativeTestsPeopleAntigen"),
             CSVColumn(label="Total Antigen Tests", model_column="totalTestsAntigen"),
-            CSVColumn(label="Positive Antigen Tests", model_column="positiveTestsAntigen")])
+            CSVColumn(label="Positive Antigen Tests", model_column="positiveTestsAntigen"),
+            CSVColumn(label="Negative Antigen Tests", model_column="negativeTestsAntigen")])
 
     return make_csv_response(columns, reformatted_data)
 

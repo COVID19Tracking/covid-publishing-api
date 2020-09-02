@@ -62,7 +62,11 @@ def get_states_csv():
                CSVColumn(label="COVID-19 site (secondary)", model_column="covid19SiteSecondary"),
                CSVColumn(label="COVID-19 site (tertiary)", model_column="covid19SiteTertiary"),
                CSVColumn(label="Twitter", model_column="twitter"),
-               CSVColumn(label="Notes", model_column="notes")]
+               CSVColumn(label="Notes", model_column="notes"),
+               CSVColumn(label="COVID Tracking Project preferred total test units",
+                         model_column="covidTrackingProjectPreferredTotalTestUnits"),
+               CSVColumn(label="COVID Tracking Project preferred total test field",
+                         model_column="covidTrackingProjectPreferredTotalTestField")]
 
     return make_csv_response(columns, states)
 

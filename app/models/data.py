@@ -190,11 +190,11 @@ class CoreData(db.Model, DataMixin):
     # Public Notes related to state
     notes = db.Column(db.String)
 
-    # these are the source-of-truth time columns in UTC/GMT
+    # these are the source-of-truth time columns in UTC/GMT. String representations are in UTC.
     lastUpdateTime = db.Column(db.DateTime(timezone=True),
-        info={'repr': lambda x: x.strftime("%Y-%m-%dT%H:%M:%SZ")})
+        info={'repr': lambda x: x.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
     dateChecked = db.Column(db.DateTime(timezone=True),
-        info={'repr': lambda x: x.strftime("%Y-%m-%dT%H:%M:%SZ")})
+        info={'repr': lambda x: x.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
     
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
@@ -246,12 +246,13 @@ class CoreData(db.Model, DataMixin):
         # strip any empty string fields from kwargs
         kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
 
-        # convert lastUpdateIsoUtc to lastUpdateTime
-        if 'lastUpdateIsoUtc' in kwargs:
-            last_update_time = parser.parse(kwargs['lastUpdateIsoUtc'])
+        # accept either lastUpdateTime or lastUpdateIsoUtc as an input
+        last_update_str = kwargs.get('lastUpdateTime') or kwargs.get('lastUpdateIsoUtc')
+        if last_update_str:
+            last_update_time = parser.parse(last_update_str)
             if last_update_time.tzinfo is None:
                 raise ValueError(
-                    'Expected a timezone with lastUpdateIsoUtc: %s' % kwargs['lastUpdateIsoUtc'])
+                    'Expected a timezone with last update time: %s' % last_update_str)
             kwargs['lastUpdateTime'] = last_update_time
 
         if 'dateChecked' in kwargs:

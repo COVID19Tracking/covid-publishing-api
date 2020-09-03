@@ -53,8 +53,17 @@ def test_post_core_data(app, headers):
     assert resp.json['batches'][0]['user'] == 'testing'
     # assert batch data has rows attached to it
     assert len(resp.json['batches'][0]['coreData']) == 56
+
+    # spot-check a few values
+    assert resp.json['batches'][0]['coreData'][0]['state'] == 'AK'
+    assert resp.json['batches'][0]['coreData'][0]['positive'] == 708
+    # the entry for AK uses lastUpdateIsoUtc
+    assert resp.json['batches'][0]['coreData'][0]['lastUpdateTime'] == '2020-06-18T04:00:00Z'
+
     assert resp.json['batches'][0]['coreData'][1]['state'] == 'AL'
     assert resp.json['batches'][0]['coreData'][1]['recovered'] == 15974
+    # the entry for AL uses lastUpdateTime instead of lastUpdateIsoUtc, confirming it works
+    assert resp.json['batches'][0]['coreData'][1]['lastUpdateTime'] == '2020-06-18T15:00:00Z'
 
 
 def test_post_core_data_updating_state(app, headers):

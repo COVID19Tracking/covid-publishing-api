@@ -572,7 +572,7 @@
          "death":810,
          "deathConfirmed":801,
          "deathProbable":9,
-         "lastUpdateIsoUtc":"2020-06-18T15:00:00.000Z",
+         "lastUpdateTime":"2020-06-18T15:00:00.000Z",
          "privateNotes":"(6/8 QN) Did not update negatives since total tests updated late\n(6/7 HMH) Recoveries updated weekly (not sure which day)\n\n",
          "dataQualityGrade":"B",
          "date":"2020-06-18T04:00:00.000Z"

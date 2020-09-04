@@ -11,6 +11,7 @@ import os
 import pytz
 
 from app import db
+from app.utils.editdiff import EditDiff, ChangedValue, ChangedRow
 import logging
 
 from sqlalchemy.ext.hybrid import hybrid_property
@@ -136,7 +137,7 @@ class CoreData(db.Model, DataMixin):
     __tablename__ = 'coreData'
 
     # composite PK: state_name, batch_id, date
-    state = db.Column(db.String, db.ForeignKey('states.state'), 
+    state = db.Column(db.String, db.ForeignKey('states.state'),
         nullable=False, primary_key=True)
     batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
         nullable=False, primary_key=True)
@@ -195,7 +196,7 @@ class CoreData(db.Model, DataMixin):
         info={'repr': lambda x: x.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
     dateChecked = db.Column(db.DateTime(timezone=True),
         info={'repr': lambda x: x.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")})
-    
+
     checker = db.Column(db.String(100))
     doubleChecker = db.Column(db.String(100))
     publicNotes = db.Column(db.String)
@@ -246,6 +247,41 @@ class CoreData(db.Model, DataMixin):
     @staticmethod
     def parse_str_to_date(date_input):
         return parser.parse(str(date_input), ignoretz=True).date()
+
+    def field_diffs(self, dict_other):
+        ''' Return the list of fields that dict_other would modify if applied
+        on this row.
+        Some business logic is applied, and some fields are skipped from comparison, field
+        aliases get special treatment.
+
+        Return ChangedRow if there are changes, or None if no changes
+        '''
+        diffs = []
+        if not dict_other:
+            return None
+
+        # we want to compare after all parsing is done
+        other = CoreData(**dict_other)
+
+        # special casing for aliasse (maybe move elsewhere?)
+        if 'lastUpdateIsoUtc' in dict_other:
+            # the value is compared through the object, but the key should exist
+            dict_other['lastUpdateTime'] = dict_other['lastUpdateIsoUtc']
+
+        for field in CoreData.__table__.columns.keys():
+            # we expect batch IDs to be different, skip comparing those
+            if field == 'batchId':
+                continue
+            # for any other field, compare away
+            if field in dict_other and getattr(other, field) != getattr(self, field):
+                old = getattr(self, field)
+                new = getattr(other, field)
+                diffs.append(ChangedValue(field=field, old=old, new=new))
+
+        if diffs:
+            changes = ChangedRow(date=self.date, state=self.state, changed_values=diffs)
+            return changes
+        return None
 
     def __init__(self, **kwargs):
         # strip any empty string fields from kwargs

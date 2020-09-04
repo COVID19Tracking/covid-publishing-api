@@ -48,13 +48,15 @@ WA_YESTERDAY = {
 }
 
 # edit to increase positive count by 1
+# remove inIcuCurrently
 NY_YESTERDAY_EDITED = {
     "state": "NY",
     "lastUpdateIsoUtc": NOW.isoformat(),
     "dateChecked": NOW.isoformat(),
     "date": YESTERDAY,
     "positive": 16,
-    "negative": 4
+    "negative": 4,
+    "inIcuCurrently": None
 }
 
 NY_TODAY_EDITED = {
@@ -190,4 +192,24 @@ def edit_push_multiple_states():
     return {
       "context": ctx,
       "coreData": [NY_YESTERDAY_EDITED.copy(), WA_YESTERDAY.copy()]
+    }
+
+def edit_push_ny_today_empty():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "No changes",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
+    }
+
+    edit_data = {
+        "state": "NY",
+        "date": TODAY
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [edit_data]
     }

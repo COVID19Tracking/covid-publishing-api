@@ -314,7 +314,7 @@ def edit_core_data_from_states_daily():
     # check that the state is set
     state_to_edit = context.get('state')
     if not state_to_edit:
-        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(e))
+        flask.current_app.logger.error("No state specified in batch edit context: %s" % context)
         notify_slack_error(
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
         return flask.jsonify('No state specified in batch edit context'), 400
@@ -375,7 +375,6 @@ def edit_core_data_from_states_daily():
         else:
             # this row already exists, but check each value to see if anything changed. Easiest way
             # to do this is to make a new CoreData and compare it to the existing one
-            
             for field in CoreData.__table__.columns.keys():
                 # we expect batch IDs to be different, skip comparing those
                 if field == 'batchId':
@@ -396,6 +395,10 @@ def edit_core_data_from_states_daily():
             flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
 
     db.session.flush()
+
+    if not changed_dates:
+        # there are no changes, nothing to do
+        return flask.jsonify('Unchanged'), 204
 
     # which dates got changed?
     start = sorted(changed_dates)[0].strftime('%-m/%-d/%y')

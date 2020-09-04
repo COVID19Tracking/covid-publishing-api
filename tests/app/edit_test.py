@@ -70,6 +70,34 @@ def test_edit_core_data(app, headers, slack_mock):
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
 
+def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
+
+    # make an edit batch for NY for yesterday, and leave today alone
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_push_ny_today_empty()),
+        content_type='application/json',
+        headers=headers)
+
+    assert resp.status_code == 204
+    assert slack_mock.chat_postMessage.call_count == 2 # no more calls
+
 
 def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     client = app.test_client()

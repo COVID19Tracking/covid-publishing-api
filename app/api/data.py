@@ -314,7 +314,7 @@ def edit_core_data_from_states_daily():
     # check that the state is set
     state_to_edit = context.get('state')
     if not state_to_edit:
-        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(e))
+        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(context))
         notify_slack_error(
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
         return flask.jsonify('No state specified in batch edit context'), 400

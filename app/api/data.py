@@ -356,9 +356,7 @@ def edit_core_data_from_states_daily():
         # check that there exists at least one published row for this date/state
         date = CoreData.parse_str_to_date(core_data_dict['date'])
         data_for_date = date_to_data.get(date)
-
-        is_edited = False
-        is_new = False
+        edited_core_data = None
 
         core_data_dict['batchId'] = batch.batchId
 
@@ -371,24 +369,23 @@ def edit_core_data_from_states_daily():
             # return flask.jsonify(error), 400
 
             flask.current_app.logger.info('Row for date not found, making new edit row: %s' % date)
-            is_new = True
-
+            edited_core_data = CoreData(**core_data_dict)
+            new_rows.append(edited_core_data)
         else:
             # this row already exists, but check each value to see if anything changed. Easiest way
             changed_for_date = data_for_date.field_diffs(core_data_dict)
             if changed_for_date:
-                is_edited = True
                 changed_rows.append(changed_for_date)
+                edited_core_data = data_for_date.copy_with_updates(**core_data_dict)
 
-        # if any value in the row is different or the whole row is new, make an edit batch
-        if is_edited or is_new:
-            edited_core_data = CoreData(**core_data_dict)
-            if is_new:
-                new_rows.append(edited_core_data)
+        # if any value in the row is different, make an edit batch
+        if edited_core_data:
+            # store the changes
             db.session.add(edited_core_data)
             core_data_objects.append(edited_core_data)
             flask.current_app.logger.info('Adding new edit row: %s' % edited_core_data.to_dict())
         else:
+            # there were no changes
             flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
 
     db.session.flush()

@@ -263,9 +263,12 @@ class CoreData(db.Model, DataMixin):
         # we want to compare after all parsing is done
         other = CoreData(**dict_other)
 
-        # special casing for aliasse (maybe move elsewhere?)
-        if 'lastUpdateIsoUtc' in dict_other:
-            # the value is compared through the object, but the key should exist
+        # special casing for date aliases
+        # TODO: define the ordering of expected date fields, and expectations
+        # if multiple aliases for the same field exist
+        if 'lastUpdateIsoUtc' in dict_other and not 'lastUpdateTime' in dict_other:
+            # if both fields exist this is not ideal, but the object prefers 'lastUpdateTime'.
+            # for now, 'lastUpdateTime' wins
             dict_other['lastUpdateTime'] = dict_other['lastUpdateIsoUtc']
 
         for field in CoreData.__table__.columns.keys():
@@ -283,21 +286,22 @@ class CoreData(db.Model, DataMixin):
             return changes
         return None
 
-    def __init__(self, **kwargs):
-        # strip any empty string fields from kwargs
-        kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
-
+    @staticmethod
+    def _cleanup_date_kwargs(kwargs):
         # accept either lastUpdateTime or lastUpdateIsoUtc as an input
-        last_update_str = kwargs.get('lastUpdateTime') or kwargs.get('lastUpdateIsoUtc')
-        if last_update_str:
-            last_update_time = parser.parse(last_update_str)
+        last_update_time = kwargs.get('lastUpdateTime') or kwargs.get('lastUpdateIsoUtc')
+        if last_update_time:
+            if isinstance(last_update_time, str):
+                last_update_time = parser.parse(last_update_time)
             if last_update_time.tzinfo is None:
                 raise ValueError(
-                    'Expected a timezone with last update time: %s' % last_update_str)
+                    'Expected a timezone with last update time: %s' % last_update_time)
             kwargs['lastUpdateTime'] = last_update_time
 
-        if 'dateChecked' in kwargs:
-            date_checked = parser.parse(kwargs['dateChecked'])
+        date_checked = kwargs.get('dateChecked')
+        if date_checked:
+            if isinstance(date_checked, str):
+                date_checked = parser.parse(date_checked)
             if date_checked.tzinfo is None:
                 raise ValueError(
                     'Expected a timezone with dateChecked: %s' % kwargs['dateChecked'])
@@ -305,9 +309,21 @@ class CoreData(db.Model, DataMixin):
 
         # "date" is expected to be a date string, no times or timezones
         if 'date' in kwargs:
-            kwargs['date'] = self.parse_str_to_date(kwargs['date'])
+            kwargs['date'] = CoreData.parse_str_to_date(kwargs['date'])
         else:
             kwargs['date'] = date.today()
+        return kwargs
+
+    def copy_with_updates(self, **kwargs):
+        kwargs = self._cleanup_date_kwargs(kwargs)
+        self_props = self.to_dict()
+        self_props.update(kwargs)
+        return CoreData(**self_props)
+
+    def __init__(self, **kwargs):
+        # strip any empty string fields from kwargs
+        kwargs = {k: v for k, v in kwargs.items() if v is not None and v != ""}
+        kwargs = self._cleanup_date_kwargs(kwargs)
 
         mapper = class_mapper(CoreData)
         relevant_kwargs = {k: v for k, v in kwargs.items() if k in mapper.attrs.keys()}

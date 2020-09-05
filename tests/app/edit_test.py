@@ -245,3 +245,68 @@ def test_edit_core_data_from_states_daily_timestamps_only(app, headers, slack_mo
     # we've changed only lastUpdateIsoUtc, which is lastUpdateTime on output
     assert len(resp.json['changedFields']) == 1
     assert 'lastUpdateTime' in resp.json['changedFields']
+
+
+def test_edit_core_data_from_states_daily_partial_update(app, headers, slack_mock):
+    ''' Verify that when sending only part of the fileds, then these fields
+    are updated, and the other are set with the most recent published
+    batch values
+    '''
+
+    # setup
+    client = app.test_client()
+
+    # prep
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
+
+    # test
+    # make an edit batch for NY for yesterday, and leave today alone
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_push_ny_yesterday_change_only_positive()),
+        content_type='application/json',
+        headers=headers)
+
+    # verify
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 3
+    assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
+    batch_id = resp.json['batch']['batchId']
+    assert resp.json['batch']['user'] == 'testing'
+    # submitted a single field, and that's the only field that should change
+    assert len(resp.json['changedFields']) == 1
+    assert 'positive' in resp.json['changedFields']
+
+    # test that getting the states daily for NY has the UNEDITED data for yesterday
+    resp = client.get("/api/v1/public/states/NY/daily")
+    assert len(resp.json) == 2
+    yesterday = resp.json[1]
+    assert yesterday['date'] == '2020-05-24'
+    assert yesterday['positive'] == 16
+    assert yesterday['negative'] == 4
+    assert yesterday['inIcuCurrently'] == 37
+
+    # test
+    # make exactly the same edit
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_push_ny_yesterday_change_only_positive()),
+        content_type='application/json',
+        headers=headers)
+
+    # verify
+    assert resp.status_code == 204
+    assert slack_mock.chat_postMessage.call_count == 3

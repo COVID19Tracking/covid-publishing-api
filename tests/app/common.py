@@ -59,6 +59,16 @@ NY_YESTERDAY_EDITED = {
     "inIcuCurrently": None
 }
 
+# edit to increase positive count by 1
+# do not send other fields
+NY_YESTERDAY_PARTIAL_EDIT = {
+    "state": "NY",
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
+    "date": YESTERDAY,
+    "positive": 16
+}
+
 NY_TODAY_EDITED = {
     "state": "NY",
     "lastUpdateIsoUtc": NOW.isoformat(),
@@ -164,6 +174,20 @@ def edit_push_ny_yesterday_change_only_timestamp():
       "coreData": [edit_data]
     }
 
+def edit_push_ny_yesterday_change_only_positive():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "This is an edit test changing only the positive val",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [NY_YESTERDAY_PARTIAL_EDIT.copy()]
+    }
 
 def edit_push_ny_today_and_before_yesterday():
     ctx = {

@@ -395,8 +395,8 @@ def edit_core_data_from_states_daily():
                     row_diffs.append(ChangedValue(field=field, old=old, new=new))
 
             # if the row has been edited, save the list of the differences
-            if is_edited:
-                    changed_rows.append(ChangedRow(date=edited_core_data.date, state=state, changed_values=row_diffs))
+            if row_diffs:
+                changed_rows.append(ChangedRow(date=edited_core_data.date, state=state, changed_values=row_diffs))
 
         # if any value in the row is different or the whole row is new, make an edit batch
         if is_edited:

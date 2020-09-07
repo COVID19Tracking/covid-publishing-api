@@ -382,7 +382,6 @@ def edit_core_data_from_states_daily():
             # this row already exists, but check each value to see if anything changed. Easiest way
             # to do this is to make a new CoreData (edited_core_data) and compare it to the existing one
             row_diffs = []
-
             for field in CoreData.__table__.columns.keys():
                 # we expect batch IDs to be different, skip comparing those
                 if field == 'batchId':
@@ -410,6 +409,10 @@ def edit_core_data_from_states_daily():
             flask.current_app.logger.info('All values are the same for date %s, ignoring' % date)
 
     db.session.flush()
+
+    if not changed_dates:
+        # there are no changes, nothing to do
+        return flask.jsonify('Unchanged'), 204
 
     # which dates got changed?
     start = sorted(changed_dates)[0].strftime('%-m/%-d/%y')

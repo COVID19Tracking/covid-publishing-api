@@ -88,6 +88,7 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 2
+    assert slack_mock.files_upload.call_count == 0
 
     # make an edit batch for NY for yesterday, and leave today alone
     resp = client.post(
@@ -97,7 +98,13 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
+    assert slack_mock.files_upload.call_count == 1
     assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
+    assert "Rows edited: 1" in slack_mock.files_upload.call_args[1]['content']
+    assert "NY 2020-05-24" in slack_mock.files_upload.call_args[1]['content']
+    assert "positive: 16 (was 15)" in slack_mock.files_upload.call_args[1]['content']
+    assert "inIcuCurrently: None (was 37)" in slack_mock.files_upload.call_args[1]['content']
+
     batch_id = resp.json['batch']['batchId']
     assert resp.json['batch']['user'] == 'testing'
     # we've changed positive and removed inIcuCurrently, so both should count as changed
@@ -153,6 +160,10 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
             assert day_data['positive'] == 10
             assert day_data['negative'] == 2
     assert found_new_date is True
+
+    # the slack notification should note the addition of the new row
+    assert "New rows: 1" in slack_mock.files_upload.call_args[1]['content']
+    assert "NY 2020-05-20" in slack_mock.files_upload.call_args[1]['content']
 
     # test that sending an edit batch with multiple states fails
     resp = client.post(

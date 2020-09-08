@@ -10,6 +10,7 @@ from app import db
 from app.api import api
 from app.api.common import states_daily_query
 from app.models.data import *
+from app.utils.editdiff import EditDiff, ChangedValue, ChangedRow
 from app.utils.slacknotifier import notify_slack, notify_slack_error, exceptions_to_slack
 from app.utils.validation import validate_core_data_payload, validate_edit_data_payload
 from app.utils.webhook import notify_webhook
@@ -314,7 +315,7 @@ def edit_core_data_from_states_daily():
     # check that the state is set
     state_to_edit = context.get('state')
     if not state_to_edit:
-        flask.current_app.logger.error("No state specified in batch edit context: %s" % context)
+        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(context))
         notify_slack_error(
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
         return flask.jsonify('No state specified in batch edit context'), 400
@@ -336,10 +337,14 @@ def edit_core_data_from_states_daily():
     for state_daily_data in latest_daily_data_for_state:
         date_to_data[state_daily_data.date] = state_daily_data
 
-    # check each core data row that the corresponding date/state already exists in published form
+    # keep track of all our changes as we go
     core_data_objects = []
     changed_fields = set()
     changed_dates = set()
+    changed_rows = []
+    new_rows = []
+
+    # check each core data row that the corresponding date/state already exists in published form
     for core_data_dict in payload['coreData']:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
@@ -371,20 +376,29 @@ def edit_core_data_from_states_daily():
 
             flask.current_app.logger.info('Row for date not found, making new edit row: %s' % date)
             is_edited = True
+            new_rows.append(edited_core_data)
 
         else:
             # this row already exists, but check each value to see if anything changed. Easiest way
-            # to do this is to make a new CoreData and compare it to the existing one
+            # to do this is to make a new CoreData (edited_core_data) and compare it to the existing one
+            row_diffs = []
             for field in CoreData.__table__.columns.keys():
                 # we expect batch IDs to be different, skip comparing those
                 if field == 'batchId':
                     continue
                 # for any other field, compare away
-                if getattr(data_for_date, field) != getattr(edited_core_data, field):
+                old = getattr(data_for_date, field)
+                new = getattr(edited_core_data, field)
+                if old != new:
                     changed_fields_for_date.add(field)
                     is_edited = True
+                    row_diffs.append(ChangedValue(field=field, old=old, new=new))
 
-        # if any value in the row is different, make an edit batch
+            # if the row has been edited, save the list of the differences
+            if row_diffs:
+                changed_rows.append(ChangedRow(date=edited_core_data.date, state=state, changed_values=row_diffs))
+
+        # if any value in the row is different or the whole row is new, make an edit batch
         if is_edited:
             db.session.add(edited_core_data)
             core_data_objects.append(edited_core_data)
@@ -415,9 +429,14 @@ def edit_core_data_from_states_daily():
     }
 
     db.session.commit()
+
+    # collect all the diffs for the edits we've made and format them for a slack notification
+    diffs = EditDiff(changed_rows, new_rows)
+    diffs_for_slack = diffs.plain_text_format()
+
     notify_slack(
         f"*Pushed and published edit batch #{batch.batchId}*. state: {state_to_edit}. (user: {batch.shiftLead})\n"
-        f"{batch.batchNote}")
+        f"{batch.batchNote}", diffs_for_slack)
 
     return flask.jsonify(json_to_return), 201
 

@@ -1,0 +1,17 @@
+{%- if new_rows is not none and new_rows|length > 0 -%}
+New rows: {{ new_rows|length }}
+
+{%+ for row in new_rows -%}
+{{row.state}} {{row.date}}
+{%- endfor %}
+
+{%+ endif -%}
+
+Rows edited: {{ changed_rows|length }}
+{%+ for row in changed_rows %}
+{{row.state}} {{row.date}}
+{%- for value in row.changed_values %}
+    {{ value.field }}: {{ value.new }} (was {{ value.old }})
+{%- endfor -%}
+{%- endfor -%}
+

@@ -84,3 +84,15 @@ def test_total_test_results(app):
         assert core_data_row.totalTestResults == 5
         core_data_row.positive = 25
         assert core_data_row.totalTestResults == 30
+
+        # RI and CO have special behavior (use totalTestEncountersViral)
+        core_data_row = CoreData(
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
+            date=datetime.today(), state='RI', positive=25, negative=5, totalTestEncountersViral=33)
+        assert core_data_row.totalTestResults == 33
+        core_data_row.state = 'NY'
+        assert core_data_row.totalTestResults == 30
+        core_data_row.state = 'CO'
+        assert core_data_row.totalTestResults == 33
+        core_data_row.totalTestEncountersViral = None
+        assert core_data_row.totalTestResults == 0

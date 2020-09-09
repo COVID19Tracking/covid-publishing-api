@@ -231,6 +231,11 @@ class CoreData(db.Model, DataMixin):
     def totalTestResults(self):
         # Calculated value (positive + negative) of total test results.
         # For consistency with public API, treating a negative null as 0
+
+        # to match the public API, use totalTestEncountersViral for selected states
+        if self.state in ["RI", "CO"]:
+            return self.totalTestEncountersViral or 0
+
         if self.negative is None:
             return self.positive or 0
         if self.positive is None:

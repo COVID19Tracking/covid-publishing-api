@@ -234,8 +234,12 @@ class CoreData(db.Model, DataMixin):
         # For consistency with public API, treating a negative null as 0
 
         # to match the public API, use totalTestEncountersViral for selected states
-        if self.state in ["RI", "CO"]:
+        if self.state in ["RI", "CO", "ND"]:
             return self.totalTestEncountersViral or 0
+
+        # MA uses totalTestsViral
+        if self.state in ["MA"]:
+            return self.totalTestsViral or 0
 
         if self.negative is None:
             return self.positive or 0

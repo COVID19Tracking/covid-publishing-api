@@ -96,3 +96,9 @@ def test_total_test_results(app):
         assert core_data_row.totalTestResults == 33
         core_data_row.totalTestEncountersViral = None
         assert core_data_row.totalTestResults == 0
+
+        # MA uses totalTestsViral
+        core_data_row = CoreData(
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
+            date=datetime.today(), state='MA', positive=25, negative=5, totalTestEncountersViral=33, totalTestsViral=12)
+        assert core_data_row.totalTestResults == 12

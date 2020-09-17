@@ -27,9 +27,9 @@ class LocalPSQLConfig:
     # by default, access tokens do not expire
     JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
-    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
-    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default=None)
-    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default=None)
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default='')
+    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default='')
+    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default='')
 
     @staticmethod
     def init_app(app):
@@ -59,9 +59,9 @@ class Production:
     # by default, access tokens do not expire
     JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
-    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
-    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default=None)
-    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default=None)
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default='')
+    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default='')
+    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default='')
 
     @staticmethod
     def init_app(app):
@@ -96,9 +96,9 @@ class Testing:
     # by default, access tokens do not expire
     JWT_ACCESS_TOKEN_EXPIRES = env_conf('JWT_ACCESS_TOKEN_EXPIRES', cast=int, default=False)
 
-    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
-    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default=None)
-    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default=None)
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default='')
+    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default='')
+    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default='')
 
     @staticmethod
     def init_app(app):
@@ -126,9 +126,9 @@ class Develop:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_RECORD_QUERIES = True
 
-    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default=None)
-    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default=None)
-    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default=None)
+    API_WEBHOOK_URL = env_conf('API_WEBHOOK_URL', cast=str, default='')
+    SLACK_API_TOKEN = env_conf('SLACK_API_TOKEN', cast=str, default='')
+    SLACK_CHANNEL = env_conf('SLACK_CHANNEL', cast=str, default='')
 
     # DEBUG = True
     # API configurations

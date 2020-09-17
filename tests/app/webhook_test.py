@@ -15,5 +15,10 @@ def test_call_webhook(app, requests_mock):
         assert resp.json() == {'it': 'worked'}
 
         requests_mock.get(url, status_code=500)
-        with pytest.raises(HTTPError):
-            resp = notify_webhook()
+        resp = notify_webhook()
+        assert requests_mock.call_count == 2
+
+        # try with a bad url/error in request
+        requests_mock.register_uri('GET', url, exc=HTTPError),
+        resp = notify_webhook()
+        assert resp == False

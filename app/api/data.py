@@ -72,7 +72,9 @@ def publish_batch(id):
     db.session.add(batch)
     db.session.commit()
 
-    notify_webhook()
+    res = notify_webhook()
+    if res is not None and (not res or res.status_code != 200):
+        notify_slack_error(f"Failed webhook on batch #{id}", "publish_batch")
 
     notify_slack(f"*Published batch #{id}* (type: {batch.dataEntryType})\n"
                  f"{batch.batchNote}")

@@ -39,7 +39,7 @@ def test_auth(app, headers):
     resp = client.get('/api/v1/test_auth', headers=bad_headers)
     # should fail because the token is invalid and the error message should be informative
     assert resp.status_code == 422
-    assert resp.json['msg'] == 'Your database password is invalid: did you enter a secret key?'
+    assert resp.get_data() == b'Your database password is invalid: did you enter a secret key?'
     
     with app.app_context(): 
         bad_headers = {

@@ -3,7 +3,7 @@ later on used at the very top level stories.py module to initiate the
 application with a specific config file"""
 
 # Flask Imports
-from flask import Flask, jsonify
+from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
@@ -28,10 +28,7 @@ def create_app(config):
     # Return a more interpretable message if auth fails due to an invalid token
     @jwt.invalid_token_loader
     def informative_invalid_token_callback(invalid_token):
-        return jsonify({
-            'status': 422,
-            'msg': 'Your database password is invalid: did you enter a secret key?',
-        }), 422
+        return 'Your database password is invalid: did you enter a secret key?', 422
 
     # Register our API blueprint
     from app.api import api as api_blueprint

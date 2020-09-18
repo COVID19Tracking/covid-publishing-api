@@ -25,6 +25,11 @@ def create_app(config):
     app.config['JWT_SECRET_KEY'] = app.config['SECRET_KEY']
     jwt = JWTManager(app)
 
+    # Return a more interpretable message if auth fails due to an invalid token
+    @jwt.invalid_token_loader
+    def informative_invalid_token_callback(invalid_token):
+        return 'Your database password is invalid: did you enter a secret key?', 422
+
     # Register our API blueprint
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api/v1')

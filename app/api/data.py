@@ -240,47 +240,10 @@ def edit_core_data():
         notify_slack_error(str(e), 'edit_core_data')
         return str(e), 400
 
-    # we construct the batch from the push context
     context = payload['context']
-    flask.current_app.logger.info('Creating new batch from context: %s' % context)
-    batch = Batch(**context)
-    batch.user = get_jwt_identity()
-    batch.isRevision = True
-    db.session.add(batch)
-    db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
+    core_data = payload['coreData']
+    return edit_states_daily_internal(get_jwt_identity(), context, core_data)
 
-    # check each core data row that the corresponding date/state already exists in published form
-    core_data_dicts = payload['coreData']
-    core_data_objects = []
-    for core_data_dict in core_data_dicts:
-        flask.current_app.logger.info('Creating new core data row: %s' % core_data_dict)
-
-        # check that there exists at least one published row for this date/state
-        date = core_data_dict['date']
-        state = core_data_dict['state']
-        if not any_existing_rows(state, date):
-            return "No existing published row for state %s on date %s" % (
-                state, date), 400
-
-        core_data_dict['batchId'] = batch.batchId
-        core_data = CoreData(**core_data_dict)
-        db.session.add(core_data)
-        core_data_objects.append(core_data)
-
-    db.session.flush()
-
-    json_to_return = {
-        'batch': batch.to_dict(),
-        'coreData': [core_data.to_dict() for core_data in core_data_objects],
-    }
-
-    db.session.commit()
-
-    notify_slack(
-        f"*Pushed batch #{batch.batchId}* (type: {batch.dataEntryType}, user: {batch.shiftLead})\n"
-        f"{batch.batchNote}")
-
-    return flask.jsonify(json_to_return), 201
 
 @api.route('/batches/edit_states_daily', methods=['POST'])
 @jwt_required
@@ -308,13 +271,19 @@ def edit_core_data_from_states_daily():
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
         return 'No state specified in batch edit context', 400
 
+    core_data = payload['coreData']
+    return edit_states_daily_internal(
+        get_jwt_identity(), context, core_data, state_to_edit, publish=True)
+
+def edit_states_daily_internal(user, context, core_data, state_to_edit=None, publish=False):
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
 
     batch = Batch(**context)
-    batch.user = get_jwt_identity()
+    batch.user = user
     batch.isRevision = True
-    batch.isPublished = True  # edit batches are published by default
-    batch.publishedAt = datetime.utcnow()
+    batch.isPublished = publish
+    if publish:
+        batch.publishedAt = datetime.utcnow()
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
@@ -331,10 +300,10 @@ def edit_core_data_from_states_daily():
     new_rows = []
 
     # check each core data row that the corresponding date/state already exists in published form
-    for core_data_dict in payload['coreData']:
+    for core_data_dict in core_data:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
-        if state != state_to_edit:
+        if state_to_edit and state != state_to_edit:
             error = 'Context state %s does not match JSON data state %s' % (state_to_edit, state)
             flask.current_app.logger.error(error)
             notify_slack_error(error, 'edit_core_data_from_states_daily')

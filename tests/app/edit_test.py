@@ -310,3 +310,39 @@ def test_edit_core_data_from_states_daily_partial_update(app, headers, slack_moc
     # verify
     assert resp.status_code == 204
     assert slack_mock.chat_postMessage.call_count == 3
+
+def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
+    ''' Verify that when sending edit (or insert) requests without any fields
+    that are part of the object the edit requests is rejected
+    '''
+
+    # setup
+    client = app.test_client()
+
+    # prep
+    # Write a batch containing data for NY, WA for 2 days
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
+
+    # test
+    # make an edit batch without any significant field
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_unknown_fields()),
+        content_type='application/json',
+        headers=headers)
+
+    # verify: nothing was edited
+    assert resp.status_code == 204
+    assert slack_mock.chat_postMessage.call_count == 2

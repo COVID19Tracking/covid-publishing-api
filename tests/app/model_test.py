@@ -34,7 +34,7 @@ def test_core_data_model(app):
             lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
             date=datetime.today(), state='NY', batchId=bat.batchId,
             positive=20, negative=5)
-        
+
         db.session.add(core_data_row)
         db.session.commit()
 
@@ -61,12 +61,35 @@ def test_core_data_model(app):
         # doing this crazy thing because the offset between UTC and EST varies depending on the date
         hour_in_et = now_utc.astimezone(pytz.timezone('US/Eastern')).hour
         assert core_data_row.lastUpdateEt == '5/4/2020 %d:03' % hour_in_et
-        
+
         # check that the Batch object is attached to this CoreData object
         assert core_data_row.batch == batch
         # also check the relationship in the other direction, that CoreData is attached to the batch
         assert len(batch.coreData) == 1
         assert batch.coreData[0] == core_data_row
+
+def test_core_data_fields():
+    '''This test tests the valid_fields_checker method in CoreData '''
+
+    # There are some consts and assumptions here about what is a field and what isn't.
+    # It's not read dynamically
+
+    valid_fields = ['positive', 'negative']
+    keys = ['state', 'date', 'batchId']
+    unknown_fields = ['moonBaze', 'marsBase', 'kuiperBeltShield']
+
+    valids, unknowns = CoreData.valid_fields_checker(valid_fields + keys + unknown_fields)
+    assert set(valid_fields) == set(valids)
+    assert set(unknown_fields) == set(unknowns)
+
+
+    valids, unknowns = CoreData.valid_fields_checker(valid_fields + keys)
+    assert set(valid_fields) == set(valids)
+    assert len(unknowns) == 0
+
+    valids, unknowns = CoreData.valid_fields_checker(keys)
+    assert len(valids) == 0
+    assert len(unknowns) == 0
 
 def test_total_test_results(app):
     with app.app_context():

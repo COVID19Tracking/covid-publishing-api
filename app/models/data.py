@@ -252,6 +252,28 @@ class CoreData(db.Model, DataMixin):
     def parse_str_to_date(date_input):
         return parser.parse(str(date_input), ignoretz=True).date()
 
+    @staticmethod
+    def valid_fields_checker(candidates):
+        '''
+        dict[string] -> ([string], [string])
+        Gets a list of field names and returns a tuple of (valid_fields, unknown_fields).
+
+        If valid_fields is empty, then this list contains no data for this object.
+        If unknown_fields is not-empty, then this list contains extra fields
+        that mean nothing for this object, but we might want to alert on this.
+        In the valid fields, we exclude state, date and batchId because these are the
+        primary keys for the record, and all keys without values make it a dull record
+        '''
+        mapper = class_mapper(CoreData)
+        keys = mapper.attrs.keys()
+
+        candidate_set = set(candidates)
+        key_set = set(keys)
+        unknowns = candidate_set - key_set
+        valid = candidate_set & key_set
+        valid = valid - {x.name for x in mapper.primary_key}
+        return (valid, unknowns)
+
     def field_diffs(self, dict_other):
         ''' Return the list of fields that dict_other would modify if applied
         on this row.

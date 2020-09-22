@@ -134,8 +134,9 @@ def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
         content_type='application/json',
         headers=headers)
 
-    assert resp.status_code == 204
-    assert slack_mock.chat_postMessage.call_count == 2 # logging unchanged edit to Slack
+    assert resp.status_code == 400
+    assert slack_mock.chat_postMessage.call_count == 2  # logging unchanged edit to Slack
+    assert "no edits detected" in resp.data.decode("utf-8")
 
 
 def test_edit_core_data_from_states_daily(app, headers, slack_mock):
@@ -347,8 +348,9 @@ def test_edit_core_data_from_states_daily_partial_update(app, headers, slack_moc
         headers=headers)
 
     # verify
-    assert resp.status_code == 204
+    assert resp.status_code == 400
     assert slack_mock.chat_postMessage.call_count == 3
+    assert "no edits detected" in resp.data.decode("utf-8")
 
 def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
     ''' Verify that when sending edit (or insert) requests without any fields
@@ -383,5 +385,6 @@ def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
         headers=headers)
 
     # verify: nothing was edited
-    assert resp.status_code == 204
+    assert resp.status_code == 400
     assert slack_mock.chat_postMessage.call_count == 2
+    assert "no edits detected" in resp.data.decode("utf-8")

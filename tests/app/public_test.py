@@ -17,8 +17,8 @@ from common import daily_push_ny_wa_two_days
 def test_get_state_info(app):
     client = app.test_client()
     with app.app_context():
-        nys = State(state='NY', name='New York', pum=False, notes='Testing123')
-        wa = State(state='WA', name='Washington', pum=False, notes='Testing321')
+        nys = State(state='NY', name='New York', pum=False, notes='Testing123', totalTestResultsFieldDbColumn="totalTestsViral")
+        wa = State(state='WA', name='Washington', pum=False, notes='Testing321', totalTestResultsFieldDbColumn="totalTestsViral")
         db.session.add(nys)
         db.session.add(wa)
         db.session.commit()
@@ -29,6 +29,7 @@ def test_get_state_info(app):
     assert len(respjson) == 2
     assert respjson[0]["pum"] == False
     assert respjson[0]["notes"] == 'Testing123'
+    assert respjson[0]["totalTestResultsFieldDbColumn"] == 'totalTestsViral'
 
 
 def test_get_states_daily(app, headers):

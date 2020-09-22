@@ -68,7 +68,7 @@ def test_post_core_data(app, headers):
 
 def test_post_core_data_updating_state(app, headers):
     with app.app_context():
-        nys = State(state='AK', name='Alaska')
+        nys = State(state='AK', name='Alaska', totalTestResultsFieldDbColumn='totalTestsViral')
         db.session.add(nys)
         db.session.commit()
 
@@ -76,7 +76,7 @@ def test_post_core_data_updating_state(app, headers):
         assert len(states) == 1
         state = states[0]
         assert state.state == 'AK'
-        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02'}
+        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02', 'totalTestResultsFieldDbColumn': 'totalTestsViral'}
 
     client = app.test_client()
     resp = client.get('/api/v1/public/states/info')
@@ -98,6 +98,8 @@ def test_post_core_data_updating_state(app, headers):
     resp = client.get('/api/v1/public/states/info')
     assert resp.json[0]['state'] == "AK"
     assert resp.json[0]['twitter'] == "@Alaska_DHSS"
+    # and setting totalTestResultsFieldDbColumn
+    assert resp.json[0]['totalTestResultsFieldDbColumn'] == "totalTestEncountersViral"
 
 
 def test_get_batches(app):
@@ -325,7 +327,8 @@ def test_edit_state_metadata(app, headers):
     state_data = {
         'states': [{
             'state': 'AK',
-            'twitter': 'AlaskaNewTwitter'
+            'twitter': 'AlaskaNewTwitter',
+            'totalTestResultsFieldDbColumn': 'totalTestEncountersViral'
         }]
     }
     resp = client.post(
@@ -337,3 +340,19 @@ def test_edit_state_metadata(app, headers):
     assert len(resp.json['states']) == 1
     assert resp.json['states'][0]['state'] == "AK"
     assert resp.json['states'][0]['twitter'] == "AlaskaNewTwitter"
+    assert resp.json['states'][0]['totalTestResultsFieldDbColumn'] == "totalTestEncountersViral"
+
+    # try setting totalTestResultsFieldDbColumn to an invalid value
+    state_data = {
+        'states': [{
+            'state': 'AK',
+            'totalTestResultsFieldDbColumn': 'invalid_value'
+        }]
+    }
+    resp = client.post(
+        "/api/v1/states/edit",
+        data=json.dumps(state_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 500
+    assert resp.data.decode("utf-8") == 'invalid value for totalTestResultsFieldDbColumn'

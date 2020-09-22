@@ -408,7 +408,7 @@ def edit_core_data_from_states_daily():
             f"*Received edit batch #{batch.batchId}*. state: {state_to_edit}. (user: {batch.shiftLead})\n"
             f"{batch.batchNote} but no differences detected, data is unchanged", "edit_states_daily")
 
-        return 'Data is unchanged: no edits detected', 204
+        return 'Data is unchanged: no edits detected', 400
 
     json_to_return = {
         'batch': batch.to_dict(),

@@ -360,13 +360,22 @@ def edit_core_data_from_states_daily():
             notify_slack_error(error, 'edit_core_data_from_states_daily')
             return flask.jsonify(error), 400
 
+        valid, unknown = CoreData.valid_fields_checker(core_data_dict)
+        if not valid:
+            # there are no fields to add/update
+            flask.current_app.logger.info('Got row without updates, skipping. %r' % core_data_dict)
+            continue
+
+        if unknown:
+            # report unknown fields, we won't fail the request, but should at least log
+            flask.current_app.logger.warning('Got row with unknown field updates. %r' % core_data_dict)
+
         # is there a date for this?
         # check that there exists at least one published row for this date/state
         date = CoreData.parse_str_to_date(core_data_dict['date'])
         data_for_date = date_to_data.get(date)
-        edited_core_data = None
-
         core_data_dict['batchId'] = batch.batchId
+        edited_core_data = None
 
         if not data_for_date:
             # this is a new row: we treat this as a changed date

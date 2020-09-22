@@ -237,3 +237,24 @@ def edit_push_ny_today_empty():
       "context": ctx,
       "coreData": [edit_data]
     }
+
+def edit_unknown_fields():
+    ctx = {
+      "dataEntryType": "edit",
+      "shiftLead": "test",
+      "state": "NY",
+      "batchNote": "no data",
+      "logCategory": "State Updates",
+      "link": "https://example.com"
+    }
+
+    edit_data = {
+      "state": "NY",
+      "date": BEFORE_YESTERDAY,
+      "foobar": 1
+    }
+
+    return {
+      "context": ctx,
+      "coreData": [edit_data]
+    }

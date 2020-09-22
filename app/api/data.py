@@ -65,7 +65,7 @@ def publish_batch(id):
 
     # if batch is already published, fail out
     if batch.isPublished:
-        return flask.jsonify('Batch %d already published, rejecting double-publish' % id), 422
+        return 'Batch %d already published, rejecting double-publish' % id, 422
 
     batch.isPublished = True
     batch.publishedAt = datetime.utcnow()   # set publish time to now
@@ -99,7 +99,7 @@ def edit_state_metadata():
         err = '/states/edit payload must contain "states" field'
         flask.current_app.logger.error(err)
         notify_slack_error(err, 'edit_state_metadata')
-        return flask.jsonify(err), 400
+        return err, 400
 
     state_dicts = payload['states']
     state_objects = []
@@ -109,7 +109,7 @@ def edit_state_metadata():
             err = '/states/edit payload trying to edit nonexistent state: %s' % state_pk
             flask.current_app.logger.error(err)
             notify_slack_error(err, 'edit_state_metadata')
-            return flask.jsonify(err), 400
+            return err, 400
 
         flask.current_app.logger.info('Updating state row from info: %s' % state_dict)
         db.session.query(State).filter_by(state=state_pk).update(state_dict)
@@ -141,7 +141,7 @@ def post_core_data_json(payload):
     except ValueError as e:
         flask.current_app.logger.error('Data post failed: %s' % str(e))
         notify_slack_error(str(e), 'post_core_data_json')
-        return flask.jsonify(str(e)), 400
+        return str(e), 400
 
     # we construct the batch from the push context
     context = payload['context']
@@ -252,7 +252,7 @@ def edit_core_data():
     except ValueError as e:
         flask.current_app.logger.error("Edit data failed validation: %s" % str(e))
         notify_slack_error(str(e), 'edit_core_data')
-        return flask.jsonify(str(e)), 400
+        return str(e), 400
 
     # we construct the batch from the push context
     context = payload['context']
@@ -273,8 +273,8 @@ def edit_core_data():
         date = core_data_dict['date']
         state = core_data_dict['state']
         if not any_existing_rows(state, date):
-            return flask.jsonify("No existing published row for state %s on date %s" % (
-                state, date)), 400
+            return "No existing published row for state %s on date %s" % (
+                state, date), 400
 
         core_data_dict['batchId'] = batch.batchId
         core_data = CoreData(**core_data_dict)
@@ -309,7 +309,7 @@ def edit_core_data_from_states_daily():
     except ValueError as e:
         flask.current_app.logger.error("Edit data failed validation: %s" % str(e))
         notify_slack_error(str(e), 'edit_core_data_from_states_daily')
-        return flask.jsonify(str(e)), 400
+        return str(e), 400
 
     # we construct the batch from the push context
     context = payload['context']
@@ -320,7 +320,7 @@ def edit_core_data_from_states_daily():
         flask.current_app.logger.error("No state specified in batch edit context: %s" % str(context))
         notify_slack_error(
             'No state specified in batch edit context', 'edit_core_data_from_states_daily')
-        return flask.jsonify('No state specified in batch edit context'), 400
+        return 'No state specified in batch edit context', 400
 
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
 
@@ -352,7 +352,7 @@ def edit_core_data_from_states_daily():
             error = 'Context state %s does not match JSON data state %s' % (state_to_edit, state)
             flask.current_app.logger.error(error)
             notify_slack_error(error, 'edit_core_data_from_states_daily')
-            return flask.jsonify(error), 400
+            return error, 400
 
         valid, unknown = CoreData.valid_fields_checker(core_data_dict)
         if not valid:
@@ -404,7 +404,11 @@ def edit_core_data_from_states_daily():
     diffs = EditDiff(changed_rows, new_rows)
     if diffs.is_empty():
         # there are no changes, nothing to do
-        return flask.jsonify('Unchanged'), 204
+        notify_slack_error(
+            f"*Received edit batch #{batch.batchId}*. state: {state_to_edit}. (user: {batch.shiftLead})\n"
+            f"{batch.batchNote} but no differences detected, data is unchanged", "edit_states_daily")
+
+        return 'Data is unchanged: no edits detected', 204
 
     json_to_return = {
         'batch': batch.to_dict(),

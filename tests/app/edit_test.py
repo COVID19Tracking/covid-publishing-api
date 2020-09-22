@@ -10,6 +10,45 @@ from common import *
 import datetime
 
 
+def test_edit_state_metadata(app, headers):
+    client = app.test_client()
+
+    # write some initial data
+    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
+    with open(example_filename) as f:
+        payload_json_str = f.read()
+
+    resp = client.post(
+        "/api/v1/batches",
+        data=payload_json_str,
+        content_type='application/json', 
+        headers=headers)
+    assert resp.status_code == 201
+
+    # we should've written 56 states, 4 core data rows, 1 batch
+    resp = client.get('/api/v1/public/states/info')
+    assert len(resp.json) == 56
+    assert resp.json[0]['state'] == "AK"
+    assert resp.json[0]['twitter'] == "@Alaska_DHSS"
+
+    # make a states metadata edit request updating the twitter account for AK
+    state_data = {
+        'states': [{
+            'state': 'AK',
+            'twitter': 'AlaskaNewTwitter'
+        }]
+    }
+    resp = client.post(
+        "/api/v1/states/edit",
+        data=json.dumps(state_data),
+        content_type='application/json', 
+        headers=headers)
+    assert resp.status_code == 201
+    assert len(resp.json['states']) == 1
+    assert resp.json['states'][0]['state'] == "AK"
+    assert resp.json['states'][0]['twitter'] == "AlaskaNewTwitter"
+
+
 def test_edit_core_data(app, headers, slack_mock):
     client = app.test_client()
 
@@ -88,7 +127,7 @@ def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 2
 
-    # make an edit batch for NY for yesterday, and leave today alone
+    # make an empty edit batch for NY for yesterday containing no edits
     resp = client.post(
         "/api/v1/batches/edit_states_daily",
         data=json.dumps(edit_push_ny_today_empty()),
@@ -96,7 +135,7 @@ def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
         headers=headers)
 
     assert resp.status_code == 204
-    assert slack_mock.chat_postMessage.call_count == 2 # no more calls
+    assert slack_mock.chat_postMessage.call_count == 2 # logging unchanged edit to Slack
 
 
 def test_edit_core_data_from_states_daily(app, headers, slack_mock):

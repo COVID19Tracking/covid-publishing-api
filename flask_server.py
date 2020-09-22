@@ -9,6 +9,8 @@ import click
 import config as configs
 
 # Figure out which config we want based on the `ENV` env variable, default to local
+from app.utils.backfill import backfill
+
 env_config = config("ENV", cast=str, default="localpsql")
 config_dict = {
     'production': configs.Production,
@@ -28,8 +30,9 @@ auth_cli = AppGroup('auth')
 @auth_cli.command("getToken")
 @click.argument('name')
 def getToken_cli(name):
-   click.echo(getToken(name))
-   
+    click.echo(getToken(name))
+
+
 app.cli.add_command(auth_cli)
 
 @app.cli.command()
@@ -37,3 +40,13 @@ def deploy():
     """Run deployment tasks"""
     # e.g. this _used_ to be where a database migration would run via `upgrade()`
     pass
+
+
+utils_cli = AppGroup('utils')
+@utils_cli.command("backfill")
+@click.argument('input_file')
+def backfill_cli(input_file):
+    backfill(input_file)
+
+
+app.cli.add_command(utils_cli)

@@ -34,10 +34,6 @@ def create_app(config):
     from app.api import api as api_blueprint
     app.register_blueprint(api_blueprint, url_prefix='/api/v1')
 
-    # Register utils blueprint; this contains backfill logic
-    from app.utils import utils as utils_blueprint
-    app.register_blueprint(utils_blueprint)
-
     # register an error handler to return full exceptions for server errors
     @app.errorhandler(500)
     def internal_server_error(e):

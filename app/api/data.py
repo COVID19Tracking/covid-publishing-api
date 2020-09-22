@@ -215,6 +215,7 @@ def post_core_data():
 
     return post_result
 
+
 def any_existing_rows(state, date):
     date = CoreData.parse_str_to_date(date)
     existing_rows = db.session.query(CoreData).join(Batch).filter(
@@ -223,21 +224,6 @@ def any_existing_rows(state, date):
         CoreData.date == date).all()
     return len(existing_rows) > 0
 
-# Returns a string with any errors if the payload is invalid, otherwise returns empty string.
-def edit_data_payload_error(payload):
-    # check push context
-    if 'context' not in payload:
-        return "Payload requires 'context' field"
-    if payload['context']['dataEntryType'] != 'edit':
-        return "Payload 'context' must contain data entry type 'edit'"
-    if not payload['context'].get('batchNote'):
-        return "Payload 'context' must contain a batchNote explaining edit"
-
-    # check that edit data exists
-    if 'coreData' not in payload:
-        return "Payload requires 'coreData' field"
-
-    return ''
 
 @api.route('/batches/edit', methods=['POST'])
 @jwt_required

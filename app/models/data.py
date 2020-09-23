@@ -131,11 +131,7 @@ class State(db.Model, DataMixin):
         Acceptable values are either a valid CoreData column name or a known special keyword like 'posNeg'.
         """
         ttr_special_keywords = ['posNeg']
-        is_valid = value in ttr_special_keywords
-        if not is_valid:  # check all columns
-            for column in CoreData.__table__.columns:
-                if value == column.name or value in ttr_special_keywords:
-                    is_valid = True
+        is_valid = value in ttr_special_keywords or value in [column.name for column in CoreData.__table__.columns]
         assert is_valid, "invalid value for totalTestResultsFieldDbColumn"
         return value
 
@@ -250,11 +246,7 @@ class CoreData(db.Model, DataMixin):
         This value is determined based on the state's totalTestResultsFieldDbColumn, with empty cells converted to 0.
         If a CoreData column name is specified, that column will be used for totalTestResults.
         Alternatively, the 'posNeg' keyword can be used to indicate totalTestResults = (positive+negative)"""
-
-        # there are circumstances where this is called where the state doesn't exist. default to posNeg in those cases
-        column = 'posNeg'
-        if self.state_obj is not None and self.state_obj.totalTestResultsFieldDbColumn is not None:
-            column = self.state_obj.totalTestResultsFieldDbColumn
+        column = self.state_obj.totalTestResultsFieldDbColumn
 
         if column == 'posNeg':  # posNeg: calculated value (positive + negative) of total test results.
             if self.negative is None:
@@ -263,9 +255,7 @@ class CoreData(db.Model, DataMixin):
                 return self.negative or 0
             return self.positive + self.negative
         else:  # column is a coreData column, return its value, converting none to 0
-            value = getattr(self, column)
-            if value is None:
-                value = 0
+            value = getattr(self, column) or 0
             return value
 
     # Converts the input to a string and returns parsed datetime.date object

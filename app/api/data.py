@@ -400,6 +400,7 @@ def edit_core_data_from_states_daily():
             # store the changes
             db.session.add(edited_core_data)
             core_data_objects.append(edited_core_data)
+            db.session.flush()
             flask.current_app.logger.info('Adding new edit row: %s' % edited_core_data.to_dict())
         else:
             # there were no changes

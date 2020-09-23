@@ -221,8 +221,9 @@ def test_push_with_validation_error(app, headers, slack_mock):
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 400
-    assert "Non-numeric value for field" in resp.json
-    assert 'NY ' in resp.json
+    resp_data = resp.data.decode("utf-8")
+    assert "Non-numeric value for field" in resp_data
+    assert 'NY ' in resp_data
     assert slack_mock.files_upload.call_count == 1
 
     # negative number in a numeric field
@@ -234,8 +235,9 @@ def test_push_with_validation_error(app, headers, slack_mock):
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 400
-    assert "Negative value for field" in resp.json
-    assert 'NY ' in resp.json
+    resp_data = resp.data.decode("utf-8")
+    assert "Negative value for field" in resp_data
+    assert 'NY ' in resp_data
     assert slack_mock.files_upload.call_count == 2
 
     # empty value for non-nullable field
@@ -247,7 +249,8 @@ def test_push_with_validation_error(app, headers, slack_mock):
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 400
-    assert "Missing value for 'state' in row" in resp.json
+    resp_data = resp.data.decode("utf-8")
+    assert "Missing value for 'state' in row" in resp_data
     assert slack_mock.files_upload.call_count == 3
 
 
@@ -262,7 +265,7 @@ def test_push_missing_context(app, headers, slack_mock):
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 400
-    assert "Payload requires 'context' field" in resp.json
+    assert "Payload requires 'context' field" in resp.data.decode("utf-8")
     assert slack_mock.files_upload.call_count == 1
 
 
@@ -300,59 +303,3 @@ def test_get_state_date_history(app, headers):
     # history for NY today should have just one row
     resp = client.get("/api/v1/state-date-history/NY/2020-05-25")
     assert len(resp.json) == 1
-
-
-def test_edit_state_metadata(app, headers):
-    client = app.test_client()
-
-    # write some initial data
-    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
-    with open(example_filename) as f:
-        payload_json_str = f.read()
-
-    resp = client.post(
-        "/api/v1/batches",
-        data=payload_json_str,
-        content_type='application/json', 
-        headers=headers)
-    assert resp.status_code == 201
-
-    # we should've written 56 states, 4 core data rows, 1 batch
-    resp = client.get('/api/v1/public/states/info')
-    assert len(resp.json) == 56
-    assert resp.json[0]['state'] == "AK"
-    assert resp.json[0]['twitter'] == "@Alaska_DHSS"
-
-    # make a states metadata edit request updating the twitter account for AK
-    state_data = {
-        'states': [{
-            'state': 'AK',
-            'twitter': 'AlaskaNewTwitter',
-            'totalTestResultsFieldDbColumn': 'totalTestEncountersViral'
-        }]
-    }
-    resp = client.post(
-        "/api/v1/states/edit",
-        data=json.dumps(state_data),
-        content_type='application/json', 
-        headers=headers)
-    assert resp.status_code == 201
-    assert len(resp.json['states']) == 1
-    assert resp.json['states'][0]['state'] == "AK"
-    assert resp.json['states'][0]['twitter'] == "AlaskaNewTwitter"
-    assert resp.json['states'][0]['totalTestResultsFieldDbColumn'] == "totalTestEncountersViral"
-
-    # try setting totalTestResultsFieldDbColumn to an invalid value
-    state_data = {
-        'states': [{
-            'state': 'AK',
-            'totalTestResultsFieldDbColumn': 'invalid_value'
-        }]
-    }
-    resp = client.post(
-        "/api/v1/states/edit",
-        data=json.dumps(state_data),
-        content_type='application/json',
-        headers=headers)
-    assert resp.status_code == 500
-    assert resp.data.decode("utf-8") == 'invalid value for totalTestResultsFieldDbColumn'

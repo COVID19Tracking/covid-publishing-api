@@ -1,9 +1,3 @@
-"""This is an example model which will be used for creating stories on the web.
-The model is defined in a similar way to python class/object, however is
-inherited from a SQLAlchemy class so a DB entry with a table can be built
-easily
-"""
-
 import csv
 from datetime import datetime, date
 from dateutil import parser
@@ -16,7 +10,7 @@ import logging
 
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.inspection import inspect
-from sqlalchemy.orm import class_mapper, relationship
+from sqlalchemy.orm import class_mapper, relationship, validates
 
 
 class DataMixin(object):
@@ -103,6 +97,7 @@ def fips_lookup(state):
                 _FIPS_MAP[row['state']] = row['fips']
     return _FIPS_MAP[state]
 
+
 class State(db.Model, DataMixin):
     __tablename__ = 'states'
 
@@ -117,6 +112,8 @@ class State(db.Model, DataMixin):
     pui = db.Column(db.String)
     covidTrackingProjectPreferredTotalTestUnits = db.Column(db.String)
     covidTrackingProjectPreferredTotalTestField = db.Column(db.String)
+    totalTestResultsField = db.Column(db.String)
+    totalTestResultsFieldDbColumn = db.Column(db.String, nullable=False)
 
     # here for parity with public API, deprecated field
     @hybrid_property
@@ -126,6 +123,17 @@ class State(db.Model, DataMixin):
     @hybrid_property
     def fips(self):
         return fips_lookup(self.state)
+
+    @validates('totalTestResultsFieldDbColumn')
+    def validate_totalTestResultsFieldDbColumn(self, key, value):
+        """Validate the totalTestResultsFieldDbColumn value, used to calculate totalTestResults.
+
+        Acceptable values are either a valid CoreData column name or a known special keyword like 'posNeg'.
+        """
+        ttr_special_keywords = ['posNeg']
+        is_valid = value in ttr_special_keywords or value in [column.name for column in CoreData.__table__.columns]
+        assert is_valid, "invalid value for totalTestResultsFieldDbColumn"
+        return value
 
     def __init__(self, **kwargs):
         mapper = class_mapper(State)
@@ -139,8 +147,11 @@ class CoreData(db.Model, DataMixin):
     # composite PK: state_name, batch_id, date
     state = db.Column(db.String, db.ForeignKey('states.state'),
         nullable=False, primary_key=True)
+    state_obj = relationship("State", lazy="selectin")
+
     batchId = db.Column(db.Integer, db.ForeignKey('batches.batchId'),
         nullable=False, primary_key=True)
+
     # the day we mean to report this data for; meant for "states daily" extraction
     date = db.Column(db.Date, nullable=False, primary_key=True,
         info={'repr': lambda x: x.strftime('%Y-%m-%d')})
@@ -230,22 +241,22 @@ class CoreData(db.Model, DataMixin):
 
     @hybrid_property
     def totalTestResults(self):
-        # Calculated value (positive + negative) of total test results.
-        # For consistency with public API, treating a negative null as 0
+        """Calculated value of total test results
 
-        # to match the public API, use totalTestEncountersViral for selected states
-        if self.state in ["RI", "CO", "ND"]:
-            return self.totalTestEncountersViral or 0
+        This value is determined based on the state's totalTestResultsFieldDbColumn, with empty cells converted to 0.
+        If a CoreData column name is specified, that column will be used for totalTestResults.
+        Alternatively, the 'posNeg' keyword can be used to indicate totalTestResults = (positive+negative)"""
+        column = self.state_obj.totalTestResultsFieldDbColumn
 
-        # MA uses totalTestsViral
-        if self.state in ["MA"]:
-            return self.totalTestsViral or 0
-
-        if self.negative is None:
-            return self.positive or 0
-        if self.positive is None:
-            return self.negative or 0
-        return self.positive + self.negative
+        if column == 'posNeg':  # posNeg: calculated value (positive + negative) of total test results.
+            if self.negative is None:
+                return self.positive or 0
+            if self.positive is None:
+                return self.negative or 0
+            return self.positive + self.negative
+        else:  # column is a coreData column, return its value, converting none to 0
+            value = getattr(self, column) or 0
+            return value
 
     # Converts the input to a string and returns parsed datetime.date object
     @staticmethod

@@ -38,8 +38,8 @@ def test_make_csv_response(app):
 def test_get_state_info_csv(app):
     client = app.test_client()
     with app.app_context():
-        nys = State(state='NY', name='New York', pum=False, notes='Testing123')
-        wa = State(state='WA', name='Washington', pum=False, notes='Testing321')
+        nys = State(state='NY', name='New York', pum=False, notes='Testing123', totalTestResultsFieldDbColumn='posNeg')
+        wa = State(state='WA', name='Washington', pum=False, notes='Testing321', totalTestResultsFieldDbColumn='posNeg')
         db.session.add(nys)
         db.session.add(wa)
         db.session.commit()

@@ -19,7 +19,7 @@ def test_editdiff(app):
         assert "positive: 456 (was 123)" in output
         assert "New rows" not in output
 
-        nys = State(state='NY')
+        nys = State(state='NY', totalTestResultsFieldDbColumn="posNeg")
         bat = Batch(batchNote='test', createdAt=datetime.now(),
                     isPublished=False, isRevision=False)
         db.session.add(bat)

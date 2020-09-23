@@ -22,7 +22,7 @@ def test_state_model():
 
 def test_core_data_model(app):
     with app.app_context():
-        nys = State(state='NY')
+        nys = State(state='NY', totalTestResultsFieldDbColumn='posNeg')
         bat = Batch(batchNote='test', createdAt=datetime.now(),
             isPublished=False, isRevision=False)
         db.session.add(bat)
@@ -42,7 +42,7 @@ def test_core_data_model(app):
         assert len(states) == 1
         state = states[0]
         assert state.state == 'NY'
-        assert state.to_dict() == {'state': 'NY', 'fips': '36', 'pum': False}
+        assert state.to_dict() == {'state': 'NY', 'fips': '36', 'pum': False, 'totalTestResultsFieldDbColumn': 'posNeg'}
 
         batches = Batch.query.all()
         assert len(batches) == 1
@@ -68,6 +68,7 @@ def test_core_data_model(app):
         assert len(batch.coreData) == 1
         assert batch.coreData[0] == core_data_row
 
+
 def test_core_data_fields():
     '''This test tests the valid_fields_checker method in CoreData '''
 
@@ -91,15 +92,37 @@ def test_core_data_fields():
     assert len(valids) == 0
     assert len(unknowns) == 0
 
+
+def test_totalTestResultsFieldDbColumn(app):
+    # totalTestResultsFieldDbColumn should be validated as either a CoreData column name or posNeg
+    with app.app_context():
+        # should work
+        nys = State(state='NY', totalTestResultsFieldDbColumn='totalTestsViral')
+        nys = State(state='NY', totalTestResultsFieldDbColumn='posNeg')
+        # should fail
+        with pytest.raises(AssertionError):
+            nys = State(state='NY', totalTestResultsFieldDbColumn='some_nonsense')
+        with pytest.raises(AssertionError):
+            nys = State(state='NY', totalTestResultsFieldDbColumn='covid19Site')
+
+
 def test_total_test_results(app):
     with app.app_context():
         now_utc = datetime(2020, 5, 4, 20, 3, tzinfo=pytz.UTC)
+        nys = State(state='NY', totalTestResultsFieldDbColumn='posNeg')
+        bat = Batch(batchNote='test', createdAt=datetime.now(),
+                    isPublished=False, isRevision=False)
+        db.session.add(nys)
+        db.session.add(bat)
+        db.session.flush()
         core_data_row = CoreData(
             lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
-            date=datetime.today(), state='NY')
+            date=datetime.today(), state='NY', batchId=bat.batchId)
+        db.session.add(core_data_row)
+        db.session.commit()
 
+        # test posNeg behavior
         assert core_data_row.totalTestResults == 0
-
         core_data_row.positive = 25
         assert core_data_row.totalTestResults == 25
         core_data_row.positive = None
@@ -108,20 +131,18 @@ def test_total_test_results(app):
         core_data_row.positive = 25
         assert core_data_row.totalTestResults == 30
 
-        # RI and CO have special behavior (use totalTestEncountersViral)
-        core_data_row = CoreData(
-            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
-            date=datetime.today(), state='RI', positive=25, negative=5, totalTestEncountersViral=33)
-        assert core_data_row.totalTestResults == 33
-        core_data_row.state = 'NY'
-        assert core_data_row.totalTestResults == 30
-        core_data_row.state = 'CO'
-        assert core_data_row.totalTestResults == 33
+        # now set the state to use a column for totalTestResultsFieldDbColumn
+        nys.totalTestResultsFieldDbColumn = 'totalTestEncountersViral'
+        db.session.commit()
+        assert core_data_row.totalTestResults == 0
+        core_data_row.totalTestEncountersViral = 55
+        assert core_data_row.totalTestResults == 55
         core_data_row.totalTestEncountersViral = None
         assert core_data_row.totalTestResults == 0
+        core_data_row.totalTestEncountersViral = 100
 
-        # MA uses totalTestsViral
-        core_data_row = CoreData(
-            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
-            date=datetime.today(), state='MA', positive=25, negative=5, totalTestEncountersViral=33, totalTestsViral=12)
-        assert core_data_row.totalTestResults == 12
+        nys.totalTestResultsFieldDbColumn = 'totalTestsViral'
+        db.session.commit()
+        assert core_data_row.totalTestResults == 0
+        core_data_row.totalTestsViral = 75
+        assert core_data_row.totalTestResults == 75

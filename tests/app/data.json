@@ -13,7 +13,8 @@
          "twitter":"@Alaska_DHSS",
          "pui":"All data",
          "notes":"Total tests are taken from the annotations on the charts on the page. \nNegatives = (Totals – Positives)\nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.\nLast Updated (Local Time) = (today's date + time = 00:00) \nAs of May 16, Alaska reports specimens tested; because some people may be tested more than once, this number may be higher than the number of people tested.",
-         "name":"Alaska"
+         "name":"Alaska",
+         "totalTestResultsFieldDbColumn":"totalTestEncountersViral"
       },
       {
          "state":"AL",
@@ -23,7 +24,8 @@
          "twitter":"@alpublichealth",
          "pui":"No data",
          "notes":"Negatives = (Totals - Positives) \nPositives occasionally update before totals do; do not revise negatives down, keep the last calculated negative.",
-         "name":"Alabama"
+         "name":"Alabama",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"AR",
@@ -32,7 +34,8 @@
          "covid19SiteSecondary":"https://adem.maps.arcgis.com/apps/opsdashboard/index.html#/f533ac8a8b6040e5896b05b47b17a647",
          "twitter":"@adhpio",
          "pui":"All data",
-         "name":"Arkansas"
+         "name":"Arkansas",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"AS",
@@ -41,7 +44,8 @@
          "covid19SiteSecondary":"https://www.facebook.com/amsamgov/",
          "pui":"No Data",
          "notes":"Our data comes from a press release [from 5/1](https://6fe16cc8-c42f-411f-9950-4abb1763c703.filesusr.com/ugd/4bfff9_54e0ecfd113444029f54b7ebbcc92972.pdf) ",
-         "name":"American Samoa"
+         "name":"American Samoa",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"AZ",
@@ -51,7 +55,8 @@
          "twitter":"@azdhs",
          "pui":"All data",
          "notes":"Dashboard now has a new tab that details total tested. \nNegative = Total - Positive.\nWe do not currently track it, but hospitalization and ICU data is available from [Maricopa County](https://www.maricopa.gov/5460/Coronavirus-Disease-2019) and [Pima County](https://webcms.pima.gov/cms/One.aspx?portalId=169&pageId=527452).\nAs of May 8, Arizona is reporting specimens tested, including both PCR and antibody tests. Because some people may be tested more than once, this number is probably higher than the number of people tested",
-         "name":"Arizona"
+         "name":"Arizona",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"CA",
@@ -61,7 +66,8 @@
          "twitter":"@CAPublicHealth",
          "pui":"Only positives",
          "notes":"California has been inconsistent in its timing of reporting. We used faster-updating sources until 4/1, when we standardized on its [new data dashboards](https://public.tableau.com/views/COVID-19PublicDashboard/Covid-19Public?:embed=y&:display_count=no&:showVizHome=no). This led to a drop in cases and deaths, as the state's data lags county sources. The state reported a huge batch of negative tests on April 4 and again on April 22. As of April 22, California now reports specimens tested instead of people tested. Because some people may be tested more than once, this number is probably higher than the number of people tested.",
-         "name":"California"
+         "name":"California",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"CO",
@@ -72,7 +78,8 @@
          "twitter":"@cdphe",
          "pui":"Positives + Negatives",
          "notes":"Negative = People Tested - Cases. Cases include people who test positive for COVID-19 AND people who have symptoms of COVID-19 and are a close contact to someone who tested positive. As of April 27, Colorado is reporting people tested. On 6/14, CO revised some previous daily discharged number. This caused an overall decline in their recovered count. ",
-         "name":"Colorado"
+         "name":"Colorado",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"CT",
@@ -81,7 +88,8 @@
          "twitter":"@ctdph",
          "pui":"All data",
          "notes":"Negative = Total - Positive.  \nPositives occasionally update before totals do; we do not revise negatives down, keep the last calculated negative.\nAs of May 24, Connecticut is reporting PCR specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested.\nAs of May 29, CHA changed to only reporting the number of patients with laboratory-confirmed COVID-19; data for previous dates include patients with laboratory-confirmed or suspected COVID-19. This impacts the numbers for cumulative hospitalizations and recoveries.\nOn June 18, CT reported that \"Please note that 81 new cases were reported in the past 24-hours; 70 previously reported cases were removed from the total counts due to correction of data errors.\"",
-         "name":"Connecticut"
+         "name":"Connecticut",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"DC",
@@ -90,7 +98,8 @@
          "twitter":"@_DCHealth",
          "pui":"All data",
          "notes":"Positive and Negative include both public and commercial labs. As of April 27, District of Columbia is reporting people tested.\nTotal tests reported by DC dropped by about 11,000 from 5/24 to 5/25.",
-         "name":"District of Columbia"
+         "name":"District of Columbia",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"DE",
@@ -99,7 +108,8 @@
          "twitter":"@Delaware_DHSS",
          "pui":"All data",
          "notes":"As of April 27, Delaware is reporting people tested.\nOn April 11, Delaware revised down negatives from 10415 to 9624",
-         "name":"Delaware"
+         "name":"Delaware",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"FL",
@@ -109,7 +119,8 @@
          "twitter":"@HealthyFla",
          "pui":"All data",
          "notes":"We report using the raw data provided by FDOH but we include both Florida residents and non-residents.\nOn March 26, the dashboard stopped including non-residents in its visible counts, but they're still tracked behind the scenes.  \nOn March 21, negatives jumped due to a methodology change: tests of people not investigated as PUIs are now included. \nAs of May 15, Florida is reporting both specimens (PCR and antibody) and people tested. We report positives and negatives based on the number of people tested. However, the \"people tested\" number reported on Florida's dashboard has come into question as of May 31, because this number is not fully de-duplicated. Florida's report states that: \"People tested on multiple days will be included for each day a new result was received.\"",
-         "name":"Florida"
+         "name":"Florida",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"GA",
@@ -119,7 +130,8 @@
          "twitter":"@GaDPH",
          "pui":"Only positives",
          "notes":"Positive includes deaths. Positives occasionally update before totals.\nWe use the state's \"as of\" time as our Update Time. \nAs of May 16, Georgia is reporting specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested. \nAs of May 27, GA started separating serology tests from PCR. This caused a the number of tests to decline on that day from the combined number.",
-         "name":"Georgia"
+         "name":"Georgia",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"GU",
@@ -129,7 +141,8 @@
          "twitter":"@guamdphss",
          "pui":"All Data",
          "notes":"Testing data from Guam's Situation Report is often older than case data in Guam's press releases, so there are sometimes more cases than test results. On May 4, Guam adjusted cases down from 150 to 149 because they found that the case was double counted,  number of recovered was also adjusted down because 7 people were returned to isolation.\nGuam's counts include 11 people tested at the San Diego naval base.\nAs of May 25, Guam is reporting people tested.",
-         "name":"Guam"
+         "name":"Guam",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"HI",
@@ -139,7 +152,8 @@
          "twitter":"@HIgov_Health",
          "pui":"Only positives",
          "notes":"Data now pulled from their [new Dashboard Project](https://www.hawaiidata.org/covid19).\nAs of May 16, Hawaii is reporting people tested\nOn May 23, Hawaii revised down 5 cases due to updated testing information.\nOn May 25, Hawaii revised down 1 cumulative hospitalization patient.\nOn June 5, Hawaii revised down 1 case released from isolation.\nAs of June 1, Hawaii started reporting total number of unique people tested. Total tests might be impacted",
-         "name":"Hawaii"
+         "name":"Hawaii",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"IA",
@@ -149,7 +163,8 @@
          "twitter":"@IAPublicHealth",
          "pui":"All data",
          "notes":"Not all commercial labs report negatives to Iowa, as per their guidance. As of April 27, Iowa is reporting people tested.\nAs of May 19, Iowa is separating out the numbers of people tested with PCR and antibody tests; we report the number of people tested with PCR. Total testing numbers might be impacted.",
-         "name":"Iowa"
+         "name":"Iowa",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"ID",
@@ -159,7 +174,8 @@
          "twitter":"@IDHW",
          "pui":"All data",
          "notes":"Negative = Totals - Positives.  Positives sometimes update before totals do. \nTotal includes Oregon residents tested in Idaho.  As of April 9, Idaho separately reports both probable and confirmed cases. Idaho reports test counts in specimens. On June 5, Idaho received a large batch of previously unreported tests.",
-         "name":"Idaho"
+         "name":"Idaho",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"IL",
@@ -168,7 +184,8 @@
          "twitter":"@IDPH",
          "pui":"All data",
          "notes":"Illinois counts deaths in positives. \nAs of May 25, Illinois is reporting PCR specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested. On 6/17/2020, IL reported no change in probable cases and deaths.",
-         "name":"Illinois"
+         "name":"Illinois",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"IN",
@@ -177,7 +194,8 @@
          "twitter":"@statehealthin",
          "pui":"Only positives",
          "notes":"Negative = Total – Positive. Negatives are a lower bound, and may not include all private labs.",
-         "name":"Indiana"
+         "name":"Indiana",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"KS",
@@ -187,7 +205,8 @@
          "twitter":"@kdhe",
          "pui":"All data",
          "notes":"On April 23rd, Kansas reported 112 deaths.  On April 24th, they revised this down to 111 deaths.\nAs of May 7, 2020, confirmed and probable cases are included in the case totals.",
-         "name":"Kansas"
+         "name":"Kansas",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"KY",
@@ -197,7 +216,8 @@
          "twitter":"@CHFSKy",
          "pui":"All data",
          "notes":"Negative = Total - Positive.\nPositives sometimes update before totals do; when this happens, we keep the last calculated negative. As of April 27, Kentucky is reporting people tested.\nOn May 23, KY revised down the total number of tests.\nAs of May 27, KY started separating serology tests from PCR. This might cause the number of total tests to go down compared to the previous day",
-         "name":"Kentucky"
+         "name":"Kentucky",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"LA",
@@ -206,7 +226,8 @@
          "twitter":"@LADeptHealth",
          "pui":"Only positives",
          "notes":"Total = State Lab + Commercial Lab, Negative = Total - Positive\nFrom 4/20 through 4/24 LA paused reporting commercial testing data to do a review of the data. On 6/18 a notice on LA dashboard said \"LDH is reviewing all data and will not be updating its dashboard today.\"",
-         "name":"Louisiana"
+         "name":"Louisiana",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MA",
@@ -215,7 +236,8 @@
          "twitter":"@massdph",
          "pui":"Only positives",
          "notes":"Positives include results from the CDC. Total tested includes repeat testing on individuals. State lab numbers are as of 8 am, other lab numbers are as of 11:30 am. Commercial lab numbers are subject to change. As of April 20, Cumulative Hospitalized + ICU includes both confirmed and suspected cases.",
-         "name":"Massachusetts"
+         "name":"Massachusetts",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MD",
@@ -224,7 +246,8 @@
          "twitter":"@MDHealthDept",
          "pui":"All data",
          "notes":"Didn't report negatives between 3/12 and 3/28.",
-         "name":"Maryland"
+         "name":"Maryland",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"ME",
@@ -233,7 +256,8 @@
          "twitter":"@mainedhhs",
          "pui":"Only positives",
          "notes":"As of May 13, Maine is reporting total specimens tested; this number is updated once a week on Wednesdays. Because some people may be tested more than once, this number is probably higher than the number of people tested.\nAs of May 20, Maine is separating out PCR tests and antibody tests; we report the number of PCR tests. Total testing numbers might be impacted.",
-         "name":"Maine"
+         "name":"Maine",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MI",
@@ -243,7 +267,8 @@
          "twitter":"@MichiganHHS",
          "pui":"All data",
          "notes":"Michigan has reported each day's negative results since 3/10 but has never totaled them. We sum all the negative results and report the total. Michigan reports specimens tested instead of people tested. \nRecovered counts are updated once a week. \nAs of May 16, Michigan uses 'total specimens' reported on lab testing page\nAs of May 23, Michigan is separating out antibody and PCR tests; we report the number of PCR tests. Total testing numbers might be impacted. As of June 5, positives include both confirmed and probable cases of COVID-19, as reported by the Michigan Department of Health & Human Services.\nOn 6/11 MI DDHS provided an XLS with historical time series and we updated our data  to reflect the correct dates of probable and confirmed cases and deaths. ",
-         "name":"Michigan"
+         "name":"Michigan",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MN",
@@ -252,7 +277,8 @@
          "twitter":"@mnhealth",
          "pui":"All data",
          "notes":"Since March 23, Negative = Total - Positive.\nAs of June 5, Minnesota reports specimens tested; because some people may be tested more than once, this number may be higher than the number of people tested.",
-         "name":"Minnesota"
+         "name":"Minnesota",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MO",
@@ -262,7 +288,8 @@
          "twitter":"@HealthyLivingMo",
          "pui":"Only positives",
          "notes":"Negative = Total - Positive. As of April 27, Missouri is reporting people tested.\nAs of May 22, Missouri is separating out the numbers of people tested with PCR and antibody tests; we report the number of people tested with PCR tests. Total tests might be impacted.",
-         "name":"Missouri"
+         "name":"Missouri",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MP",
@@ -271,7 +298,8 @@
          "twitter":"@cnmichcc",
          "pui":"No Data",
          "notes":"As of May 16, Northern Mariana Islands is reporting specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested",
-         "name":"Norther Marianas"
+         "name":"Norther Marianas",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MS",
@@ -280,7 +308,8 @@
          "twitter":"@msdh",
          "pui":"Only positives",
          "notes":"Negatives = Total - Positives.\nHospitalizations are calculated by calculating multiplying % of hospitalized times total cases, pending clarification from the state. Recoveries are estimated, and updated twice weekly.\nAs of May 23, Mississippi is separating out PCR and antibody tests; we report PCR specimens tested. Total tests might be impacted. Mississippi notes that hospitalization data for May 23 is incomplete.\nOn June 11th, due to a technicall issue, Mississippi did not provide new updates",
-         "name":"Mississippi"
+         "name":"Mississippi",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"MT",
@@ -290,7 +319,8 @@
          "twitter":"@dphhsmt",
          "pui":"All data",
          "notes":"Negative = Total - Positive.  The dashboard says that the data \"as-of\" is from the day previous - in this case we use current date + time = 0:00 On 6/17/2020 Cumulative Hospitalizations reported by Montana decreased from 79 to 78 with no explanation.",
-         "name":"Montana"
+         "name":"Montana",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NC",
@@ -299,7 +329,8 @@
          "twitter":"@ncdhhs",
          "pui":"Only positives",
          "notes":"Negative = Total tests* - total positives (where total tests include all data from public labs and partial data from hospital and commercial labs).",
-         "name":"North Carolina"
+         "name":"North Carolina",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"ND",
@@ -308,7 +339,8 @@
          "twitter":"@NDDOH",
          "pui":"All data",
          "notes":"As of May 2, North Dakota is reporting people tested.",
-         "name":"North Dakota"
+         "name":"North Dakota",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NE",
@@ -317,7 +349,8 @@
          "twitter":"@NEDHHS",
          "pui":"All data",
          "notes":"The count of 56 on 4/27 included a death erroneously entered into NE’s electronic system. NE removed it from the total count on 4/28\nWe do not currently track it, but partial hospitalization data are available from [Douglas County](https://dogis.maps.arcgis.com/apps/opsdashboard/index.html#/21bec056a9a6449abcca89a329868fd6)",
-         "name":"Nebraska"
+         "name":"Nebraska",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NH",
@@ -327,7 +360,8 @@
          "twitter":"@NHPubHealth",
          "pui":"All data",
          "notes":"On May 4, New Hampshire revised the recovered down from 1107 to 1017. Negative count is from the four largest labs. Pending count is from the Public Health Laboratories only. As of April 27, New Hampshire is reporting people tested.\nAs of May 25, New Hampshire is separating out the numbers of people tested with PCR and antibody tests; we report the number of people tested with PCR tests.\nOn June 13, New Hampshire revised its hospitalizations down from 504 to 503, removing cases that were not New Hampshire residents.",
-         "name":"New Hampshire"
+         "name":"New Hampshire",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NJ",
@@ -337,7 +371,8 @@
          "twitter":"@NJDeptofHealth",
          "pui":"All data",
          "notes":"Positive count includes deaths. Hospitalization + ICU counts include both positive cases and persons under investigation. As of May 11, New Jersey is reporting total PCR specimens tested.\nOn May 16, New Jersey had a significant jump in recovered (about 7,000) due to backfilling previous days after a shift in how this figure was reported on April 28.",
-         "name":"New Jersey"
+         "name":"New Jersey",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NM",
@@ -346,7 +381,8 @@
          "twitter":"@NMDOH",
          "pui":"All data",
          "notes":"[Hospitalization from NMDH](https://cv.nmhealth.org/newsroom/). Hospitalization count is people in New Mexico hospitals: it includes people who tested positive out of state but are hospitalized in New Mexico, and excludes New Mexicans who tested positive in state and transferred to a hospital out of state. As of April 27, New Mexico is reporting people tested. On 5/28 NM reported ~1100 less tests than the day before. We're unsure of the reason.",
-         "name":"New Mexico"
+         "name":"New Mexico",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NV",
@@ -356,7 +392,8 @@
          "twitter":"@dhhsnevada",
          "pui":"All data",
          "notes":"Individual data fields have different update times; we use the latest as our \"Last Update\" time. Hospitalizations, ICU bed usage, and ventilator usage are reported as a percentage of total capacity in daily situation reports, but total capacity is not published, so we do not estimate those numbers. As of May 6, Nevada is reporting both specimens and people tested. We report positives and negatives based on the number of people tested. ",
-         "name":"Nevada"
+         "name":"Nevada",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"NY",
@@ -366,7 +403,8 @@
          "twitter":"@healthnygov",
          "pui":"Only positives",
          "notes":"Numbers come from [press conference](https://www.governor.ny.gov). \nRecovered = discharged. As of April 27, New York is reporting people tested. Cumulative hospitalized and recovered are calculated using the 3 day average change in hospitalization benchmarked from April 12.\nThere is a significant gap between deaths reported by New York City and New York State. As of 6/1, the difference between the state reported deaths, which we use, and the NYC deaths was 5740",
-         "name":"New York"
+         "name":"New York",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"OH",
@@ -376,7 +414,8 @@
          "twitter":"@OHdeptofhealth",
          "pui":"All data",
          "notes":"Ohio now publishes detailed [Key Metrics](https://coronavirus.ohio.gov/wps/portal/gov/covid-19/dashboards/key-metrics/cases)",
-         "name":"Ohio"
+         "name":"Ohio",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"OK",
@@ -385,7 +424,8 @@
          "twitter":"@HealthyOklahoma",
          "pui":"All data",
          "notes":"[Executive Order Reports](https://coronavirus.health.ok.gov/executive-order-reports)\nfirst reported [comprehensive test results](https://coronavirus.health.ok.gov/articles/new-data-private-labs-show-tenfold-increase-covid-19-tests-administered-oklahoma-dating) on 4/6. We exclude \"Positive (Out-of-State)\" results, as we assume these are isolated outside the state.\nAs of April 27, Oklahoma is reporting specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested.\nDue to differences in reporting, the number of negative tests might include inconclusive tests",
-         "name":"Oklahoma"
+         "name":"Oklahoma",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"OR",
@@ -395,7 +435,8 @@
          "twitter":"@OHAOregon",
          "pui":"All data",
          "notes":"Total includes Oregon & Montana residents tested in Idaho. As of April 27, Oregon is reporting people tested. \nFor June 15, we report deaths, cases and negatives from Oregon’s press release from [June 14](https://www.oregon.gov/oha/ERD/Pages/Oregon-reports-101-new-confirmed-presumptive-COVID-19-cases-2-new-deaths.aspx).",
-         "name":"Oregon"
+         "name":"Oregon",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"PA",
@@ -405,7 +446,8 @@
          "twitter":"@PAHealthDept",
          "pui":"Only positives",
          "notes":"County level data may differ from the state totals. We are not adding deaths back into positives. On 4/27, Pennsylvania revised down its total deaths from 1,622 to 1,421 to exclude some probable deaths that needed further confirmation to be linked to COVID 19.",
-         "name":"Pennsylvania"
+         "name":"Pennsylvania",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"PR",
@@ -415,7 +457,8 @@
          "twitter":"@DeptSaludPR",
          "pui":"No Data",
          "notes":"Death counts include both confirmed and presumed COVID deaths.\nWhen it is reported, we add inconclusive results to pending.\nPositive counts reflect individual who test positive, combining both PCR and antibody.\nOn 4/22 Puerto Rico revised down its positive count from 1,298 to 915 to exclude double-counted cases.",
-         "name":"Puerto Rico"
+         "name":"Puerto Rico",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"RI",
@@ -424,7 +467,8 @@
          "twitter":"@rihealth",
          "pui":"All data",
          "notes":"Recovered numbers are from hospital discharges.",
-         "name":"Rhode Island"
+         "name":"Rhode Island",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"SC",
@@ -434,7 +478,8 @@
          "twitter":"@scdhec",
          "pui":"All data",
          "notes":"Hospitalization and Recovery Rate come from demographic data released every Tuesday and Friday afternoon.\nAs of May 22, South Carolina is reporting specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested.\nAs of June 11, South Carolina is separating out PCR and antibody tests; we report the number of PCR tests. Total tests might be impacted.",
-         "name":"South Carolina"
+         "name":"South Carolina",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"SD",
@@ -442,7 +487,8 @@
          "covid19Site":"https://doh.sd.gov/news/Coronavirus.aspx",
          "twitter":"@SDDOH",
          "pui":"All data",
-         "name":"South Dakota"
+         "name":"South Dakota",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"TN",
@@ -452,7 +498,8 @@
          "twitter":"@TNDeptofHealth",
          "pui":"Only positives",
          "notes":"Tennessee now provides positive and negative test results from all laboratories. On April 5, the state reported a decline in recoveries. As of June 7, positives include both confirmed and probable cases of COVID-19 reported to or tested by the Tennessee Department of Health.",
-         "name":"Tennessee"
+         "name":"Tennessee",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"TX",
@@ -462,7 +509,8 @@
          "twitter":"@TexasDSHS",
          "pui":"Only positives",
          "notes":"As of May 16, Texas is reporting mostly specimens tested, except for the small number of tests performed by public labs, which are de-duplicated.\nAs of May 23, Texas is separating out PCR and antibody tests; we report the number of PCR tests. Total tests might be impacted. \nTX notes that \"The reported cases for June 16 include 2,622 new cases and 1,476 cases that were previously diagnosed among Texas Department of Criminal Justice inmates but that had not been reported by local health departments (887 from Anderson County and 589 from Brazoria County).\"",
-         "name":"Texas"
+         "name":"Texas",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"UT",
@@ -472,7 +520,8 @@
          "twitter":"@utahdepofhealth",
          "pui":"Only positives",
          "notes":"Positive count includes non-Utah residents. Negative = Total - Positive. According to the state, negative test results may lag for up to 72 hours, and recovered persons is estimated by cases whose first positive laboratory test was reported at least 21 days ago, excluding deaths. As of April 27, Utah is reporting people tested. As of June 11, Utah reports a combined case count for total intubated patients and patients on a ventilator. We report this figure as cumulative on ventilator.",
-         "name":"Utah"
+         "name":"Utah",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"VA",
@@ -482,7 +531,8 @@
          "twitter":"@vdhgov",
          "pui":"Positives + Negatives",
          "notes":"Virginia hospitalization statistics from [Hospital dashboard](https://www.vhha.com/communications/virginia-hospital-covid-19-data-dashboard/)  We assume the count \"hospitalized in the ICU\" includes the count \"currently on a ventilator.\" Cumulative Hospitalized is computed from currently hospitalized + discharged on the Virginia Hospitals dashboard. \nAs of May 15, Virginia is reporting specimens tested; including both a value for PCR tests only and all tests (PCR and antibody tests combined). We report the number of PCR tests. Total tests may be impacted.",
-         "name":"Virginia"
+         "name":"Virginia",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"VI",
@@ -492,7 +542,8 @@
          "twitter":"@usvidoh",
          "pui":"Positives Only",
          "notes":"Virgin Islands: Positive, Negative, and Pending provided. ",
-         "name":"Virgin Islands"
+         "name":"Virgin Islands",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"VT",
@@ -501,7 +552,8 @@
          "twitter":"@healthvermont",
          "pui":"Positives + Negatives",
          "notes":"Negative = (Total Tested - Positives). VT reports both Currently Hospitalized (implicitly, confirmed cases only) and Hospitalized Under Investigation. For Currently Hospitalized, we sum these two numbers. As of May 2, Vermont is reporting people tested.\nBetween May 15 and May 16, Vermont decreased their total tests by about 1,000; as of May 16 it is unclear if this was a typo or a revision of a previously preliminary count.",
-         "name":"Vermont"
+         "name":"Vermont",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"WA",
@@ -511,7 +563,8 @@
          "twitter":"@WADeptHealth",
          "pui":"Positives + Negatives",
          "notes":"Washington reports confirmed cases, laboratory tests, and deaths as of the previous day. WA did not report new negative test results between March 31 and April 15.\nOn April 18, data cleaning removed 190 confirmed cases that were discovered to be out of state residents tested in WA labs. As of April 27, Washington is reporting people tested. On June 18, due to a previous mistake in reporting negative cases, Washington state revised down the total number of tests. Additionally, Washington state also plans to re-adjust their total death numbers due to a standard adjustment",
-         "name":"Washington"
+         "name":"Washington",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"WI",
@@ -520,7 +573,8 @@
          "twitter":"@DHSWI",
          "pui":"All data",
          "notes":"Negatives include only Wisconsin residents whose negative test results were reported electronically to DHS. This underestimates total negative test results. \nDeaths must be reported by health providers or coroners, and recorded by local health departments, to be counted. As of April 27, Wisconsin is reporting people tested. \nOn March 30, WI revised down negatives from 16550 to 15856.",
-         "name":"Wisconsin"
+         "name":"Wisconsin",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"WV",
@@ -529,7 +583,8 @@
          "twitter":"@WV_DHHR",
          "pui":"All data",
          "notes":"Negatives = Totals - Positives. As of April 16, WV reports hospitalization + ICU + ventilator counts from 49 of 55 counties. Before April 16, those counts were unreliable -- based on reported percentages of completed investigations, an unpublished number.\nAs of May 23, West Virginia is separating out PCR and antibody tests; we report the number of PCR tests. Total tests might be impacted. ",
-         "name":"West Virginia"
+         "name":"West Virginia",
+         "totalTestResultsFieldDbColumn":"posNeg"
       },
       {
          "state":"WY",
@@ -539,7 +594,8 @@
          "twitter":"@health_wyoming",
          "pui":"No data",
          "notes":"Negatives = Total - Positive.\nThe week of April 6, WY began separating confirmed & suspected cases; we now report only confirmed. From April 7 to April 13, our recovered count may be slightly high, as WY combined recovered confirmed cases + recovered probable cases. On April 22, total tests were revised down, resulting in a decrease in negatives. As of April 28, we are including the suspected cases with the confirmed cases.\nAs of May 16, Wyoming is reporting specimens tested. Because some people may be tested more than once, this number is probably higher than the number of people tested",
-         "name":"Wyoming"
+         "name":"Wyoming",
+         "totalTestResultsFieldDbColumn":"posNeg"
       }
    ],
    "coreData":[

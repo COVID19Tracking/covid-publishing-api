@@ -68,7 +68,7 @@ def test_post_core_data(app, headers):
 
 def test_post_core_data_updating_state(app, headers):
     with app.app_context():
-        nys = State(state='AK', name='Alaska')
+        nys = State(state='AK', name='Alaska', totalTestResultsFieldDbColumn='totalTestsViral')
         db.session.add(nys)
         db.session.commit()
 
@@ -76,7 +76,7 @@ def test_post_core_data_updating_state(app, headers):
         assert len(states) == 1
         state = states[0]
         assert state.state == 'AK'
-        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02'}
+        assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02', 'totalTestResultsFieldDbColumn': 'totalTestsViral'}
 
     client = app.test_client()
     resp = client.get('/api/v1/public/states/info')
@@ -98,6 +98,8 @@ def test_post_core_data_updating_state(app, headers):
     resp = client.get('/api/v1/public/states/info')
     assert resp.json[0]['state'] == "AK"
     assert resp.json[0]['twitter'] == "@Alaska_DHSS"
+    # and setting totalTestResultsFieldDbColumn
+    assert resp.json[0]['totalTestResultsFieldDbColumn'] == "totalTestEncountersViral"
 
 
 def test_get_batches(app):

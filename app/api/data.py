@@ -105,7 +105,8 @@ def edit_state_metadata():
     state_objects = []
     for state_dict in state_dicts:
         state_pk = state_dict['state']
-        if db.session.query(State).get(state_pk) is None:
+        state_obj = db.session.query(State).get(state_pk)
+        if state_obj is None:
             err = '/states/edit payload trying to edit nonexistent state: %s' % state_pk
             flask.current_app.logger.error(err)
             notify_slack_error(err, 'edit_state_metadata')
@@ -113,6 +114,8 @@ def edit_state_metadata():
 
         flask.current_app.logger.info('Updating state row from info: %s' % state_dict)
         db.session.query(State).filter_by(state=state_pk).update(state_dict)
+        # this method of updating does not trigger validators, so validate manually
+        state_obj.validate_totalTestResultsFieldDbColumn(None, state_obj.totalTestResultsFieldDbColumn)
         state_objects.append(db.session.query(State).get(state_pk))  # return updated state
 
     db.session.flush()
@@ -156,10 +159,13 @@ def post_core_data_json(payload):
     state_objects = []
     for state_dict in state_dicts:
         state_pk = state_dict['state']
-        if db.session.query(State).get(state_pk) is not None:
+        state_obj = db.session.query(State).get(state_pk)
+        if state_obj is not None:
             flask.current_app.logger.info('Updating state row from info: %s' % state_dict)
             db.session.query(State).filter_by(state=state_pk).update(state_dict)
-            state_objects.append(db.session.query(State).get(state_pk))  # return updated state
+            # this method of updating does not trigger validators, so validate manually
+            state_obj.validate_totalTestResultsFieldDbColumn(None, state_obj.totalTestResultsFieldDbColumn)
+            state_objects.append(state_obj)  # return updated state
         else:
             flask.current_app.logger.info('Creating new state row from info: %s' % state_dict)
             state = State(**state_dict)
@@ -349,6 +355,7 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
             # store the changes
             db.session.add(edited_core_data)
             core_data_objects.append(edited_core_data)
+            db.session.flush()
             flask.current_app.logger.info('Adding new edit row: %s' % edited_core_data.to_dict())
         else:
             # there were no changes

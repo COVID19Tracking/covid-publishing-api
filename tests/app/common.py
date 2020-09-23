@@ -6,8 +6,8 @@ YESTERDAY = date(2020, 5, 24)
 TODAY = date(2020, 5, 25)
 NOW = pytz.utc.localize(datetime.now())
 
-NY = {"state": "NY"}
-WA = {"state": "WA"}
+NY = {"state": "NY", "totalTestResultsFieldDbColumn": "posNeg"}
+WA = {"state": "WA", "totalTestResultsFieldDbColumn": "posNeg"}
 
 NY_TODAY = {
     "state": "NY",

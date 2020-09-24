@@ -58,6 +58,7 @@ def get_batch_by_id(id):
 
 @api.route('/batches/<int:id>/publish', methods=['POST'])
 @jwt_required
+@notify_webhook
 @exceptions_to_slack
 def publish_batch(id):
     flask.current_app.logger.info('Received request to publish batch %d' % id)
@@ -72,10 +73,6 @@ def publish_batch(id):
     db.session.add(batch)
     db.session.commit()
 
-    res = notify_webhook()
-    if res is not None and (not res or res.status_code != 200):
-        notify_slack_error(f"Failed webhook on batch #{id}", "publish_batch")
-
     notify_slack(f"*Published batch #{id}* (type: {batch.dataEntryType})\n"
                  f"{batch.batchNote}")
 
@@ -89,6 +86,7 @@ def publish_batch(id):
 
 @api.route('/states/edit', methods=['POST'])
 @jwt_required
+@notify_webhook
 @exceptions_to_slack
 def edit_state_metadata():
     payload = flask.request.json
@@ -233,6 +231,7 @@ def any_existing_rows(state, date):
 
 @api.route('/batches/edit', methods=['POST'])
 @jwt_required
+@notify_webhook
 @exceptions_to_slack
 def edit_core_data():
     flask.current_app.logger.info('Received a CoreData edit request')
@@ -253,6 +252,7 @@ def edit_core_data():
 
 @api.route('/batches/edit_states_daily', methods=['POST'])
 @jwt_required
+@notify_webhook
 @exceptions_to_slack
 def edit_core_data_from_states_daily():
     payload = flask.request.json

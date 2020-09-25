@@ -68,6 +68,8 @@ def get_states_csv():
                CSVColumn(label="COVID-19 site", model_column="covid19Site"),
                CSVColumn(label="COVID-19 site (secondary)", model_column="covid19SiteSecondary"),
                CSVColumn(label="COVID-19 site (tertiary)", model_column="covid19SiteTertiary"),
+               CSVColumn(label="COVID-19 site (quaternary)", model_column="covid19SiteQuaternary"),
+               CSVColumn(label="COVID-19 site (quinary)", model_column="covid19SiteQuinary"),
                CSVColumn(label="Twitter", model_column="twitter"),
                CSVColumn(label="Notes", model_column="notes"),
                CSVColumn(label="COVID Tracking Project preferred total test units",

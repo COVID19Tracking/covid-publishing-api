@@ -107,6 +107,9 @@ class State(db.Model, DataMixin):
     covid19SiteOld = db.Column(db.String)
     covid19SiteSecondary = db.Column(db.String)
     covid19SiteTertiary = db.Column(db.String)
+    covid19SiteQuaternary = db.Column(db.String)
+    covid19SiteQuinary = db.Column(db.String)
+
     twitter = db.Column(db.String)
     notes = db.Column(db.String)
     pui = db.Column(db.String)

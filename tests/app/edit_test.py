@@ -10,7 +10,7 @@ from common import *
 import datetime
 
 
-def test_edit_state_metadata(app, headers):
+def test_edit_state_metadata(app, headers, requests_mock):
     client = app.test_client()
 
     # write some initial data
@@ -38,6 +38,10 @@ def test_edit_state_metadata(app, headers):
             'twitter': 'AlaskaNewTwitter'
         }]
     }
+    # ensure the webhook is called on edit
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
     resp = client.post(
         "/api/v1/states/edit",
         data=json.dumps(state_data),
@@ -47,9 +51,10 @@ def test_edit_state_metadata(app, headers):
     assert len(resp.json['states']) == 1
     assert resp.json['states'][0]['state'] == "AK"
     assert resp.json['states'][0]['twitter'] == "AlaskaNewTwitter"
+    assert requests_mock.call_count == 1
 
 
-def test_edit_core_data(app, headers, slack_mock):
+def test_edit_core_data(app, headers, slack_mock, requests_mock):
     client = app.test_client()
 
     # Write a batch containing the above data, two days for NY and WA, publish it
@@ -68,6 +73,10 @@ def test_edit_core_data(app, headers, slack_mock):
     assert slack_mock.chat_postMessage.call_count == 2
 
     # make an edit batch for NY for yesterday
+    # ensure the webhook is called on edit
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
     resp = client.post(
         "/api/v1/batches/edit",
         data=json.dumps(edit_push_ny_yesterday()),
@@ -75,6 +84,7 @@ def test_edit_core_data(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
+    assert requests_mock.call_count == 1
     batch_id = resp.json['batch']['batchId']
     assert resp.json['batch']['user'] == 'testing'
 
@@ -109,7 +119,7 @@ def test_edit_core_data(app, headers, slack_mock):
             assert day_data['positive'] == 16
             assert day_data['negative'] == 4
 
-def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
+def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock, requests_mock):
     client = app.test_client()
 
     # Write a batch containing the above data, two days for NY and WA, publish it
@@ -128,6 +138,10 @@ def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
     assert slack_mock.chat_postMessage.call_count == 2
 
     # make an empty edit batch for NY for yesterday containing no edits
+    # ensure the webhook is not called because the edit fails
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
     resp = client.post(
         "/api/v1/batches/edit_states_daily",
         data=json.dumps(edit_push_ny_today_empty()),
@@ -136,10 +150,11 @@ def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock):
 
     assert resp.status_code == 400
     assert slack_mock.chat_postMessage.call_count == 2  # logging unchanged edit to Slack
+    assert requests_mock.call_count == 0  # should not call the webhook
     assert "no edits detected" in resp.data.decode("utf-8")
 
 
-def test_edit_core_data_from_states_daily(app, headers, slack_mock):
+def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_mock):
     client = app.test_client()
 
     # Write a batch containing the above data, two days for NY and WA, publish it
@@ -159,6 +174,10 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert slack_mock.files_upload.call_count == 0
 
     # make an edit batch for NY for yesterday, and leave today alone
+    # ensure the webhook is not called because the edit fails
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
     resp = client.post(
         "/api/v1/batches/edit_states_daily",
         data=json.dumps(edit_push_ny_yesterday_unchanged_today()),
@@ -167,6 +186,7 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock):
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 3
     assert slack_mock.files_upload.call_count == 1
+    assert requests_mock.call_count == 1
     assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
     assert "Rows edited: 1" in slack_mock.files_upload.call_args[1]['content']
     assert "NY 2020-05-24" in slack_mock.files_upload.call_args[1]['content']

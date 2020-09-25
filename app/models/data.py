@@ -243,13 +243,18 @@ class CoreData(db.Model, DataMixin):
             return None
 
     @hybrid_property
+    def totalTestResultsSource(self):
+        """The source column used to calculate totalTestResults, equal to the state's totalTestResultsFieldDbColumn"""
+        return self.state_obj.totalTestResultsFieldDbColumn
+
+    @hybrid_property
     def totalTestResults(self):
         """Calculated value of total test results
 
         This value is determined based on the state's totalTestResultsFieldDbColumn, with empty cells converted to 0.
         If a CoreData column name is specified, that column will be used for totalTestResults.
         Alternatively, the 'posNeg' keyword can be used to indicate totalTestResults = (positive+negative)"""
-        column = self.state_obj.totalTestResultsFieldDbColumn
+        column = self.totalTestResultsSource
 
         if column == 'posNeg':  # posNeg: calculated value (positive + negative) of total test results.
             if self.negative is None:

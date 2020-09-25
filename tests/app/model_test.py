@@ -122,6 +122,7 @@ def test_total_test_results(app):
         db.session.commit()
 
         # test posNeg behavior
+        assert core_data_row.totalTestResultsSource == 'posNeg'
         assert core_data_row.totalTestResults == 0
         core_data_row.positive = 25
         assert core_data_row.totalTestResults == 25
@@ -134,6 +135,7 @@ def test_total_test_results(app):
         # now set the state to use a column for totalTestResultsFieldDbColumn
         nys.totalTestResultsFieldDbColumn = 'totalTestEncountersViral'
         db.session.commit()
+        assert core_data_row.totalTestResultsSource == 'totalTestEncountersViral'
         assert core_data_row.totalTestResults == 0
         core_data_row.totalTestEncountersViral = 55
         assert core_data_row.totalTestResults == 55
@@ -143,6 +145,7 @@ def test_total_test_results(app):
 
         nys.totalTestResultsFieldDbColumn = 'totalTestsViral'
         db.session.commit()
+        assert core_data_row.totalTestResultsSource == 'totalTestsViral'
         assert core_data_row.totalTestResults == 0
         core_data_row.totalTestsViral = 75
         assert core_data_row.totalTestResults == 75

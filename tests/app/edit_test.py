@@ -211,6 +211,13 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_moc
         assert batch_obj.user == 'testing'
         assert batch_obj.logCategory == 'State Updates'
 
+        # make sure metadata got saved correctly also. This should match the above test cases
+        # in the returned JSON
+        assert 'positive' in batch_obj.changedFields
+        assert 'inIcuCurrently' in batch_obj.changedFields
+        assert batch_obj.changedDates == '5/24/20'
+        assert batch_obj.numRowsEdited == 1
+
     # getting the states daily for NY has the edited data for yesterday and unchanged for today,
     # and the last batch should've been published as part of the "edit from states daily" endpoint
     resp = client.get("/api/v1/public/states/NY/daily")

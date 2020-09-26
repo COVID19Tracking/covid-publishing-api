@@ -49,8 +49,15 @@ class Batch(db.Model, DataMixin):
     link = db.Column(db.String)
     user = db.Column(db.String)
 
+    # these fields are only relevant for an edit batch
+    changedFields = db.Column(db.String)
+    changedDates = db.Column(db.String)
+    numRowsEdited = db.Column(db.Integer)
+
     # false if preview state, true if live
     isPublished = db.Column(db.Boolean, nullable=False)
+
+    # false if part of a regular data push, true if came in through an edit API endpoint
     isRevision = db.Column(db.Boolean, nullable=False)
 
     coreData = relationship('CoreData', backref='batch')

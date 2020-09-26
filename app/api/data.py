@@ -372,11 +372,18 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
 
         return 'Data is unchanged: no edits detected', 400
 
+    batch.changedFields = diffs.changed_fields
+    batch.changedDates = diffs.changed_dates_str
+    batch.numRowsEdited = diffs.size()
+    db.session.flush()
+
+    # TODO: change consumer of this response to use the changedFields, changedDates, numRowsEdited
+    # from the "batch" object, then remove those keys from the JSON response
     json_to_return = {
         'batch': batch.to_dict(),
-        'changedFields': diffs.changed_fields,
-        'changedDates': diffs.changed_dates_str,
-        'numRowsEdited': diffs.size(),
+        'changedFields': batch.changedFields,
+        'changedDates': batch.changedDates,
+        'numRowsEdited': batch.numRowsEdited,
         'user': get_jwt_identity(),
         'coreData': [core_data.to_dict() for core_data in core_data_objects],
     }
@@ -384,7 +391,6 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
     db.session.commit()
 
     # collect all the diffs for the edits we've made and format them for a slack notification
-
     diffs_for_slack = diffs.plain_text_format()
 
     notify_slack(

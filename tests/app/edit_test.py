@@ -21,7 +21,7 @@ def test_edit_state_metadata(app, headers, requests_mock):
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,
-        content_type='application/json', 
+        content_type='application/json',
         headers=headers)
     assert resp.status_code == 201
 
@@ -45,7 +45,7 @@ def test_edit_state_metadata(app, headers, requests_mock):
     resp = client.post(
         "/api/v1/states/edit",
         data=json.dumps(state_data),
-        content_type='application/json', 
+        content_type='application/json',
         headers=headers)
     assert resp.status_code == 201
     assert len(resp.json['states']) == 1
@@ -215,7 +215,8 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_moc
         # in the returned JSON
         assert 'positive' in batch_obj.changedFields
         assert 'inIcuCurrently' in batch_obj.changedFields
-        assert batch_obj.changedDates == '5/24/20'
+        assert batch_obj.changedDatesMin == datetime.date(2020,5,24)
+        assert batch_obj.changedDatesMax == datetime.date(2020,5,24)
         assert batch_obj.numRowsEdited == 1
 
     # getting the states daily for NY has the edited data for yesterday and unchanged for today,

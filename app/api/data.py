@@ -373,7 +373,6 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
         return 'Data is unchanged: no edits detected', 400
 
     batch.changedFields = diffs.changed_fields
-    batch.changedDates = diffs.changed_dates_str
     batch.numRowsEdited = diffs.size()
     db.session.flush()
 
@@ -382,7 +381,7 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
     json_to_return = {
         'batch': batch.to_dict(),
         'changedFields': batch.changedFields,
-        'changedDates': batch.changedDates,
+        'changedDates': diffs.changed_dates_str,
         'numRowsEdited': batch.numRowsEdited,
         'user': get_jwt_identity(),
         'coreData': [core_data.to_dict() for core_data in core_data_objects],

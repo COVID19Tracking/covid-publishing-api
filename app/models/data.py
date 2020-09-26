@@ -51,7 +51,6 @@ class Batch(db.Model, DataMixin):
 
     # these fields are only relevant for an edit batch
     changedFields = db.Column(db.String)
-    changedDates = db.Column(db.String)
     numRowsEdited = db.Column(db.Integer)
 
     # false if preview state, true if live
@@ -61,6 +60,18 @@ class Batch(db.Model, DataMixin):
     isRevision = db.Column(db.Boolean, nullable=False)
 
     coreData = relationship('CoreData', backref='batch')
+
+    @hybrid_property
+    def changedDatesMin(self):
+        if not self.coreData:
+            return None
+        return min(d.date for d in self.coreData)
+
+    @hybrid_property
+    def changedDatesMax(self):
+        if not self.coreData:
+            return None
+        return max(d.date for d in self.coreData)
 
     # This method isn't used when the object is read from the DB; only when a new one is being
     # created, as from a POST JSON payload.

@@ -180,7 +180,6 @@ class CoreData(db.Model, DataMixin):
     death = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
     deathProbable = db.Column(db.Integer, info={"includeInUSDaily": True})
-    positiveConfirmed = db.Column(db.Integer, info={"includeInUSDaily": True})
     probableCases = db.Column(db.Integer, info={"includeInUSDaily": True})
 
     # PCR/viral fields

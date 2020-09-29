@@ -147,7 +147,6 @@ def get_states_daily_csv():
             CSVColumn(label="Deaths (confirmed)", model_column="deathConfirmed"),
             CSVColumn(label="Deaths (probable)", model_column="deathProbable"),
             CSVColumn(label="Total PCR Tests (People)", model_column="totalTestsPeopleViral"),
-            CSVColumn(label="Total Test Results", model_column=None, blank=True),
             CSVColumn(label="Probable Cases", model_column="probableCases"),
             CSVColumn(label="Total Test Encounters (PCR)", model_column="totalTestEncountersViral"),
             CSVColumn(label="Total Antibody Tests (People)", model_column="totalTestsPeopleAntibody"),
@@ -158,7 +157,9 @@ def get_states_daily_csv():
             CSVColumn(label="Negative Antigen Tests (People)", model_column="negativeTestsPeopleAntigen"),
             CSVColumn(label="Total Antigen Tests", model_column="totalTestsAntigen"),
             CSVColumn(label="Positive Antigen Tests", model_column="positiveTestsAntigen"),
-            CSVColumn(label="Negative Antigen Tests", model_column="negativeTestsAntigen")])
+            CSVColumn(label="Negative Antigen Tests", model_column="negativeTestsAntigen"),
+            CSVColumn(label="_posNeg", model_column=None, blank=True),
+            CSVColumn(label="Total Test Results", model_column="totalTestResults")])
 
     return make_csv_response(columns, reformatted_data)
 

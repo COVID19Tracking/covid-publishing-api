@@ -269,7 +269,7 @@ class CoreData(db.Model, DataMixin):
                 return self.negative or 0
             return self.positive + self.negative
         else:  # column is a coreData column, return its value, converting none to 0
-            value = getattr(self, column) or 0
+            value = getattr(self, column)
             return value
 
     # Converts the input to a string and returns parsed datetime.date object

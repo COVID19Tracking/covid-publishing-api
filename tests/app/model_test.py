@@ -136,16 +136,16 @@ def test_total_test_results(app):
         nys.totalTestResultsFieldDbColumn = 'totalTestEncountersViral'
         db.session.commit()
         assert core_data_row.totalTestResultsSource == 'totalTestEncountersViral'
-        assert core_data_row.totalTestResults == 0
+        assert core_data_row.totalTestResults is None
         core_data_row.totalTestEncountersViral = 55
         assert core_data_row.totalTestResults == 55
         core_data_row.totalTestEncountersViral = None
-        assert core_data_row.totalTestResults == 0
+        assert core_data_row.totalTestResults is None
         core_data_row.totalTestEncountersViral = 100
 
         nys.totalTestResultsFieldDbColumn = 'totalTestsViral'
         db.session.commit()
         assert core_data_row.totalTestResultsSource == 'totalTestsViral'
-        assert core_data_row.totalTestResults == 0
+        assert core_data_row.totalTestResults is None
         core_data_row.totalTestsViral = 75
         assert core_data_row.totalTestResults == 75

@@ -323,7 +323,8 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
 
         if unknown:
             # report unknown fields, we won't fail the request, but should at least log
-            flask.current_app.logger.warning('Got row with unknown field updates. %r' % core_data_dict)
+            flask.current_app.logger.warning('Got row with unknown field updates: %s. %r' % (
+                unknown, core_data_dict))
 
         # is there a date for this?
         # check that there exists at least one published row for this date/state

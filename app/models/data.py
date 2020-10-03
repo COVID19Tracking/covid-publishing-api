@@ -347,6 +347,8 @@ class CoreData(db.Model, DataMixin):
             if last_update_time.tzinfo is None:
                 raise ValueError(
                     'Expected a timezone with last update time: %s' % last_update_time)
+            # cleanup seconds, millis
+            last_update_time = last_update_time.replace(second=0, microsecond=0)
             kwargs['lastUpdateTime'] = last_update_time
 
         date_checked = kwargs.get('dateChecked')

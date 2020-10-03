@@ -326,8 +326,13 @@ class CoreData(db.Model, DataMixin):
             # we expect batch IDs to be different, skip comparing those
             if field == 'batchId':
                 continue
+            if field == 'lastUpdateTime':
+                # special casing for seconds
+                if self.lastUpdateEt != other.lastUpdateEt:
+                    diffs.append(ChangedValue(field='lastUpdateTime',
+                                              old=self.lastUpdateEt, new=other.lastUpdateEt))
             # for any other field, compare away
-            if field in dict_other and getattr(other, field) != getattr(self, field):
+            elif field in dict_other and getattr(other, field) != getattr(self, field):
                 old = getattr(self, field)
                 new = getattr(other, field)
                 diffs.append(ChangedValue(field=field, old=old, new=new))

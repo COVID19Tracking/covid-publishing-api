@@ -379,6 +379,56 @@ def test_edit_core_data_from_states_daily_partial_update(app, headers, slack_moc
     assert slack_mock.chat_postMessage.call_count == 3
     assert "no edits detected" in resp.data.decode("utf-8")
 
+
+def test_edit_core_data_with_stripped_seconds(app, headers, slack_mock):
+    '''Seconds are stripped when stored to DB, make sure that seconds are
+    not part of the comparison for "changed fields" and do not trigger an update
+    '''
+
+    # setup
+    client = app.test_client()
+
+    # prep
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
+
+    # test
+    # make an edit with the same data, updated lastUpdateTime with seconds
+    data = daily_push_ny_wa_two_days()
+    state = 'NY'
+    data["context"]["dataEntryType"] = "edit"
+    data["context"]['state'] = state
+    data['coreData'] = [x for x in data['coreData'] if x['state'] == state]
+    for x in data['coreData']:
+         x['lastUpdateTime'] = x.get('lastUpdateIsoUtc')
+         # I hope it's unlikely that he'll accidentally hit this time
+         x['lastUpdateTime'] = x['lastUpdateTime'][:17] + "12.456" + x['lastUpdateTime'][23:]
+
+    # make an edit with the same NY data, updated seconds in lastUpdateTime
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(data),
+        content_type='application/json',
+        headers=headers)
+
+    # verify
+    assert resp.status_code == 400
+    assert slack_mock.chat_postMessage.call_count == 2
+    assert "no edits detected" in resp.data.decode("utf-8")
+
+
 def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
     ''' Verify that when sending edit (or insert) requests without any fields
     that are part of the object the edit requests is rejected

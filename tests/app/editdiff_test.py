@@ -18,6 +18,7 @@ def test_editdiff(app):
         assert "CA 20200903" in output
         assert "positive: 456 (was 123)" in output
         assert "New rows" not in output
+        assert not output.startswith("\n")  # ensure no leading newlines
 
         nys = State(state='NY', totalTestResultsFieldDbColumn="posNeg")
         bat = Batch(batchNote='test', createdAt=datetime.now(),
@@ -26,15 +27,20 @@ def test_editdiff(app):
         db.session.add(nys)
         db.session.flush()
 
-        now_utc = datetime(2020, 5, 4, 20, 3, tzinfo=pytz.UTC)
+        date1 = datetime(2020, 5, 4, 20, 3, tzinfo=pytz.UTC)
         core_data_row = CoreData(
-            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
-            date=now_utc, state='NY', batchId=bat.batchId,
+            lastUpdateIsoUtc=date1.isoformat(), dateChecked=date1.isoformat(),
+            date=date1, state='NY', batchId=bat.batchId,
             positive=20, negative=5)
-        new_rows = [core_data_row]
+        date2 = datetime(2020, 5, 5, 20, 3, tzinfo=pytz.UTC)
+        core_data_row2 = CoreData(
+            lastUpdateIsoUtc=date2.isoformat(), dateChecked=date2.isoformat(),
+            date=date2, state='NY', batchId=bat.batchId,
+            positive=25, negative=5)
+        new_rows = [core_data_row, core_data_row2]
 
         ed = EditDiff(changed_rows, new_rows)
         output = ed.plain_text_format()
         assert "Rows edited: 1" in output
-        assert "New rows: 1" in output
-        assert "NY "+now_utc.strftime("%Y-%m-%d") in output
+        assert "New rows: 2" in output
+        assert f"NY {date1.strftime('%Y-%m-%d')}\nNY {date2.strftime('%Y-%m-%d')}" in output

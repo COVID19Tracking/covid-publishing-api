@@ -1,4 +1,3 @@
-import collections
 import csv
 from datetime import timedelta
 from io import StringIO
@@ -10,10 +9,8 @@ from flask_restful import inputs
 
 from app.api import api
 from app.api.common import us_daily_query, states_daily_query, State
+from app.api.csv_columns import *
 
-CSVColumn = collections.namedtuple('Column', 'label model_column blank')
-# set default value of the blank parameter to false, all other params are required
-CSVColumn.__new__.__defaults__ = (False, )
 """Represents the recipe to generate a column of CSV output data. 
 
 This maps a model column name to a CSV column name. An ordered list of CSVColumns can be passed to `make_csv_response`
@@ -110,56 +107,10 @@ def get_states_daily_csv():
         # add the row to the output
         reformatted_data.append(result_dict)
 
-    columns = []
-
-    if request.endpoint != 'api.states_current':
-        columns.append(CSVColumn(label="Date", model_column="date"))
-
-    columns.extend([
-        CSVColumn(label="State", model_column="state"),
-        CSVColumn(label="Positive", model_column="positive"),
-        CSVColumn(label="Negative", model_column="negative"),
-        CSVColumn(label="Pending", model_column="pending"),
-        CSVColumn(label="Hospitalized – Currently", model_column="hospitalizedCurrently"),
-        CSVColumn(label="Hospitalized – Cumulative", model_column="hospitalizedCumulative"),
-        CSVColumn(label="In ICU – Currently", model_column="inIcuCurrently"),
-        CSVColumn(label="In ICU – Cumulative", model_column="inIcuCumulative"),
-        CSVColumn(label="On Ventilator – Currently", model_column="onVentilatorCurrently"),
-        CSVColumn(label="On Ventilator – Cumulative", model_column="onVentilatorCumulative"),
-        CSVColumn(label="Recovered", model_column="recovered"),
-        CSVColumn(label="Deaths", model_column="death")])
-
-    if request.endpoint == 'api.states_current':
-        columns.extend([
-            CSVColumn(label="Last Update ET", model_column="lastUpdateEt"),
-            CSVColumn(label="Check Time (ET)", model_column="dateChecked")])
-    else:
-        columns.extend([
-            CSVColumn(label="Data Quality Grade", model_column="dataQualityGrade"),
-            CSVColumn(label="Last Update ET", model_column="lastUpdateEt"),
-            CSVColumn(label="Total Antibody Tests", model_column="totalTestsAntibody"),
-            CSVColumn(label="Positive Antibody Tests", model_column="positiveTestsAntibody"),
-            CSVColumn(label="Negative Antibody Tests", model_column="negativeTestsAntibody"),
-            CSVColumn(label="Total Tests (PCR)", model_column="totalTestsViral"),
-            CSVColumn(label="Positive Tests (PCR)", model_column="positiveTestsViral"),
-            CSVColumn(label="Negative Tests (PCR)", model_column="negativeTestsViral"),
-            CSVColumn(label="Positive Cases (PCR)", model_column="positiveCasesViral"),
-            CSVColumn(label="Deaths (confirmed)", model_column="deathConfirmed"),
-            CSVColumn(label="Deaths (probable)", model_column="deathProbable"),
-            CSVColumn(label="Total PCR Tests (People)", model_column="totalTestsPeopleViral"),
-            CSVColumn(label="Probable Cases", model_column="probableCases"),
-            CSVColumn(label="Total Test Encounters (PCR)", model_column="totalTestEncountersViral"),
-            CSVColumn(label="Total Antibody Tests (People)", model_column="totalTestsPeopleAntibody"),
-            CSVColumn(label="Positive Antibody Tests (People)", model_column="positiveTestsPeopleAntibody"),
-            CSVColumn(label="Negative Antibody Tests (People)", model_column="negativeTestsPeopleAntibody"),
-            CSVColumn(label="Total Antigen Tests (People)", model_column="totalTestsPeopleAntigen"),
-            CSVColumn(label="Positive Antigen Tests (People)", model_column="positiveTestsPeopleAntigen"),
-            CSVColumn(label="Negative Antigen Tests (People)", model_column="negativeTestsPeopleAntigen"),
-            CSVColumn(label="Total Antigen Tests", model_column="totalTestsAntigen"),
-            CSVColumn(label="Positive Antigen Tests", model_column="positiveTestsAntigen"),
-            CSVColumn(label="Negative Antigen Tests", model_column="negativeTestsAntigen"),
-            CSVColumn(label="_posNeg", model_column=None, blank=True),
-            CSVColumn(label="Total Test Results", model_column="totalTestResults")])
+    columns = STATES_CURRENT
+    if request.endpoint == 'api.states_daily':
+        columns = STATES_DAILY
+    columns = select(columns)
 
     return make_csv_response(columns, reformatted_data)
 
@@ -176,23 +127,8 @@ def get_us_daily_csv():
     if request.endpoint == 'api.us_current':
         us_data_by_date = us_data_by_date[:1]
 
-    columns = []
-
-    if request.endpoint != 'api.us_current':
-        columns.extend([CSVColumn(label="Date", model_column="date"),
-                        CSVColumn(label="States", model_column="states")])
-
-    columns.extend([
-        CSVColumn(label="Positive", model_column="positive"),
-        CSVColumn(label="Negative", model_column="negative"),
-        CSVColumn(label="Pending", model_column="pending"),
-        CSVColumn(label="Hospitalized – Currently", model_column="hospitalizedCurrently"),
-        CSVColumn(label="Hospitalized – Cumulative", model_column="hospitalizedCumulative"),
-        CSVColumn(label="In ICU – Currently", model_column="inIcuCurrently"),
-        CSVColumn(label="In ICU – Cumulative", model_column="inIcuCumulative"),
-        CSVColumn(label="On Ventilator – Currently", model_column="onVentilatorCurrently"),
-        CSVColumn(label="On Ventilator – Cumulative", model_column="onVentilatorCumulative"),
-        CSVColumn(label="Recovered", model_column="recovered"),
-        CSVColumn(label="Deaths", model_column="death")])
-
+    columns = US_CURRENT_COLUMNS
+    if request.endpoint == 'api.us_daily':
+        columns = US_DAILY_COLUMNS
+    columns = select(columns)
     return make_csv_response(columns, us_data_by_date)

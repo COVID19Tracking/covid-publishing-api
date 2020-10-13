@@ -11,7 +11,7 @@ from flask import json, jsonify
 from app import db
 from app.models.data import *
 
-from common import daily_push_ny_wa_two_days
+from common import daily_push_ny_wa_two_days, daily_push_ny_ca_total_test_results_different_source
 
 
 def test_get_state_info(app):
@@ -133,6 +133,41 @@ def test_get_us_daily(app, headers):
     assert resp.json[0]['positive'] == 30
     assert resp.json[0]['negative'] == 15
     # check that totalTestResult aggregation works as expected
+    assert resp.json[0]['totalTestResults'] == 45
+
+    assert resp.json[1]['date'] == '2020-05-24'
+    assert resp.json[1]['positive'] == 24
+    assert resp.json[1]['negative'] == 12
+    assert resp.json[1]['totalTestResults'] == 36
+
+
+def test_get_us_daily_some_null_totals(app, headers):
+    test_data = daily_push_ny_ca_total_test_results_different_source()
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days each of NY and WA and one day for CA. But,
+    # CA has a different totalTestResults source, and so should not be counted in the totals data.
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(test_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    # Publish the batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id),
+                       headers=headers)
+    assert resp.status_code == 201
+
+    resp = client.get("/api/v1/public/us/daily")
+    assert resp.status_code == 200
+    assert len(resp.json) == 2
+
+    # should come back in reverse chronological order and include CA's positives or negatives
+    assert resp.json[0]['date'] == '2020-05-25'
+    assert resp.json[0]['positive'] == 40
+    assert resp.json[0]['negative'] == 20
+    # but totalTestResult aggregation should NOT include CA
     assert resp.json[0]['totalTestResults'] == 45
 
     assert resp.json[1]['date'] == '2020-05-24'

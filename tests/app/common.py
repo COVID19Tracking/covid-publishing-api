@@ -7,6 +7,7 @@ TODAY = date(2020, 5, 25)
 NOW = pytz.utc.localize(datetime.now())
 
 NY = {"state": "NY", "totalTestResultsFieldDbColumn": "posNeg"}
+CA_DIFFERENT_TOTAL_SOURCE = {"state": "CA", "totalTestResultsFieldDbColumn": "totalTestsViral"}
 WA = {"state": "WA", "totalTestResultsFieldDbColumn": "posNeg"}
 
 NY_TODAY = {
@@ -88,6 +89,15 @@ NY_BEFORE_YESTERDAY = {
     "negative": 2
 }
 
+CA_TODAY = {
+    "state": "CA",
+    "lastUpdateIsoUtc": NOW.isoformat(),
+    "dateChecked": NOW.isoformat(),
+    "date": TODAY,
+    "positive": 10,
+    "negative": 5
+}
+
 # Test data used for testing US daily and states daily by state
 def daily_push_ny_wa_two_days():
     ctx = {
@@ -100,6 +110,22 @@ def daily_push_ny_wa_two_days():
       "context": ctx,
       "states": [NY, WA],
       "coreData": [NY_TODAY.copy(), WA_TODAY.copy(), NY_YESTERDAY.copy(), WA_YESTERDAY.copy()]
+    }
+
+def daily_push_ny_ca_total_test_results_different_source():
+    ctx = {
+      "dataEntryType": "daily",
+      "shiftLead": "test",
+      "batchNote": "This is a test with a different totalTestResults source for CA"
+    }
+
+    return {
+      "context": ctx,
+      "states": [NY, WA, CA_DIFFERENT_TOTAL_SOURCE],
+      "coreData": [
+          NY_TODAY.copy(), WA_TODAY.copy(), NY_YESTERDAY.copy(), WA_YESTERDAY.copy(),
+          CA_TODAY.copy()
+      ]
     }
 
 def daily_push_ny_wa_yesterday():

@@ -17,8 +17,10 @@ from common import daily_push_ny_wa_two_days
 def test_get_state_info(app):
     client = app.test_client()
     with app.app_context():
-        nys = State(state='NY', name='New York', pum=False, notes='Testing123', totalTestResultsFieldDbColumn="totalTestsViral")
-        wa = State(state='WA', name='Washington', pum=False, notes='Testing321', totalTestResultsFieldDbColumn="totalTestsViral")
+        nys = State(state='NY', name='New York', pum=False, notes='Testing123',
+            totalTestResultsFieldDbColumn="totalTestsViral")
+        wa = State(state='WA', name='Washington', pum=False, notes='Testing321',
+            totalTestResultsFieldDbColumn="totalTestsViral")
         db.session.add(nys)
         db.session.add(wa)
         db.session.commit()
@@ -130,10 +132,13 @@ def test_get_us_daily(app, headers):
     assert resp.json[0]['date'] == '2020-05-25'
     assert resp.json[0]['positive'] == 30
     assert resp.json[0]['negative'] == 15
+    # check that totalTestResult aggregation works as expected
+    assert resp.json[0]['totalTestResults'] == 45
 
     assert resp.json[1]['date'] == '2020-05-24'
     assert resp.json[1]['positive'] == 24
     assert resp.json[1]['negative'] == 12
+    assert resp.json[1]['totalTestResults'] == 36
 
 
 def test_get_states_daily_for_state(app, headers):

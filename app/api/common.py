@@ -1,3 +1,4 @@
+from collections import defaultdict
 import flask
 from flask import request
 
@@ -46,13 +47,15 @@ def states_daily_query(state=None, preview=False):
 def us_daily_query(preview=False, date_format='%Y-%m-%d'):
     """Query US Daily Data
 
-    Sums up the numeric columns from the data for all states to provide an aggregate for the whole country.
+    Sums up the numeric columns from the data for all states to provide an aggregate for the whole
+    country.
 
     Args:
-        preview (bool, optional): return data in the preview state or only published data. Optional, defaults to False
+        preview (bool, optional): return data in the preview state or only published data. Optional,
+            defaults to False
         date_format: (str, optional): optional strftime format string.
-            If provided, the `date` property of the output will be formatted in the specified fashion
-            (default '%Y-%m-%d')
+            If provided, the `date` property of the output will be formatted in the specified
+            fashion (default '%Y-%m-%d')
 
     Returns:
         dict: Dictionary of US daily data, one row per date
@@ -72,10 +75,21 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d'):
         ).order_by(states_daily.c.date.desc()
         ).all()
 
+    # short term hack: we need to get totalTestResults as an aggregate, but since it's a hybrid
+    # property, this is difficult without complex sql. Instead, getting states daily results as
+    # CoreData objects, and going to do aggregation in Python.
+    date_total_results_dict = defaultdict(int)
+    states_daily_full_results = states_daily_query(preview=preview).all()
+    for result in states_daily_full_results:
+        date_total_results_dict[result.date] += result.totalTestResults
+
     us_data_by_date = []
     for day in us_daily:
         result_dict = day._asdict()
+        # grab totalTestResults from the aggregation-by-date dict we just computed, and update
+        # date object formats
         result_dict.update({
+            'totalTestResults': date_total_results_dict[day.date],
             'dateChecked': day.date.isoformat(),
             'date': day.date.strftime(date_format),
         })

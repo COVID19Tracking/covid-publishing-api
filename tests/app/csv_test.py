@@ -164,3 +164,77 @@ def test_get_us_states_csv(app, headers):
     assert "Deaths" in data[0]
     assert data[0]["Positive"] == "30"
     assert data[0]["Negative"] == "15"
+
+def test_get_latest_states_daily_csv(app, headers):
+    # post some test data
+    client = app.test_client()
+
+    # prepare test data
+    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
+    with open(example_filename) as f:
+        payload_json_str = f.read()
+    resp = client.post(
+        "/api/v1/batches",
+        data=payload_json_str,
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+
+    resp = client.post('/api/v1/batches/1/publish', headers=headers)
+    assert resp.status_code == 201
+
+    resp = client.get("/api/v1/internal/states/daily.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert len(data) == 56
+    assert data[0]["date"] == '20200618'
+    assert data[0]["positive"] == "708"
+    assert data[0]["negative"] == "80477"
+
+    # 2 days
+    resp = client.get("/api/v1/internal/states/daily.csv?days=2")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert len(data) == 56 * 2
+    assert data[0]["date"] == '20200618'
+    assert data[0]["state"] == 'AK'
+    assert data[0]["positive"] == "708"
+    assert data[0]["totalTestsViral"] == "81185"
+
+    assert data[56]["date"] == '20200617'
+    assert data[56]["state"] == 'AK'
+    assert data[56]["positive"] == "709"
+    assert data[56]["totalTestsViral"] == "81185"
+
+    # More days than we have
+    resp = client.get("/api/v1/internal/states/daily.csv?days=5000")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert len(data) == 56 * 2
+
+    # US endpoints that use the same underlying method
+    resp = client.get("/api/v1/public/us/current.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert len(data) == 1
+    assert data[0]["Positive"] == "2177888"
+
+    resp = client.get("/api/v1/public/us/daily.csv")
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert len(data) == 2
+    assert data[0]["Date"] == '20200618'
+    assert data[0]["Positive"] == "2177888"
+    assert data[1]["Date"] == '20200617'
+    assert data[1]["Positive"] == "2177944"

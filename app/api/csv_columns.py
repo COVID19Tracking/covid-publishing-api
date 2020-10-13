@@ -78,8 +78,7 @@ US_CURRENT_COLUMNS = [
 ]
 
 
-US_DAILY_COLUMNS = [CoreData.date, Literal("states")] + US_CURRENT_COLUMNS
-
+US_DAILY_COLUMNS = [ CoreData.date, Literal("states") ] + US_CURRENT_COLUMNS
 
 
 STATES_CURRENT = [
@@ -95,7 +94,6 @@ STATES_CURRENT = [
     CoreData.onVentilatorCumulative,
     CoreData.recovered,
     CoreData.death,
-
 
     Literal("lastUpdateEt"),
     #CoreData.lastUpdateEt,

@@ -8,10 +8,11 @@ from flask import make_response, request
 from flask_restful import inputs
 
 from app.api import api
-from app.api.common import us_daily_query, states_daily_query, State
+from app.api.common import us_daily_query, states_daily_query
 from app.api.csv_columns import *
+from app.models.data import State, CoreData
 
-"""Represents the recipe to generate a column of CSV output data. 
+"""Represents the recipe to generate a column of CSV output data.
 
 This maps a model column name to a CSV column name. An ordered list of CSVColumns can be passed to `make_csv_response`
 to generate CSV output
@@ -36,6 +37,9 @@ def make_csv_response(columns, data):
     """
     si = StringIO()
     writer = csv.writer(si)
+
+    if not columns:
+        []
 
     # write a header row
     writer.writerow([column.label for column in columns])
@@ -77,12 +81,8 @@ def get_states_csv():
     return make_csv_response(columns, states)
 
 
-@api.route('/public/states/daily.csv', methods=['GET'], endpoint='states_daily')
-@api.route('/public/states/current.csv', methods=['GET'], endpoint='states_current')
-def get_states_daily_csv():
-    flask.current_app.logger.info('Retrieving States Daily')
-    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    latest_daily_data = states_daily_query(preview=include_preview).all()
+def get_states_daily_data(preview, limit):
+    latest_daily_data = states_daily_query(preview=preview, limit=limit).all()
 
     # rewrite date formats to match the old public sheet
     reformatted_data = []
@@ -97,22 +97,42 @@ def get_states_daily_csv():
                 "%-m/%d/%Y %H:%M") if data.dateChecked else ""
         })
 
-        # for the /current endpoint, only add the row if it's the latest data for the state
-        if request.endpoint == 'api.states_current':
-            # if we've seen this state before and the one we saw is newer, skip this row
-            if data.state in state_latest_dates and state_latest_dates[data.state] > data.date:
-                continue
-            state_latest_dates[data.state] = data.date
-
         # add the row to the output
         reformatted_data.append(result_dict)
+    return reformatted_data
+
+
+@api.route('/internal/states/daily.csv', methods=['GET'], endpoint='states_latest')
+def get_latest_states_daily_csv():
+    preview = request.args.get('preview', default=False, type=inputs.boolean)
+    days = request.args.get('days', default=1, type=inputs.positive)
+    flask.current_app.logger.info('Retrieving US daily for {} days with preview = {}'.format(
+        days, preview))
+
+    states_data = get_states_daily_data(preview, limit=days)
+
+    # need to return all columns, with their db names
+    columns = [CSVColumn(label=c.name, model_column=c.name) for c in CoreData.__table__.columns]
+    return make_csv_response(columns, states_data)
+
+
+@api.route('/public/states/daily.csv', methods=['GET'], endpoint='states_daily')
+@api.route('/public/states/current.csv', methods=['GET'], endpoint='states_current')
+def get_states_daily_csv():
+    flask.current_app.logger.info('Retrieving States Daily')
+    include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+
+    limit = None
+    if request.endpoint == 'api.states_current':
+        limit = 1
+    states_data = get_states_daily_data(include_preview, limit)
 
     columns = STATES_CURRENT
     if request.endpoint == 'api.states_daily':
         columns = STATES_DAILY
     columns = select(columns)
 
-    return make_csv_response(columns, reformatted_data)
+    return make_csv_response(columns, states_data)
 
 
 @api.route('/public/us/daily.csv', methods=['GET'], endpoint='us_daily')
@@ -120,12 +140,8 @@ def get_states_daily_csv():
 def get_us_daily_csv():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    us_data_by_date = us_daily_query(preview=include_preview, date_format="%Y%m%d")
-
-    # the /current endpoint only returns the latest data instead of all dates
-    # and is missing the Date and States columns
-    if request.endpoint == 'api.us_current':
-        us_data_by_date = us_data_by_date[:1]
+    limit = 1 if request.endpoint == 'api.us_current' else None
+    us_data_by_date = us_daily_query(preview=include_preview, date_format="%Y%m%d", limit=limit)
 
     columns = US_CURRENT_COLUMNS
     if request.endpoint == 'api.us_daily':

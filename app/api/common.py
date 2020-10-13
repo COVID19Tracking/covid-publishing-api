@@ -81,7 +81,8 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d'):
     date_total_results_dict = defaultdict(int)
     states_daily_full_results = states_daily_query(preview=preview).all()
     for result in states_daily_full_results:
-        date_total_results_dict[result.date] += result.totalTestResults
+        if result.totalTestResults is not None:
+            date_total_results_dict[result.date] += result.totalTestResults
 
     us_data_by_date = []
     for day in us_daily:

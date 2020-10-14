@@ -8,8 +8,9 @@ from flask import make_response, request
 from flask_restful import inputs
 
 from app.api import api
-from app.api.common import us_daily_query, states_daily_query, State
+from app.api.common import us_daily_query, states_daily_query, states_daily_query_with_limit
 from app.api.csv_columns import *
+from app.models.data import State
 
 """Represents the recipe to generate a column of CSV output data. 
 
@@ -132,3 +133,40 @@ def get_us_daily_csv():
         columns = US_DAILY_COLUMNS
     columns = select(columns)
     return make_csv_response(columns, us_data_by_date)
+
+
+@api.route('/internal/states/daily.csv', methods=['GET'], endpoint='states_latest')
+def get_latest_states_daily_csv():
+    preview = request.args.get('preview', default=False, type=inputs.boolean)
+    days = request.args.get('days', default=1, type=inputs.positive)
+    flask.current_app.logger.info('Retrieving US daily for {} days with preview = {}'.format(
+        days, preview))
+
+    latest_daily_data = states_daily_query_with_limit(preview=preview, limit=days).all()
+
+    # rewrite date formats to match the old public sheet
+    reformatted_data = []
+    state_latest_dates = {}
+    eastern_time = tz.gettz('EST')
+    for data in latest_daily_data:
+        result_dict = data.to_dict()
+        result_dict.update({
+            'date': data.date.strftime("%Y%m%d"),
+            # due to DST issues, this time needs to be advanced forward one hour to match the old output
+            'dateChecked': (data.dateChecked.astimezone(eastern_time) + timedelta(hours=1)).strftime(
+                "%-m/%d/%Y %H:%M") if data.dateChecked else ""
+        })
+
+        # for the /current endpoint, only add the row if it's the latest data for the state
+        if request.endpoint == 'api.states_current':
+            # if we've seen this state before and the one we saw is newer, skip this row
+            if data.state in state_latest_dates and state_latest_dates[data.state] > data.date:
+                continue
+            state_latest_dates[data.state] = data.date
+
+        # add the row to the output
+        reformatted_data.append(result_dict)
+
+    # need to return all columns, with their db names
+    columns = [CSVColumn(label=c.name, model_column=c.name) for c in CoreData.__table__.columns]
+    return make_csv_response(columns, reformatted_data)

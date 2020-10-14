@@ -119,11 +119,13 @@ def test_get_us_states_csv(app, headers):
     assert data[0]["States"] == "2"
     assert data[0]["Positive"] == "30"
     assert data[0]["Negative"] == "15"
+    assert data[0]["Total Test Results"] == "45"
 
     assert data[1]["Date"] == '20200524'
     assert data[1]["States"] == "2"
     assert data[1]["Positive"] == "24"
     assert data[1]["Negative"] == "12"
+    assert data[0]["Total Test Results"] == "45"
 
     # test states current CSV
     resp = client.get("/api/v1/public/states/current.csv")

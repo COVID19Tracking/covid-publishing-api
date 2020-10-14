@@ -80,7 +80,10 @@ US_CURRENT_COLUMNS = [
 ]
 
 
-US_DAILY_COLUMNS = [CoreData.date, Literal("states")] + US_CURRENT_COLUMNS
+
+US_DAILY_COLUMNS = [ CoreData.date, Literal("states") ] \
+    + US_CURRENT_COLUMNS \
+    + [ Literal("totalTestResults") ]
 
 
 STATES_CURRENT = [

@@ -11,7 +11,7 @@ from app.models.data import *
 
 @api.route('/public/states/info', methods=['GET'])
 def get_states():
-    states = State.query.all()
+    states = State.query.order_by(State.state.asc()).all()
     return flask.jsonify(
         [state.to_dict() for state in states]
     )

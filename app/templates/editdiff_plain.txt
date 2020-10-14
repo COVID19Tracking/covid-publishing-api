@@ -1,7 +1,7 @@
 {%- if new_rows is not none and new_rows|length > 0 -%}
 New rows: {{ new_rows|length }}
 
-{%+ for row in new_rows -%}
+{%+ for row in new_rows %}
 {{row.state}} {{row.date}}
 {%- endfor %}
 

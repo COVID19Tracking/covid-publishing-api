@@ -60,8 +60,6 @@ def test_get_states_daily_csv(app, headers):
     # post some test data
     client = app.test_client()
 
-    # TODO: for now, this is one day's worth of data. Need to expand this to multiple days, once
-    # we start passing "date" in the JSON (right now inferring it). Then this test case will be more
     # meaningful
     example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
     with open(example_filename) as f:
@@ -79,12 +77,17 @@ def test_get_states_daily_csv(app, headers):
     resp = client.get("/api/v1/public/states/daily.csv")
     assert resp.status_code == 200
     lines = resp.data.decode("utf-8").splitlines()
-    assert len(lines) == 57
+    assert len(lines) == 56 * 2 + 1
     reader = csv.DictReader(lines, delimiter=',')
     data = list(reader)
     assert data[0]["Date"] == '20200618'
     assert data[0]["Positive"] == "708"
     assert data[0]["Negative"] == "80477"
+
+    assert data[56]["Date"] == '20200617'
+    assert data[56]["Positive"] == "709"
+    assert data[56]["Negative"] == "80477"
+
 
 def test_get_us_states_csv(app, headers):
     test_data = daily_push_ny_wa_two_days()

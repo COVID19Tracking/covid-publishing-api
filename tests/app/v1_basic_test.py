@@ -13,10 +13,10 @@ import datetime
 def test_get_test(app):
     client = app.test_client()
     resp = client.get("/api/v1/test")
-    assert resp.data != None 
+    assert resp.data != None
     assert resp.status_code == 200
     data = json.loads(resp.data)
-    assert "test_data_key" in data 
+    assert "test_data_key" in data
     assert data["test_data_key"] == "test_data_value"
 
 
@@ -37,11 +37,11 @@ def test_post_core_data(app, headers):
     resp = client.post(
         "/api/v1/batches",
         data=payload_json_str,
-        content_type='application/json', 
+        content_type='application/json',
         headers=headers)
     assert resp.status_code == 201
 
-    # we should've written 56 states, 4 core data rows, 1 batch
+    # we should've written 56 states times 2 days, 4 core data rows, 1 batch
     resp = client.get('/api/v1/public/states/info')
     assert len(resp.json) == 56
     assert resp.json[0]['state'] == "AK"
@@ -52,7 +52,7 @@ def test_post_core_data(app, headers):
     assert resp.json['batches'][0]['batchId'] == 1
     assert resp.json['batches'][0]['user'] == 'testing'
     # assert batch data has rows attached to it
-    assert len(resp.json['batches'][0]['coreData']) == 56
+    assert len(resp.json['batches'][0]['coreData']) == 56 * 2
 
     # spot-check a few values
     assert resp.json['batches'][0]['coreData'][0]['state'] == 'AK'

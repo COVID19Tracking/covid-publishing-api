@@ -37,7 +37,7 @@ def test_get_state_info(app):
 def test_get_states_daily(app, headers):
     # post some test data
     client = app.test_client()
-    
+
     # TODO: for now, this is one day's worth of data. Need to expand this to multiple days, once
     # we start passing "date" in the JSON (right now inferring it). Then this test case will be more
     # meaningful
@@ -66,7 +66,7 @@ def test_get_states_daily(app, headers):
     assert resp.status_code == 200
     # batch hasn't been published
     unpublished_version = resp.json
-    assert len(resp.json) == 56
+    assert len(resp.json) == 56 * 2
 
     # publish it, make sure the data comes back
     resp = client.post('/api/v1/batches/1/publish')
@@ -77,12 +77,17 @@ def test_get_states_daily(app, headers):
     resp = client.get("/api/v1/public/states/daily")
     assert resp.status_code == 200
     # check that we returned all states
-    assert len(resp.json) == 56
+    assert len(resp.json) == 56 * 2
     assert resp.json == unpublished_version
 
-    # check that the states are sorted alphabetically - test data should be just one date
+    # check that the states are sorted alphabetically, doubled - test data is 2 days
     returned_states = [x['state'] for x in resp.json]
-    assert returned_states == sorted(returned_states)
+    set1 = sorted(list(set(returned_states)))
+    assert returned_states == set1 + set1
+
+    # check that there are 2 different dates
+    returned_dates = list(set([x['date'] for x in resp.json]))
+    assert len(returned_dates) == 2
 
     # check that the "preview" request now returns nothing, since we've published the batch
     resp = client.get("/api/v1/public/states/daily?preview=true")

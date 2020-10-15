@@ -81,7 +81,6 @@ US_CURRENT_COLUMNS = [
 ]
 
 
-
 US_DAILY_COLUMNS = [ CoreData.date, Literal("states") ] \
     + US_CURRENT_COLUMNS \
     + [ Literal("totalTestResults") ]
@@ -100,7 +99,6 @@ STATES_CURRENT = [
     CoreData.onVentilatorCumulative,
     CoreData.recovered,
     CoreData.death,
-
     Literal("lastUpdateEt"),
     CoreData.dateChecked
 ]
@@ -120,7 +118,6 @@ STATES_DAILY = [
     CoreData.onVentilatorCumulative,
     CoreData.recovered,
     CoreData.death,
-
     CoreData.dataQualityGrade,
     Literal("lastUpdateEt"),
     CoreData.totalTestsAntibody,
@@ -132,6 +129,7 @@ STATES_DAILY = [
     CoreData.positiveCasesViral,
     CoreData.deathConfirmed,
     CoreData.deathProbable,
+    CoreData.totalTestsPeopleViral,
     CoreData.probableCases,
     CoreData.totalTestEncountersViral,
     CoreData.totalTestsPeopleAntibody,
@@ -143,10 +141,7 @@ STATES_DAILY = [
     CoreData.totalTestsAntigen,
     CoreData.positiveTestsAntigen,
     CoreData.negativeTestsAntigen,
-
-    # Fake Column
-    literal_column("''").label('_posNeg'),
-
+    literal_column("''").label('_posNeg'),  # Fake Column
     Literal("totalTestResults"),
 ]
 

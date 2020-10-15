@@ -141,7 +141,6 @@ STATES_DAILY = [
     CoreData.totalTestsAntigen,
     CoreData.positiveTestsAntigen,
     CoreData.negativeTestsAntigen,
-    literal_column("''").label('_posNeg'),  # Fake Column
     Literal("totalTestResults"),
 ]
 

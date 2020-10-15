@@ -62,6 +62,7 @@ COLUMNS_DISPLAY_NAMES = {
     "positiveTestsAntigen": "Positive Antigen Tests",
     "negativeTestsAntigen": "Negative Antigen Tests",
     "totalTestResults": "Total Test Results",
+    "dateChecked": "Check Time (ET)",
 }
 
 

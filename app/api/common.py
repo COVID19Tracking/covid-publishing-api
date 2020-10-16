@@ -1,8 +1,6 @@
 from collections import defaultdict
-import flask
-from flask import request
 
-from app.models.data import *
+from app.models.data import CoreData, Batch
 from app import db
 
 from sqlalchemy import func, and_
@@ -14,7 +12,7 @@ from sqlalchemy.sql import label
 #
 # Returns a SQLAlchemy BaseQuery object. If input state is not None, will return daily data only
 # for the input state.
-def states_daily_query(state=None, preview=False):
+def states_daily_query(state=None, preview=False, limit=None):
     # first retrieve latest published batch per state
     filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
     if state is not None:
@@ -25,12 +23,21 @@ def states_daily_query(state=None, preview=False):
     else:
         filter_list.append(Batch.isPublished == True)
 
+    # The query here uses a window function using over/partition-by, the specific window
+    # function that's used is row_number, because we want at most $limit number of
+    # newest rows for each state. So we partition by state and order by date desc, assing
+    # row_number, and then filter by this row number
     latest_state_daily_batches = db.session.query(
-        CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid')
-        ).join(Batch
-        ).filter(*filter_list
-        ).group_by(CoreData.state, CoreData.date
-        ).subquery('latest_state_daily_batches')
+        CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid'),
+        func.row_number().over(
+            partition_by=CoreData.state, order_by=CoreData.date.desc()).label('row')
+    ).join(Batch).filter(*filter_list).group_by(
+        CoreData.date, CoreData.state
+    ).order_by(CoreData.date.desc(), CoreData.state).subquery('latest_state_daily_batches')
+
+    filter_list = []
+    if limit is not None:
+        filter_list = [latest_state_daily_batches.c.row <= limit]
 
     latest_daily_data_query = db.session.query(CoreData).join(
         latest_state_daily_batches,
@@ -38,13 +45,12 @@ def states_daily_query(state=None, preview=False):
             CoreData.batchId == latest_state_daily_batches.c.maxBid,
             CoreData.state == latest_state_daily_batches.c.state,
             CoreData.date == latest_state_daily_batches.c.date
-        )).order_by(CoreData.date.desc()
-        ).order_by(CoreData.state)
+        )).filter(*filter_list).order_by(CoreData.date.desc()).order_by(CoreData.state)
 
     return latest_daily_data_query
 
 
-def us_daily_query(preview=False, date_format='%Y-%m-%d'):
+def us_daily_query(preview=False, date_format='%Y-%m-%d', limit=None):
     """Query US Daily Data
 
     Sums up the numeric columns from the data for all states to provide an aggregate for the whole
@@ -60,7 +66,7 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d'):
     Returns:
         dict: Dictionary of US daily data, one row per date
     """
-    states_daily = states_daily_query(preview=preview).subquery('states_daily')
+    states_daily = states_daily_query(preview=preview, limit=limit).subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery
     colnames = CoreData.numeric_fields()
@@ -97,42 +103,3 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d'):
         us_data_by_date.append(result_dict)
 
     return us_data_by_date
-
-
-def states_daily_query_with_limit(state=None, preview=False, limit=None):
-    ''' TODO: shortly, this method will eventually replace the top
-    `states_daily_query`, but for now, we're using it as a
-    separate method
-    '''
-
-    # first retrieve latest published batch per state
-    filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
-    if state is not None:
-        filter_list.append(CoreData.state == state)
-
-    if preview:
-        filter_list.append(Batch.isPublished == False)
-    else:
-        filter_list.append(Batch.isPublished == True)
-
-    latest_state_daily_batches = db.session.query(
-        CoreData.state, CoreData.date, func.max(CoreData.batchId).label('maxBid'),
-        func.row_number().over(
-            partition_by=CoreData.state, order_by=CoreData.date.desc()).label('row')
-    ).join(Batch).filter(*filter_list).group_by(
-        CoreData.date, CoreData.state
-    ).order_by(CoreData.date.desc(), CoreData.state).subquery('latest_state_daily_batches')
-
-    filter_list = []
-    if limit is not None:
-        filter_list = [latest_state_daily_batches.c.row <= limit]
-
-    latest_daily_data_query = db.session.query(CoreData).join(
-        latest_state_daily_batches,
-        and_(
-            CoreData.batchId == latest_state_daily_batches.c.maxBid,
-            CoreData.state == latest_state_daily_batches.c.state,
-            CoreData.date == latest_state_daily_batches.c.date
-        )).filter(*filter_list).order_by(CoreData.date.desc()).order_by(CoreData.state)
-
-    return latest_daily_data_query

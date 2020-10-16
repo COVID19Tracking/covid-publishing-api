@@ -6,9 +6,7 @@
 
 import collections
 
-from sqlalchemy.sql import literal_column, func
-from enum import Enum
-from app.models.data import Batch, CoreData, State
+from app.models.data import CoreData
 
 
 CSVColumn = collections.namedtuple('Column', 'label model_column blank')
@@ -81,9 +79,9 @@ US_CURRENT_COLUMNS = [
 ]
 
 
-US_DAILY_COLUMNS = [ CoreData.date, Literal("states") ] \
+US_DAILY_COLUMNS = [CoreData.date, Literal("states")] \
     + US_CURRENT_COLUMNS \
-    + [ Literal("totalTestResults") ]
+    + [Literal("totalTestResults")]
 
 
 STATES_CURRENT = [

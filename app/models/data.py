@@ -65,13 +65,15 @@ class Batch(db.Model, DataMixin):
     def changedDatesMin(self):
         if not self.coreData:
             return None
-        return min(d.date for d in self.coreData)
+        d = min(d.date for d in self.coreData)
+        return str(d)
 
     @hybrid_property
     def changedDatesMax(self):
         if not self.coreData:
             return None
-        return max(d.date for d in self.coreData)
+        d = max(d.date for d in self.coreData)
+        return str(d)
 
     # This method isn't used when the object is read from the DB; only when a new one is being
     # created, as from a POST JSON payload.

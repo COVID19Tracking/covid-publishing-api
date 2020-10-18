@@ -215,8 +215,8 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_moc
         # in the returned JSON
         assert 'positive' in batch_obj.changedFields
         assert 'inIcuCurrently' in batch_obj.changedFields
-        assert batch_obj.changedDatesMin == datetime.date(2020,5,24)
-        assert batch_obj.changedDatesMax == datetime.date(2020,5,24)
+        assert batch_obj.changedDatesMin == '2020-05-24'
+        assert batch_obj.changedDatesMax == '2020-05-24'
         assert batch_obj.numRowsEdited == 1
 
     # getting the states daily for NY has the edited data for yesterday and unchanged for today,

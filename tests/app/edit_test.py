@@ -77,9 +77,12 @@ def test_edit_core_data(app, headers, slack_mock, requests_mock):
     webhook_url = 'http://example.com/web/hook'
     app.config['API_WEBHOOK_URL'] = webhook_url
     requests_mock.get(webhook_url, json={'it': 'worked'})
+    # partial edit:
+    edit = edit_push_ny_yesterday()
+    edit['coreData'][0].pop('negative')
     resp = client.post(
         "/api/v1/batches/edit",
-        data=json.dumps(edit_push_ny_yesterday()),
+        data=json.dumps(edit),
         content_type='application/json',
         headers=headers)
     assert resp.status_code == 201

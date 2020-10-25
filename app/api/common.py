@@ -16,7 +16,9 @@ def states_daily_query(state=None, preview=False, limit=None):
     # first retrieve latest published batch per state
     filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
     if state is not None:
-        filter_list.append(CoreData.state == state)
+        if isinstance(state, str):
+            state = [state]
+        filter_list.append(CoreData.state.in_(state))
 
     if preview:
         filter_list.append(Batch.isPublished == False)

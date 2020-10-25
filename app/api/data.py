@@ -1,5 +1,6 @@
 """Registers the necessary routes for the core data model. """
 
+from collections import defaultdict
 from datetime import datetime
 
 import flask
@@ -284,6 +285,15 @@ def edit_core_data_from_states_daily():
 def edit_states_daily_internal(user, context, core_data, state_to_edit=None, publish=False):
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
 
+    # validate data
+    states_to_fetch = set([x.get('state') for x in core_data])
+    if state_to_edit and (len(states_to_fetch) > 1 or state_to_edit not in states_to_fetch):
+        error = 'Context state %s does not match JSON data state %s' \
+            % (state_to_edit, states_to_fetch)
+        flask.current_app.logger.error(error)
+        notify_slack_error(error, 'edit_states_daily_internal')
+        return error, 400
+
     batch = Batch(**context)
     batch.user = user
     batch.isRevision = True
@@ -293,12 +303,12 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
-    latest_daily_data_for_state = states_daily_query(state=state_to_edit).all()
+    latest_daily_data_for_state = states_daily_query(state=states_to_fetch).all()
 
     # split up by date for easier lookup/comparison with input edit rows
-    date_to_data = {}
+    key_to_date = defaultdict(dict)  # state -> date -> data
     for state_daily_data in latest_daily_data_for_state:
-        date_to_data[state_daily_data.date] = state_daily_data
+        key_to_date[state_daily_data.state][state_daily_data.date] = state_daily_data
 
     # keep track of all our changes as we go
     core_data_objects = []
@@ -309,11 +319,8 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
     for core_data_dict in core_data:
         # this state has to be identical to the state from the context
         state = core_data_dict['state']
-        if state_to_edit and state != state_to_edit:
-            error = 'Context state %s does not match JSON data state %s' % (state_to_edit, state)
-            flask.current_app.logger.error(error)
-            notify_slack_error(error, 'edit_core_data_from_states_daily')
-            return error, 400
+        # already checked for this condition:
+        assert state_to_edit is None or state == state_to_edit
 
         valid, unknown = CoreData.valid_fields_checker(core_data_dict)
         if not valid:
@@ -329,7 +336,7 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
         # is there a date for this?
         # check that there exists at least one published row for this date/state
         date = CoreData.parse_str_to_date(core_data_dict['date'])
-        data_for_date = date_to_data.get(date)
+        data_for_date = key_to_date.get(state, {}).get(date)
         core_data_dict['batchId'] = batch.batchId
         edited_core_data = None
 
@@ -345,7 +352,7 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
             edited_core_data = CoreData(**core_data_dict)
             new_rows.append(edited_core_data)
         else:
-            # this row already exists, but check each value to see if anything changed. Easiest way
+            # this row already exists, check each property to see if anything changed.
             changed_for_date = data_for_date.field_diffs(core_data_dict)
             if changed_for_date:
                 changed_rows.append(changed_for_date)

@@ -24,8 +24,6 @@ from app.utils.webhook import notify_webhook
 
 @api.route('/test', methods=['GET'])
 def get_data():
-    flask.current_app.logger.info('Retrieving all data: placeholder')
-    flask.current_app.logger.debug('This is a debug log')
     return flask.jsonify({'test_data_key': 'test_data_value'})
 
 

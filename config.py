@@ -37,6 +37,7 @@ class LocalPSQLConfig:
         # INFO level or DEBUG level logs, you need to lower the main loggers
         # level first.
         app.logger.setLevel(logging.DEBUG)
+        app.logger.handlers.clear()
         app.logger.addHandler(file_logger)
         app.logger.addHandler(client_logger)
 
@@ -69,6 +70,7 @@ class Production:
         # INFO level or DEBUG level logs, you need to lower the main loggers
         # level first.
         app.logger.setLevel(logging.DEBUG)
+        app.logger.handlers.clear()
         app.logger.addHandler(file_logger)
         app.logger.addHandler(client_logger)
 
@@ -106,6 +108,7 @@ class Testing:
         # INFO level or DEBUG level logs, you need to lower the main loggers
         # level first.
         app.logger.setLevel(logging.DEBUG)
+        app.logger.handlers.clear()
         app.logger.addHandler(file_logger)
         app.logger.addHandler(client_logger)
 
@@ -140,5 +143,6 @@ class Develop:
     def init_app(app):
         """Initiates application."""
         app.logger.setLevel(logging.DEBUG)
+        app.logger.handlers.clear()
         app.logger.addHandler(client_logger)
         app.logger.addHandler(file_logger)

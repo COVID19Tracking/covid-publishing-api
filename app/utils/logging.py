@@ -21,8 +21,7 @@ if not os.path.exists(log_folder_path):
 log_file_path = os.path.join(log_folder_path, 'log.out')
 
 # Configure logger format
-log_fmt = '%(threadName)s - %(asctime)s - %(name)s - ' \
-          '%(levelname)s - %(message)s'
+log_fmt = '%(levelname).1s%(asctime)s [%(filename)s:%(lineno)d] %(message)s'
 
 logger_formatter = logging.Formatter(log_fmt)
 

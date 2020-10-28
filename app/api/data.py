@@ -72,7 +72,7 @@ def publish_batch(id):
     db.session.add(batch)
     db.session.commit()
 
-    notify_slack(f"*Published batch #{id}* (type: {batch.dataEntryType})\n"
+    notify_slack(f"*Published batch #{id}* (button 2 pressed) (type: {batch.dataEntryType})\n"
                  f"{batch.batchNote}")
 
     return flask.jsonify(batch.to_dict()), 201
@@ -213,7 +213,7 @@ def post_core_data():
     status_code = post_result[1]
     if status_code == 201:
         batch_info = post_result[0].json['batch']
-        notify_slack(f"*Pushed batch #{batch_info['batchId']}* (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
+        notify_slack(f"*Pushed batch #{batch_info['batchId']}* (button 1 pressed) (type: {batch_info['dataEntryType']}, user: {batch_info['shiftLead']})\n"
                      f"{batch_info['batchNote']}")
 
     return post_result

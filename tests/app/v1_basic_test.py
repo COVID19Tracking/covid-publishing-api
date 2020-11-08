@@ -66,6 +66,23 @@ def test_post_core_data(app, headers):
     assert resp.json['batches'][0]['coreData'][1]['lastUpdateTime'] == '2020-06-18T15:00:00Z'
 
 
+def test_post_core_data_unknown_field(app, headers, slack_mock):
+    client = app.test_client()
+
+    # test an unknown field, simulating a bad/new column being sent to the DB
+    bad_data = daily_push_ny_wa_today()
+    bad_data["coreData"][0]["311"] = 42
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(bad_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 400
+    resp_data = resp.data.decode("utf-8")
+    assert "Unknown field(s) in CoreData" in resp_data
+    assert slack_mock.files_upload.call_count == 1
+
+
 def test_post_core_data_updating_state(app, headers):
     with app.app_context():
         nys = State(state='AK', name='Alaska', totalTestResultsFieldDbColumn='totalTestsViral')

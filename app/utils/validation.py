@@ -33,6 +33,15 @@ def validate_numeric_fields(payload):
                     raise ValueError(f"Negative value for field '{state} {field}': {value}")
 
 
+def validate_no_unknown_fields(payload):
+    core_data_dicts = payload['coreData']
+    for core_data_dict in core_data_dicts:
+        valid, unknown = CoreData.valid_fields_checker(core_data_dict)
+        # lastUpdateIsoUtc can come in as an argument, gets converted to lastUpdateTime internally
+        if unknown and unknown != {'lastUpdateIsoUtc'}:
+            raise ValueError("Unknown field(s) in CoreData: %s" % unknown)
+
+
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.
 def validate_core_data_payload(payload):
     # test the input data
@@ -45,6 +54,7 @@ def validate_core_data_payload(payload):
 
     validate_numeric_fields(payload)
     validate_non_empty_fields(payload)    
+    validate_no_unknown_fields(payload)
 
 
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.
@@ -52,10 +62,14 @@ def validate_edit_data_payload(payload):
     # check push context
     if 'context' not in payload:
         raise ValueError("Payload requires 'context' field")
-    if payload['context']['dataEntryType'] != 'edit':
+
+    context = payload['context']
+    if context['dataEntryType'] != 'edit':
         raise ValueError("Payload 'context' must contain data entry type 'edit'")
-    if not payload['context'].get('batchNote'):
+    if not context.get('batchNote'):
         raise ValueError("Payload 'context' must contain a batchNote explaining edit")
+    if not context.get('state'):
+        raise ValueError("No state specified in batch edit context")
 
     # check that edit data exists and that there's at least one row
     if 'coreData' not in payload or not payload['coreData']:
@@ -63,3 +77,15 @@ def validate_edit_data_payload(payload):
 
     validate_numeric_fields(payload)
     validate_non_empty_fields(payload)
+    validate_no_unknown_fields(payload)
+
+    # check that the context state matches JSON data state, of which there should be only one
+    context_state = context['state']
+    data_state_set = set([x.get('state') for x in payload['coreData']])
+    if len(data_state_set) > 1:
+        raise ValueError("Multiple states in edit request, only 1 expected: %s" % data_state_set)
+
+    data_state = list(data_state_set)[0]
+    if context_state != data_state:
+        raise ValueError(
+            f"Context state {context_state} does not match JSON data state {data_state}")

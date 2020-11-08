@@ -54,74 +54,6 @@ def test_edit_state_metadata(app, headers, requests_mock):
     assert requests_mock.call_count == 1
 
 
-def test_edit_core_data(app, headers, slack_mock, requests_mock):
-    client = app.test_client()
-
-    # Write a batch containing the above data, two days for NY and WA, publish it
-    resp = client.post(
-        "/api/v1/batches",
-        data=json.dumps(daily_push_ny_wa_two_days()),
-        content_type='application/json',
-        headers=headers)
-    assert resp.status_code == 201
-    batch_id = resp.json['batch']['batchId']
-    assert slack_mock.chat_postMessage.call_count == 1
-
-    # Publish the new batch
-    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
-    assert resp.status_code == 201
-    assert slack_mock.chat_postMessage.call_count == 2
-
-    # make an edit batch for NY for yesterday
-    # ensure the webhook is called on edit
-    webhook_url = 'http://example.com/web/hook'
-    app.config['API_WEBHOOK_URL'] = webhook_url
-    requests_mock.get(webhook_url, json={'it': 'worked'})
-    # partial edit:
-    edit = edit_push_ny_yesterday()
-    edit['coreData'][0].pop('negative')
-    resp = client.post(
-        "/api/v1/batches/edit",
-        data=json.dumps(edit),
-        content_type='application/json',
-        headers=headers)
-    assert resp.status_code == 201
-    assert slack_mock.chat_postMessage.call_count == 3
-    assert requests_mock.call_count == 1
-    batch_id = resp.json['batch']['batchId']
-    assert resp.json['batch']['user'] == 'testing'
-
-    # test that getting the states daily for NY has the UNEDITED data for yesterday
-    resp = client.get("/api/v1/public/states/NY/daily")
-    assert len(resp.json) == 2
-    unedited = resp.json
-
-    for day_data in resp.json:
-        assert day_data['date'] in ['2020-05-25', '2020-05-24']
-        if day_data['date'] == '2020-05-25':
-            assert day_data['positive'] == 20
-            assert day_data['negative'] == 5
-        elif day_data['date'] == '2020-05-24':
-            assert day_data['positive'] == 15
-            assert day_data['negative'] == 4
-
-    # Publish the edit batch
-    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
-    assert resp.status_code == 201
-
-    # test that getting the states daily for NY has the edited data for yesterday
-    resp = client.get("/api/v1/public/states/NY/daily")
-    assert len(resp.json) == 2
-
-    for day_data in resp.json:
-        assert day_data['date'] in ['2020-05-25', '2020-05-24']
-        if day_data['date'] == '2020-05-25':
-            assert day_data['positive'] == 20
-            assert day_data['negative'] == 5
-        elif day_data['date'] == '2020-05-24':
-            assert day_data['positive'] == 16
-            assert day_data['negative'] == 4
-
 def test_edit_core_data_from_states_daily_empty(app, headers, slack_mock, requests_mock):
     client = app.test_client()
 
@@ -383,6 +315,7 @@ def test_edit_core_data_from_states_daily_partial_update(app, headers, slack_moc
     assert slack_mock.chat_postMessage.call_count == 3
     assert "no edits detected" in resp.data.decode("utf-8")
 
+
 def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
     ''' Verify that when sending edit (or insert) requests without any fields
     that are part of the object the edit requests is rejected
@@ -407,15 +340,12 @@ def test_edit_with_valid_and_unknown_fields(app, headers, slack_mock):
     assert resp.status_code == 201
     assert slack_mock.chat_postMessage.call_count == 2
 
-    # test
-    # make an edit batch without any significant field
+    # test that an edit batch with unknown fields is rejected with error
     resp = client.post(
         "/api/v1/batches/edit_states_daily",
         data=json.dumps(edit_unknown_fields()),
         content_type='application/json',
         headers=headers)
-
-    # verify: nothing was edited
     assert resp.status_code == 400
-    assert slack_mock.chat_postMessage.call_count == 2
-    assert "no edits detected" in resp.data.decode("utf-8")
+    assert slack_mock.files_upload.call_count == 1
+    assert 'Unknown field(s) in CoreData' in resp.data.decode("utf-8")

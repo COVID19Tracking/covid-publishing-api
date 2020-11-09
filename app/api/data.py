@@ -206,9 +206,8 @@ def post_core_data():
 
     Requirements:
     """
-    flask.current_app.logger.info('Received a CoreData write request')
-    payload = flask.request.json  # this is a dict
-
+    payload = flask.request.json
+    flask.current_app.logger.info('Received a CoreData write request: %s' % payload)
     post_result = post_core_data_json(payload)
     status_code = post_result[1]
     if status_code == 201:
@@ -228,27 +227,6 @@ def any_existing_rows(state, date):
     return len(existing_rows) > 0
 
 
-@api.route('/batches/edit', methods=['POST'])
-@jwt_required
-@notify_webhook
-@exceptions_to_slack
-def edit_core_data():
-    flask.current_app.logger.info('Received a CoreData edit request')
-    payload = flask.request.json
-
-    # test input data
-    try:
-        validate_edit_data_payload(payload)
-    except ValueError as e:
-        flask.current_app.logger.error("Edit data failed validation: %s" % str(e))
-        notify_slack_error(str(e), 'edit_core_data')
-        return str(e), 400
-
-    context = payload['context']
-    core_data = payload['coreData']
-    return edit_states_daily_internal(get_jwt_identity(), context, core_data)
-
-
 @api.route('/batches/edit_states_daily', methods=['POST'])
 @jwt_required
 @notify_webhook
@@ -257,7 +235,7 @@ def edit_core_data_from_states_daily():
     payload = flask.request.json
     flask.current_app.logger.info('Received a CoreData States Daily edit request: %s' % payload)
 
-    # test input data
+    # validate input data
     try:
         validate_edit_data_payload(payload)
     except ValueError as e:
@@ -265,43 +243,18 @@ def edit_core_data_from_states_daily():
         notify_slack_error(str(e), 'edit_core_data_from_states_daily')
         return str(e), 400
 
-    # we construct the batch from the push context
     context = payload['context']
-
-    # check that the state is set
-    state_to_edit = context.get('state')
-    if not state_to_edit:
-        flask.current_app.logger.error("No state specified in batch edit context: %s" % str(context))
-        notify_slack_error(
-            'No state specified in batch edit context', 'edit_core_data_from_states_daily')
-        return 'No state specified in batch edit context', 400
-
-    core_data = payload['coreData']
-    return edit_states_daily_internal(
-        get_jwt_identity(), context, core_data, state_to_edit, publish=True)
-
-def edit_states_daily_internal(user, context, core_data, state_to_edit=None, publish=False):
     flask.current_app.logger.info('Creating new batch from context: %s' % context)
-
-    # validate data
-    states_to_fetch = set([x.get('state') for x in core_data])
-    if state_to_edit and (len(states_to_fetch) > 1 or state_to_edit not in states_to_fetch):
-        error = 'Context state %s does not match JSON data state %s' \
-            % (state_to_edit, states_to_fetch)
-        flask.current_app.logger.error(error)
-        notify_slack_error(error, 'edit_states_daily_internal')
-        return error, 400
-
     batch = Batch(**context)
-    batch.user = user
+    batch.user = get_jwt_identity()
     batch.isRevision = True
-    batch.isPublished = publish
-    if publish:
-        batch.publishedAt = datetime.utcnow()
+    batch.isPublished = True
+    batch.publishedAt = datetime.utcnow()
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
-    latest_daily_data_for_state = states_daily_query(state=states_to_fetch).all()
+    state_to_edit = payload['context']['state']
+    latest_daily_data_for_state = states_daily_query(state=state_to_edit).all()
 
     # split up by date for easier lookup/comparison with input edit rows
     key_to_date = defaultdict(dict)  # state -> date -> data
@@ -314,22 +267,13 @@ def edit_states_daily_internal(user, context, core_data, state_to_edit=None, pub
     new_rows = []
 
     # check each core data row that the corresponding date/state already exists in published form
-    for core_data_dict in core_data:
-        # this state has to be identical to the state from the context
+    for core_data_dict in payload['coreData']:
         state = core_data_dict['state']
-        # already checked for this condition:
-        assert state_to_edit is None or state == state_to_edit
-
         valid, unknown = CoreData.valid_fields_checker(core_data_dict)
         if not valid:
             # there are no fields to add/update
             flask.current_app.logger.info('Got row without updates, skipping. %r' % core_data_dict)
             continue
-
-        if unknown:
-            # report unknown fields, we won't fail the request, but should at least log
-            flask.current_app.logger.warning('Got row with unknown field updates: %s. %r' % (
-                unknown, core_data_dict))
 
         # is there a date for this?
         # check that there exists at least one published row for this date/state

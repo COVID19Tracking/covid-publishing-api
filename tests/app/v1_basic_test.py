@@ -72,6 +72,7 @@ def test_post_core_data_unknown_field(app, headers, slack_mock):
     # test an unknown field, simulating a bad/new column being sent to the DB
     bad_data = daily_push_ny_wa_today()
     bad_data["coreData"][0]["311"] = 42
+    bad_data["coreData"][0]["lastUpdateIsoUtc"] = "2020-10-09T07:59:00Z"
     resp = client.post(
         "/api/v1/batches",
         data=json.dumps(bad_data),
@@ -79,7 +80,7 @@ def test_post_core_data_unknown_field(app, headers, slack_mock):
         headers=headers)
     assert resp.status_code == 400
     resp_data = resp.data.decode("utf-8")
-    assert "Unknown field(s) in CoreData" in resp_data
+    assert resp_data == "Unknown field(s) in CoreData: 311"
     assert slack_mock.files_upload.call_count == 1
 
 

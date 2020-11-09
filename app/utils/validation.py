@@ -36,10 +36,12 @@ def validate_numeric_fields(payload):
 def validate_no_unknown_fields(payload):
     core_data_dicts = payload['coreData']
     for core_data_dict in core_data_dicts:
-        valid, unknown = CoreData.valid_fields_checker(core_data_dict)
-        # lastUpdateIsoUtc can come in as an argument, gets converted to lastUpdateTime internally
-        if unknown and unknown != {'lastUpdateIsoUtc'}:
-            raise ValueError("Unknown field(s) in CoreData: %s" % unknown)
+        _, unknown = CoreData.valid_fields_checker(core_data_dict)
+        # lastUpdateIsoUtc can come in as an argument, gets converted to lastUpdateTime internally;
+        # we don't error on its presence
+        unknown.discard('lastUpdateIsoUtc')
+        if unknown:
+            raise ValueError("Unknown field(s) in CoreData: %s" % ', '.join(unknown))
 
 
 # Returns a string with any errors if the payload is invalid, otherwise returns empty string.

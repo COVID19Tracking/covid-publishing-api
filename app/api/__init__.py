@@ -9,4 +9,5 @@ api = Blueprint('api', __name__)
 
 from app.api import data
 from app.api import public
+from app.api import public_v2
 from app.api import csv

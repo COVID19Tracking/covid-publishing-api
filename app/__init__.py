@@ -32,7 +32,7 @@ def create_app(config):
 
     # Register our API blueprint
     from app.api import api as api_blueprint
-    app.register_blueprint(api_blueprint, url_prefix='/api/v1')
+    app.register_blueprint(api_blueprint, url_prefix='/api')
 
     # register an error handler to return full exceptions for server errors
     @app.errorhandler(500)

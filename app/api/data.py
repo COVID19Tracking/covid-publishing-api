@@ -22,12 +22,12 @@ from app.utils.webhook import notify_webhook
 ##############################################################################################
 
 
-@api.route('/test', methods=['GET'])
+@api.route('/v1/test', methods=['GET'])
 def get_data():
     return flask.jsonify({'test_data_key': 'test_data_value'})
 
 
-@api.route('/test_auth', methods=['GET'])
+@api.route('/v1/test_auth', methods=['GET'])
 @jwt_required
 def test_auth():
     return flask.jsonify({'user': 'authenticated'}), 200
@@ -37,7 +37,7 @@ def test_auth():
 ##############################################################################################
 
 
-@api.route('/batches', methods=['GET'])
+@api.route('/v1/batches', methods=['GET'])
 def get_batches():
     flask.current_app.logger.info('Retrieving all batches')
     batches = Batch.query.all()
@@ -48,14 +48,14 @@ def get_batches():
     })
 
 
-@api.route('/batches/<int:id>', methods=['GET'])
+@api.route('/v1/batches/<int:id>', methods=['GET'])
 def get_batch_by_id(id):
     batch = Batch.query.get_or_404(id)
     flask.current_app.logger.info('Returning batch %d' % id)
     return flask.jsonify(batch.to_dict())
 
 
-@api.route('/batches/<int:id>/publish', methods=['POST'])
+@api.route('/v1/batches/<int:id>/publish', methods=['POST'])
 @jwt_required
 @notify_webhook
 @exceptions_to_slack
@@ -83,7 +83,7 @@ def publish_batch(id):
 ##############################################################################################
 
 
-@api.route('/states/edit', methods=['POST'])
+@api.route('/v1/states/edit', methods=['POST'])
 @jwt_required
 @notify_webhook
 @exceptions_to_slack
@@ -197,7 +197,7 @@ def post_core_data_json(payload):
     return flask.jsonify(json_to_return), 201
 
 
-@api.route('/batches', methods=['POST'])
+@api.route('/v1/batches', methods=['POST'])
 @jwt_required
 @exceptions_to_slack
 def post_core_data():
@@ -227,7 +227,7 @@ def any_existing_rows(state, date):
     return len(existing_rows) > 0
 
 
-@api.route('/batches/edit_states_daily', methods=['POST'])
+@api.route('/v1/batches/edit_states_daily', methods=['POST'])
 @jwt_required
 @notify_webhook
 @exceptions_to_slack
@@ -350,7 +350,7 @@ def edit_core_data_from_states_daily():
 
 
 # Get all published rows for this state and date, in reverse chronological order
-@api.route('/state-date-history/<string:state>/<string:date>', methods=['GET'])
+@api.route('/v1/state-date-history/<string:state>/<string:date>', methods=['GET'])
 def get_state_date_history(state, date):
     flask.current_app.logger.info('Retrieving state date history')
 

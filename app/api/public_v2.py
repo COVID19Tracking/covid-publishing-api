@@ -166,14 +166,12 @@ class ValuesCalculator(object):
         field_name : str
             The CoreData property we're calculating values for, e.g. "positiveTestsViral"
         """
-        output = {
+        return {
             'population_percent': None,  # TODO: compute this
             'change_from_prior_day': self.change_from_prior_day(core_data, field_name),
             'seven_day_average': self.seven_day_average(core_data, field_name),
             'seven_day_change_percent': self.seven_day_change_percent(core_data, field_name),
         }
-
-        return {'calculated': output}
 
 
 def recursive_tree_to_simple_output(tree, core_data):
@@ -224,7 +222,7 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
     if len(latest_daily_data) == 0:
         # likely state not found
         return flask.Response(
-            'States Daily data unavailable for state %s' % state if state else 'all', status=404)
+            'States Daily data unavailable for state %s' % state if state else 'all')
 
     out = {}
 
@@ -247,8 +245,7 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
 
     for core_data in latest_daily_data:
         meta = {
-            # TODO: is data_quality_grade the only meta field here?
-            'data_quality_grade': 'PLACEHOLDER',  # TODO: get data quality grades in here
+            'data_quality_grade': 'PLACEHOLDER',  # TODO: move this into "data" out of "metadata"
             'updated': '2020-11-08T23:59:00.000-08:00',  # TODO: where should this come from?
             'tests': {   # TODO: should there be any other fields besides tests source?
                 'total_source': core_data.totalTestResultsSource

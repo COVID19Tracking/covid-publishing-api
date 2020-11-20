@@ -9,7 +9,7 @@ from app.api.common import states_daily_query, us_daily_query
 from app.models.data import *
 
 
-@api.route('/public/states/info', methods=['GET'])
+@api.route('/v1/public/states/info', methods=['GET'])
 def get_states():
     states = State.query.order_by(State.state.asc()).all()
     return flask.jsonify(
@@ -17,7 +17,7 @@ def get_states():
     )
 
 
-@api.route('/public/states/daily', methods=['GET'])
+@api.route('/v1/public/states/daily', methods=['GET'])
 def get_states_daily():
     flask.current_app.logger.info('Retrieving States Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
@@ -25,7 +25,7 @@ def get_states_daily():
     return flask.jsonify([x.to_dict() for x in latest_daily_data])
 
 
-@api.route('/public/states/<string:state>/daily', methods=['GET'])
+@api.route('/v1/public/states/<string:state>/daily', methods=['GET'])
 def get_states_daily_for_state(state):
     flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
@@ -38,7 +38,7 @@ def get_states_daily_for_state(state):
     return flask.jsonify([x.to_dict() for x in latest_daily_data_for_state])
 
 
-@api.route('/public/us/daily', methods=['GET'])
+@api.route('/v1/public/us/daily', methods=['GET'])
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)

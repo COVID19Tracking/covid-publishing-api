@@ -60,7 +60,7 @@ def make_csv_response(columns, data):
     return output
 
 
-@api.route('/public/states/info.csv', methods=['GET'])
+@api.route('/v1/public/states/info.csv', methods=['GET'])
 def get_states_csv():
     states = State.query.order_by(State.state.asc()).all()
     columns = [CSVColumn(label="State", model_column="state"),
@@ -99,7 +99,7 @@ def get_states_daily_data(preview, limit):
     return reformatted_data
 
 
-@api.route('/internal/states/daily.csv', methods=['GET'], endpoint='states_latest')
+@api.route('/v1/internal/states/daily.csv', methods=['GET'], endpoint='states_latest')
 def get_latest_states_daily_csv():
     preview = request.args.get('preview', default=False, type=inputs.boolean)
     days = request.args.get('days', default=1, type=inputs.positive)
@@ -113,8 +113,8 @@ def get_latest_states_daily_csv():
     return make_csv_response(columns, states_data)
 
 
-@api.route('/public/states/daily.csv', methods=['GET'], endpoint='states_daily')
-@api.route('/public/states/current.csv', methods=['GET'], endpoint='states_current')
+@api.route('/v1/public/states/daily.csv', methods=['GET'], endpoint='states_daily')
+@api.route('/v1/public/states/current.csv', methods=['GET'], endpoint='states_current')
 def get_states_daily_csv():
     flask.current_app.logger.info('Retrieving States Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
@@ -132,8 +132,8 @@ def get_states_daily_csv():
     return make_csv_response(columns, states_data)
 
 
-@api.route('/public/us/daily.csv', methods=['GET'], endpoint='us_daily')
-@api.route('/public/us/current.csv', methods=['GET'], endpoint='us_current')
+@api.route('/v1/public/us/daily.csv', methods=['GET'], endpoint='us_daily')
+@api.route('/v1/public/us/current.csv', methods=['GET'], endpoint='us_current')
 def get_us_daily_csv():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)

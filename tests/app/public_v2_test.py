@@ -100,7 +100,7 @@ def test_get_states_daily_full(app, headers):
     assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
         'population_percent': None,
         'change_from_prior_day': 5,
-        'seven_day_average': 17.5,
+        'seven_day_average': 18,
         'seven_day_change_percent': None,
     }
 

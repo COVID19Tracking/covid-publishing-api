@@ -6,6 +6,7 @@ from datetime import timedelta
 import flask
 from flask import json, request
 from flask_restful import inputs
+from time import perf_counter
 
 from app.api import api
 from app.api.common import states_daily_query, us_daily_query
@@ -151,7 +152,7 @@ class ValuesCalculator(object):
 
         assert len(seven_day_values) <= 7
         if len(seven_day_values) > 0:
-            return sum(seven_day_values) / len(seven_day_values)
+            return round(sum(seven_day_values) / len(seven_day_values))
 
         return None
 
@@ -166,6 +167,7 @@ class ValuesCalculator(object):
         field_name : str
             The CoreData property we're calculating values for, e.g. "positiveTestsViral"
         """
+        # TODO: do not compute calculated values for hospitalized/inIcu/onVentilator cumulative
         return {
             'population_percent': None,  # TODO: compute this
             'change_from_prior_day': self.change_from_prior_day(core_data, field_name),
@@ -174,45 +176,33 @@ class ValuesCalculator(object):
         }
 
 
-def recursive_tree_to_simple_output(tree, core_data):
-    # walk through it recursively and populate the fields from core_data
+def recursive_tree_to_output(tree, core_data, calculator=None):
+    # walk through the data tree recursively and populate the fields from core_data
     for k, v in tree.items():
         # if v is a string, we're at a leaf, need to replace v with the actual value from core_data
         if isinstance(v, str):
-            tree[k] = getattr(core_data, v)
+            value = getattr(core_data, v)
+            if calculator:  # need to compute values for the "full" output
+                tree[k] = {
+                    'value': value,
+                    'calculated': calculator.calculate_values(core_data, v),
+                }
+            else:
+                tree[k] = value
         else:
             # need to recurse one level down
-            recursive_tree_to_simple_output(v, core_data)
+            recursive_tree_to_output(v, core_data, calculator)
 
 
 def convert_core_data_to_simple_output(core_data):
     core_data_copy = copy.deepcopy(_MAPPING)
-    recursive_tree_to_simple_output(core_data_copy, core_data)
+    recursive_tree_to_output(core_data_copy, core_data)
     return core_data_copy
-
-
-def recursive_tree_to_full_output(tree, core_data, calculator):
-    # walk through it recursively and populate the fields from core_data
-    for k, v in tree.items():
-        # if v is a string, we're at a leaf and v is the field name we need to use. need to replace
-        # v with the actual value from core_data as well as the derived values we've computed
-        if isinstance(v, str):
-            value = getattr(core_data, v)
-            # flask.current_app.logger.info(f'Calculating values for {k} where {v} is leaf')
-            calculated_values = calculator.calculate_values(core_data, v)
-            output = {
-                'value': value,
-                'calculated': calculated_values,
-            }
-            tree[k] = output
-        else:
-            # need to recurse one level down
-            recursive_tree_to_full_output(v, core_data, calculator)
 
 
 def convert_core_data_to_full_output(core_data, calculator):
     core_data_copy = copy.deepcopy(_MAPPING)
-    recursive_tree_to_full_output(core_data_copy, core_data, calculator)
+    recursive_tree_to_output(core_data_copy, core_data, calculator)
     return core_data_copy
 
 
@@ -226,13 +216,13 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
 
     out = {}
 
-    base_link = 'https://api.covidtracking.com/v2/states'
+    base_link = 'https://api.covidtracking.com/states'
     link = '%s/%s/daily' % (base_link, state) if state else '%s/daily' % (base_link)
     if simple:
         link += '/simple'
     out['links'] = {'self': link}
     out['meta'] = {
-        'build_time': '2020-11-11T21:54:35.153Z',
+        'build_time': '2020-11-11T21:54:35.153Z',  # TODO: fix this placeholder
         'license': 'CC-BY-4.0',
         'version': '2.0-beta',
     }
@@ -274,16 +264,26 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
 @api.route('/v2/public/states/<string:state>/daily/simple', methods=['GET'])
 @api.route('/v2/public/states/daily/simple', methods=['GET'])
 def get_states_daily_simple_v2(state=None):
+    t1 = perf_counter()
     flask.current_app.logger.info(
         'Retrieving simple States Daily v2 for state %s' % (state if state else 'all'))
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    return get_states_daily_v2_internal(state=state, include_preview=include_preview, simple=True)
+    resp = get_states_daily_v2_internal(state=state, include_preview=include_preview, simple=True)
+    t2 = perf_counter()
+    flask.current_app.logger.info(
+        'Simple States Daily v2 for state %s took %.1f sec' % (state if state else 'all', t2 - t1))
+    return resp
 
 
 @api.route('/v2/public/states/<string:state>/daily', methods=['GET'])
 @api.route('/v2/public/states/daily', methods=['GET'])
 def get_states_daily_v2(state=None):
+    t1 = perf_counter()
     flask.current_app.logger.info(
         'Retrieving States Daily v2 for state %s' % (state if state else 'all'))
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    return get_states_daily_v2_internal(state=state, include_preview=include_preview, simple=False)
+    resp = get_states_daily_v2_internal(state=state, include_preview=include_preview, simple=False)
+    t2 = perf_counter()
+    flask.current_app.logger.info(
+        'States Daily v2 for state %s took %.1f sec' % (state if state else 'all', t2 - t1))
+    return resp

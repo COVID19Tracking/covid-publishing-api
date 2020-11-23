@@ -100,7 +100,7 @@ def test_get_states_daily_full(app, headers):
 
     # make sure calculated values are correct
     assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
-        'population_percent': 0,
+        'population_percent': 0.0001,
         'change_from_prior_day': 5,
         'seven_day_average': 18,
         'seven_day_change_percent': None,
@@ -129,4 +129,4 @@ def test_values_calculator(app):
             positive=596214, negative=5)
 
         calculator = ValuesCalculator([core_data_row])
-        assert (calculator.population_percent(core_data_row, 'positive') == 0.0304)
+        assert (calculator.population_percent(core_data_row, 'positive') == 3.039)

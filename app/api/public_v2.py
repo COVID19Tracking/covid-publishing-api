@@ -109,7 +109,7 @@ class ValuesCalculator(object):
         state = getattr(core_data, 'state') or 'US'
         state_population = population_lookup(state)
         pop_pct = field_value_for_day / state_population
-        return round(pop_pct, 4)
+        return round(pop_pct * 100, 4)
 
     def change_from_prior_day(self, core_data, field_name):
         field_value_for_day = getattr(core_data, field_name)

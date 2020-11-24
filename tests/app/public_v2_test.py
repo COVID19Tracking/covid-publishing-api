@@ -126,7 +126,8 @@ def test_values_calculator(app):
         core_data_row = CoreData(
             lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
             date=datetime.today(), state='NY', batchId=bat.batchId,
-            positive=596214, negative=5)
+            positive=596214, negative=5, dataQualityGrade='A')
 
         calculator = ValuesCalculator([core_data_row])
-        assert (calculator.population_percent(core_data_row, 'positive') == 3.039)
+        assert calculator.population_percent(core_data_row, 'positive') == 3.039
+        assert calculator.calculate_values(core_data_row, 'dataQualityGrade') == None

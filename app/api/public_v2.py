@@ -82,7 +82,8 @@ _MAPPING = {
             'confirmed': 'deathConfirmed',
             'probable': 'deathProbable',
         }
-    }
+    },
+    'data_quality_grade': 'dataQualityGrade'
 }
 
 
@@ -100,6 +101,13 @@ class ValuesCalculator(object):
         for data_for_day in daily_data:
             state = getattr(data_for_day, 'state') or 'US'   # state is 'US' if national
             self.key_to_date[state][data_for_day.date] = data_for_day
+
+        # omit computing derived values for the following non-numeric and other fields
+        self.do_not_calculate_fields = [
+            'dataQualityGrade',
+            'hospitalizedCumulative',
+            'inIcuCumulative',
+            'onVentilatorCumulative']
 
     def population_percent(self, core_data, field_name):
         field_value_for_day = getattr(core_data, field_name)
@@ -169,7 +177,8 @@ class ValuesCalculator(object):
 
     def calculate_values(self, core_data, field_name):
         """
-        Returns calculated values for the given core data field as a dictionary.
+        Returns calculated values for the given core data field as a dictionary. If the field name
+        is in the list of fields to not calculate, returns None.
 
         Parameters
         ----------
@@ -178,7 +187,9 @@ class ValuesCalculator(object):
         field_name : str
             The CoreData property we're calculating values for, e.g. "positiveTestsViral"
         """
-        # TODO: do not compute calculated values for hospitalized/inIcu/onVentilator cumulative
+        if field_name in self.do_not_calculate_fields:
+            return None
+
         return {
             'population_percent': self.population_percent(core_data, field_name),
             'change_from_prior_day': self.change_from_prior_day(core_data, field_name),
@@ -194,10 +205,11 @@ def recursive_tree_to_output(tree, core_data, calculator=None):
         if isinstance(v, str):
             value = getattr(core_data, v)
             if calculator:  # need to compute values for the "full" output
-                tree[k] = {
-                    'value': value,
-                    'calculated': calculator.calculate_values(core_data, v),
-                }
+                leaf_dict = {'value': value}
+                calculated_values = calculator.calculate_values(core_data, v)
+                if calculated_values is not None:
+                    leaf_dict['calculated'] = calculated_values
+                tree[k] = leaf_dict
             else:
                 tree[k] = value
         else:
@@ -246,7 +258,6 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
 
     for core_data in latest_daily_data:
         meta = {
-            'data_quality_grade': 'PLACEHOLDER',  # TODO: move this into "data" out of "metadata"
             'updated': '2020-11-08T23:59:00.000-08:00',  # TODO: where should this come from?
             'tests': {   # TODO: should there be any other fields besides tests source?
                 'total_source': core_data.totalTestResultsSource

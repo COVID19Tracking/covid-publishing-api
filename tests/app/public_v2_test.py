@@ -8,6 +8,8 @@ import pytest
 
 from common import daily_push_ny_wa_two_days
 
+from app.api.public_v2 import ValuesCalculator, CoreData, datetime, State, Batch, db, pytz
+
 
 def write_and_publish_data(client, headers, data_json_str):
     # Write a batch containing two days each of NY and WA
@@ -98,7 +100,7 @@ def test_get_states_daily_full(app, headers):
 
     # make sure calculated values are correct
     assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
-        'population_percent': None,
+        'population_percent': 0.0001,
         'change_from_prior_day': 5,
         'seven_day_average': 18,
         'seven_day_change_percent': None,
@@ -109,3 +111,22 @@ def test_get_states_daily_full(app, headers):
     assert second_data['state'] == 'WA'
     assert second_data['tests']['pcr']['people']['positive']['value'] == 10
     assert second_data['tests']['pcr']['people']['negative']['value'] == 10
+
+
+def test_values_calculator(app):
+    with app.app_context():
+        nys = State(state='NY', totalTestResultsFieldDbColumn='posNeg')
+        bat = Batch(batchNote='test', createdAt=datetime.now(),
+            isPublished=False, isRevision=False)
+        db.session.add(bat)
+        db.session.add(nys)
+        db.session.flush()
+
+        now_utc = datetime(2020, 5, 4, 20, 3, tzinfo=pytz.UTC)
+        core_data_row = CoreData(
+            lastUpdateIsoUtc=now_utc.isoformat(), dateChecked=now_utc.isoformat(),
+            date=datetime.today(), state='NY', batchId=bat.batchId,
+            positive=596214, negative=5)
+
+        calculator = ValuesCalculator([core_data_row])
+        assert (calculator.population_percent(core_data_row, 'positive') == 3.039)

@@ -101,6 +101,17 @@ class ValuesCalculator(object):
             state = getattr(data_for_day, 'state') or 'US'   # state is 'US' if national
             self.key_to_date[state][data_for_day.date] = data_for_day
 
+    def population_percent(self, core_data, field_name):
+        field_value_for_day = getattr(core_data, field_name)
+        if field_value_for_day is None:
+            return None
+
+        state = getattr(core_data, 'state') or 'US'
+        # call population_lookup directly instead of using the state property to support lookup for 'US':
+        state_population = population_lookup(state)
+        pop_pct = field_value_for_day / state_population
+        return round(pop_pct * 100, 4)
+
     def change_from_prior_day(self, core_data, field_name):
         field_value_for_day = getattr(core_data, field_name)
         if field_value_for_day is None:
@@ -169,7 +180,7 @@ class ValuesCalculator(object):
         """
         # TODO: do not compute calculated values for hospitalized/inIcu/onVentilator cumulative
         return {
-            'population_percent': None,  # TODO: compute this
+            'population_percent': self.population_percent(core_data, field_name),
             'change_from_prior_day': self.change_from_prior_day(core_data, field_name),
             'seven_day_average': self.seven_day_average(core_data, field_name),
             'seven_day_change_percent': self.seven_day_change_percent(core_data, field_name),

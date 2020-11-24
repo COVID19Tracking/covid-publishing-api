@@ -42,7 +42,8 @@ def test_core_data_model(app):
         assert len(states) == 1
         state = states[0]
         assert state.state == 'NY'
-        assert state.to_dict() == {'state': 'NY', 'fips': '36', 'pum': False, 'totalTestResultsFieldDbColumn': 'posNeg'}
+        assert state.to_dict() == {'state': 'NY', 'fips': '36', 'population': 19618453,
+                                   'pum': False, 'totalTestResultsFieldDbColumn': 'posNeg'}
 
         batches = Batch.query.all()
         assert len(batches) == 1

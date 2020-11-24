@@ -118,6 +118,19 @@ def fips_lookup(state):
     return _FIPS_MAP[state]
 
 
+_POPULATION_MAP = None
+def population_lookup(state):
+    global _POPULATION_MAP
+    if _POPULATION_MAP is None:
+        path = os.path.join(os.path.dirname(__file__), 'population-lookup.csv')
+        _POPULATION_MAP = {}
+        with open(path) as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                _POPULATION_MAP[row['state']] = int(row['population'])
+    return _POPULATION_MAP[state]
+
+
 class State(db.Model, DataMixin):
     __tablename__ = 'states'
 
@@ -146,6 +159,10 @@ class State(db.Model, DataMixin):
     @hybrid_property
     def fips(self):
         return fips_lookup(self.state)
+
+    @hybrid_property
+    def population(self):
+        return population_lookup(self.state)
 
     @validates('totalTestResultsFieldDbColumn')
     def validate_totalTestResultsFieldDbColumn(self, key, value):

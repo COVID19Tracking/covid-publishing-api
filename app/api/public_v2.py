@@ -107,6 +107,7 @@ class ValuesCalculator(object):
             return None
 
         state = getattr(core_data, 'state') or 'US'
+        # call population_lookup directly instead of using the state property to support lookup for 'US':
         state_population = population_lookup(state)
         pop_pct = field_value_for_day / state_population
         return round(pop_pct * 100, 4)

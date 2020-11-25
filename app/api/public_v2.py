@@ -3,6 +3,8 @@
 from collections import defaultdict
 import copy
 from datetime import timedelta
+from itertools import filterfalse
+
 import flask
 from flask import json, request
 from flask_restful import inputs
@@ -11,7 +13,6 @@ from time import perf_counter
 from app.api import api
 from app.api.common import states_daily_query, us_daily_query
 from app.models.data import *
-
 
 # The leaves are CoreData attributes that should be used to populate these values.
 _MAPPING = {
@@ -86,6 +87,46 @@ _MAPPING = {
     'data_quality_grade': 'dataQualityGrade'
 }
 
+_STATE_INFO_MAPPING = {
+    'name': 'name',
+    'state_code': 'state',
+    'fips': 'fips',
+    'sites': [
+        {
+            'url': 'covid19Site',
+            'label': 'primary'
+        }, {
+            'url': 'covid19SiteSecondary',
+            'label': 'secondary'
+        }, {
+            'url': 'covid19SiteTertiary',
+            'label': 'tertiary'
+        }, {
+            'url': 'covid19SiteQuaternary',
+            'label': 'quaternary'
+        }, {
+            'url': 'covid19SiteQuinary',
+            'label': 'quinary'
+        },
+    ],
+    'census': {
+        'population': 'population',
+    },
+    'field_sources': {
+        'tests': {
+            'pcr': {
+                'total': 'totalTestResultsField',
+            }
+        }
+    },
+    'covid_tracking_project': {
+        'preferred_total_test': {
+            'field': 'covidTrackingProjectPreferredTotalTestField',
+            'units': 'covidTrackingProjectPreferredTotalTestUnits',
+        }
+    }
+}
+
 
 class ValuesCalculator(object):
     def __init__(self, daily_data):
@@ -99,7 +140,7 @@ class ValuesCalculator(object):
         # break down the daily data by state/date for faster lookups: state -> date -> data
         self.key_to_date = defaultdict(dict)
         for data_for_day in daily_data:
-            state = getattr(data_for_day, 'state') or 'US'   # state is 'US' if national
+            state = getattr(data_for_day, 'state') or 'US'  # state is 'US' if national
             self.key_to_date[state][data_for_day.date] = data_for_day
 
         # omit computing derived values for the following non-numeric and other fields
@@ -200,21 +241,28 @@ class ValuesCalculator(object):
 
 def recursive_tree_to_output(tree, core_data, calculator=None):
     # walk through the data tree recursively and populate the fields from core_data
-    for k, v in tree.items():
-        # if v is a string, we're at a leaf, need to replace v with the actual value from core_data
-        if isinstance(v, str):
-            value = getattr(core_data, v)
-            if calculator:  # need to compute values for the "full" output
-                leaf_dict = {'value': value}
-                calculated_values = calculator.calculate_values(core_data, v)
-                if calculated_values is not None:
-                    leaf_dict['calculated'] = calculated_values
-                tree[k] = leaf_dict
-            else:
-                tree[k] = value
-        else:
-            # need to recurse one level down
+    if isinstance(tree, list):
+        for v in tree:
             recursive_tree_to_output(v, core_data, calculator)
+    else:  # tree is a dict
+        for k, v in tree.items():
+            # if k is 'label', it's a string literal field and should be left unchanged
+            if k is 'label':
+                tree[k] = v
+            # if v is a string, we're at a leaf, need to replace v with the actual value from core_data
+            elif isinstance(v, str):
+                value = getattr(core_data, v)
+                if calculator:  # need to compute values for the "full" output
+                    leaf_dict = {'value': value}
+                    calculated_values = calculator.calculate_values(core_data, v)
+                    if calculated_values is not None:
+                        leaf_dict['calculated'] = calculated_values
+                    tree[k] = leaf_dict
+                else:
+                    tree[k] = value
+            else:
+                # need to recurse one level down
+                recursive_tree_to_output(v, core_data, calculator)
 
 
 def convert_core_data_to_simple_output(core_data):
@@ -229,6 +277,28 @@ def convert_core_data_to_full_output(core_data, calculator):
     return core_data_copy
 
 
+def convert_state_info_to_output(state_data):
+    state_data_copy = copy.deepcopy(_STATE_INFO_MAPPING)
+    recursive_tree_to_output(state_data_copy, state_data)
+
+    # remove all sites that do not have a url defined
+    state_data_copy['sites'][:] = filterfalse(lambda site: site['url'] is None, state_data_copy['sites'])
+
+    return state_data_copy
+
+
+def output_with_metadata(data, link):
+    out = {'links': {'self': link},
+           'meta': {
+               'build_time': datetime.utcnow().isoformat()[:-3] + 'Z',
+               'license': 'CC-BY-4.0',
+               'version': '2.0-beta',
+           },
+           'data': data,
+    }
+    return out
+
+
 def get_states_daily_v2_internal(state=None, include_preview=False, simple=False):
     latest_daily_data = states_daily_query(
         state=state.upper() if state else None, preview=include_preview).all()
@@ -237,29 +307,21 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
         return flask.Response(
             'States Daily data unavailable for state %s' % state if state else 'all')
 
-    out = {}
-
     base_link = 'https://api.covidtracking.com/states'
     link = '%s/%s/daily' % (base_link, state) if state else '%s/daily' % (base_link)
     if simple:
         link += '/simple'
-    out['links'] = {'self': link}
-    out['meta'] = {
-        'build_time': '2020-11-11T21:54:35.153Z',  # TODO: fix this placeholder
-        'license': 'CC-BY-4.0',
-        'version': '2.0-beta',
-    }
-    out['data'] = []
 
     # only do the caching/precomputation of calculated data if we need to
     calculator = None
     if not simple:
         calculator = ValuesCalculator(latest_daily_data)
 
+    out_data = []
     for core_data in latest_daily_data:
         meta = {
             'updated': '2020-11-08T23:59:00.000-08:00',  # TODO: where should this come from?
-            'tests': {   # TODO: should there be any other fields besides tests source?
+            'tests': {  # TODO: should there be any other fields besides tests source?
                 'total_source': core_data.totalTestResultsSource
             }
         }
@@ -275,8 +337,9 @@ def get_states_daily_v2_internal(state=None, include_preview=False, simple=False
             core_actual_data_dict = convert_core_data_to_full_output(core_data, calculator)
 
         core_data_nested_dict.update(core_actual_data_dict)
-        out['data'].append(core_data_nested_dict)
+        out_data.append(core_data_nested_dict)
 
+    out = output_with_metadata(out_data, link)
     response = flask.current_app.response_class(
         json.dumps(out, sort_keys=False, indent=2),
         mimetype=flask.current_app.config['JSONIFY_MIMETYPE'])
@@ -309,3 +372,18 @@ def get_states_daily_v2(state=None):
     flask.current_app.logger.info(
         'States Daily v2 for state %s took %.1f sec' % (state if state else 'all', t2 - t1))
     return resp
+
+
+@api.route('/v2/public/states', methods=['GET'])
+def get_state_v2():
+    states = State.query.order_by(State.state.asc()).all()
+    out_data = []
+    for state in states:
+        out_data.append(convert_state_info_to_output(state))
+
+    link = 'https://api.covidtracking.com/states'
+    out_data = output_with_metadata(out_data, link)
+
+    return flask.current_app.response_class(
+        json.dumps(out_data, sort_keys=False, indent=2),
+        mimetype=flask.current_app.config['JSONIFY_MIMETYPE'])

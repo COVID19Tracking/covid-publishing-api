@@ -268,6 +268,10 @@ class CoreData(db.Model, DataMixin):
 
         return colnames
 
+    @staticmethod
+    def stringify(timestamp):
+        return timestamp.astimezone(pytz.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
     @hybrid_property
     def lastUpdateEt(self):
         # convert lastUpdateTime (UTC) to ET, return a string that matches how we're outputting

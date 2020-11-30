@@ -153,3 +153,47 @@ def test_get_state_info_v2(app):
     assert respjson['data'][0]['fips'] == '36'
     assert len(respjson['data'][0]['sites']) == 1  # undefined sites should be omitted
     assert respjson['data'][0]['sites'][0]['label'] == 'primary'
+
+
+def test_get_us_daily(app, headers):
+    test_data = daily_push_ny_wa_two_days()
+    client = app.test_client()
+
+    # Write and publish a batch containing the above data, two days each of NY and WA
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(test_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id),
+                       headers=headers)
+    assert resp.status_code == 201
+
+    resp = client.get("/api/v2/public/us/daily")
+    assert resp.status_code == 200
+    assert len(resp.json['data']) == 2
+
+    # should come back in reverse chronological order
+    first_data = resp.json['data'][0]
+    assert first_data['date'] == '2020-05-25'
+    assert first_data['states'] == 2
+    assert first_data['tests']['pcr']['people']['positive']['value'] == 30
+    assert first_data['tests']['pcr']['people']['negative']['value'] == 15
+    assert first_data['tests']['pcr']['total']['value'] == 45
+
+    # make sure calculated values are correct
+    assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
+        'population_percent': 0.0,
+        'change_from_prior_day': 6,
+        'seven_day_average': 27,
+        'seven_day_change_percent': None,
+    }
+
+    second_data = resp.json['data'][1]
+    assert second_data['date'] == '2020-05-24'
+    assert second_data['states'] == 2
+    assert second_data['tests']['pcr']['people']['positive']['value'] == 24
+    assert second_data['tests']['pcr']['people']['negative']['value'] == 12
+    assert second_data['tests']['pcr']['total']['value'] == 36

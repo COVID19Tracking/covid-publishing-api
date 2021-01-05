@@ -88,6 +88,25 @@ def test_get_states_daily_csv(app, headers):
     assert data[56]["Positive"] == "709"
     assert data[56]["Negative"] == "80477"
 
+    # tests limit number of days with public states daily
+    days = 1
+    resp = client.get("/api/v1/public/states/daily.csv?days={}".format(days))
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    assert len(lines) == 56 * days + 1
+    reader = csv.DictReader(lines, delimiter=',')
+    data = list(reader)
+    assert data[0]["Date"] == '20200618'
+    assert data[0]["Positive"] == "708"
+    assert data[0]["Negative"] == "80477"
+
+    # return all days when requesting 0 days
+    days = 0
+    resp = client.get("/api/v1/public/states/daily.csv?days={}".format(days))
+    assert resp.status_code == 200
+    lines = resp.data.decode("utf-8").splitlines()
+    assert len(lines) == 56 * 2 + 1
+
 
 def test_get_us_states_csv(app, headers):
     test_data = daily_push_ny_wa_two_days()

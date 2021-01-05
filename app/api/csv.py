@@ -118,10 +118,11 @@ def get_latest_states_daily_csv():
 def get_states_daily_csv():
     flask.current_app.logger.info('Retrieving States Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    days = request.args.get('days', default=0, type=inputs.positive)
 
-    limit = None
     if request.endpoint == 'api.states_current':
-        limit = 1
+        days = 1
+    limit = None if days == 0 else days
     states_data = get_states_daily_data(include_preview, limit)
 
     columns = STATES_CURRENT

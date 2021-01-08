@@ -12,7 +12,7 @@ _MAPPING = {
     },
     'tests': {
         'pcr': {
-            'total': 'totalTestsViral',
+            'total': 'totalTestResults',
             'pending': 'pending',
             'encounters': {
                 'total': 'totalTestEncountersViral',
@@ -120,7 +120,29 @@ _STATE_INFO_MAPPING = {
 }
 
 
-# US daily data needs its own mapping in order to propagate the logic to compute totalTestResults
+# US daily data is a small subset of state data. The total test count will be a sum of each state's
+# "totalTestResults" entry.
 # for each state, since it's going to be handled by that state.
-_US_MAPPING = copy.deepcopy(_MAPPING)
-_US_MAPPING['tests']['pcr']['total'] = 'totalTestResults'
+
+_US_MAPPING = {
+    'cases': {
+        'total': 'positive',
+    },
+    'testing': {
+        'total': 'totalTestResults',
+    },
+    'outcomes': {
+        'hospitalized': {
+            'currently': 'hospitalizedCurrently',
+            'in_icu': {
+                'currently': 'inIcuCurrently',
+            },
+            'on_ventilator': {
+                'currently': 'onVentilatorCurrently',
+            }
+        },
+        'death': {
+            'total': 'death',
+        }
+    }
+}

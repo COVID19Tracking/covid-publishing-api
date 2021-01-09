@@ -129,7 +129,7 @@ def test_values_calculator(app):
             positive=596214, negative=5, dataQualityGrade='A')
 
         calculator = ValuesCalculator([core_data_row])
-        assert calculator.population_percent(core_data_row, 'positive') == 3.039
+        assert calculator.population_percent(core_data_row, 'positive') == 3.0462
         assert calculator.calculate_values(core_data_row, 'dataQualityGrade') == None
 
 
@@ -149,7 +149,7 @@ def test_get_state_info_v2(app):
     respjson = resp.json
     assert len(respjson['data']) == 2
     assert respjson['data'][0]['name'] == 'New York'
-    assert respjson['data'][0]['census']['population'] == 19618453
+    assert respjson['data'][0]['census']['population'] == 19572319
     assert respjson['data'][0]['fips'] == '36'
     assert len(respjson['data'][0]['sites']) == 1  # undefined sites should be omitted
     assert respjson['data'][0]['sites'][0]['label'] == 'primary'

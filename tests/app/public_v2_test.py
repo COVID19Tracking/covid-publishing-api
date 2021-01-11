@@ -179,21 +179,17 @@ def test_get_us_daily(app, headers):
     first_data = resp.json['data'][0]
     assert first_data['date'] == '2020-05-25'
     assert first_data['states'] == 2
-    assert first_data['tests']['pcr']['people']['positive']['value'] == 30
-    assert first_data['tests']['pcr']['people']['negative']['value'] == 15
-    assert first_data['tests']['pcr']['total']['value'] == 45
+    assert first_data['testing']['total']['value'] == 45
 
     # make sure calculated values are correct
-    assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
+    assert first_data['testing']['total']['calculated'] == {
         'population_percent': 0.0,
-        'change_from_prior_day': 6,
-        'seven_day_average': 27,
+        'change_from_prior_day': 9,
+        'seven_day_average': 40,
         'seven_day_change_percent': None,
     }
 
     second_data = resp.json['data'][1]
     assert second_data['date'] == '2020-05-24'
     assert second_data['states'] == 2
-    assert second_data['tests']['pcr']['people']['positive']['value'] == 24
-    assert second_data['tests']['pcr']['people']['negative']['value'] == 12
-    assert second_data['tests']['pcr']['total']['value'] == 36
+    assert second_data['testing']['total']['value'] == 36

@@ -95,7 +95,7 @@ def test_post_core_data_updating_state(app, headers):
         state = states[0]
         assert state.state == 'AK'
         assert state.to_dict() == {'state': 'AK', 'name': 'Alaska', 'pum': False, 'fips': '02',
-                                   'population': 738516, 'totalTestResultsFieldDbColumn': 'totalTestsViral'}
+                                   'population': 737068, 'totalTestResultsFieldDbColumn': 'totalTestsViral'}
 
     client = app.test_client()
     resp = client.get('/api/v1/public/states/info')

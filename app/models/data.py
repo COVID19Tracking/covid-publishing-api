@@ -202,6 +202,7 @@ class CoreData(db.Model, DataMixin):
     pending = db.Column(db.Integer, info={"includeInUSDaily": True})
     hospitalizedCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})
     hospitalizedCumulative = db.Column(db.Integer, info={"includeInUSDaily": True})
+    hospitalizedDischarged = db.Column(db.Integer, info={"includeInUSDaily": True})
     inIcuCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})
     inIcuCumulative = db.Column(db.Integer, info={"includeInUSDaily": True})
     onVentilatorCurrently = db.Column(db.Integer, info={"includeInUSDaily": True})

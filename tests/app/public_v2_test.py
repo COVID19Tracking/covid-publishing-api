@@ -99,10 +99,10 @@ def test_get_states_daily_full(app, headers):
     assert first_data['tests']['pcr']['people']['negative']['value'] == 5
 
     # make sure calculated values are correct
-    assert first_data['tests']['pcr']['people']['positive']['calculated'] == {
-        'population_percent': 0.0001,
-        'change_from_prior_day': 5,
-        'seven_day_average': 18,
+    assert first_data['tests']['pcr']['people']['negative']['calculated'] == {
+        'population_percent': 0,
+        'change_from_prior_day': 1,
+        'seven_day_average': 4,
         'seven_day_change_percent': None,
     }
 
@@ -185,7 +185,6 @@ def test_get_us_daily(app, headers):
     assert first_data['testing']['total']['calculated'] == {
         'population_percent': 0.0,
         'change_from_prior_day': 9,
-        'seven_day_average': 40,
         'seven_day_change_percent': None,
     }
 

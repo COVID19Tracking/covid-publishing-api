@@ -53,6 +53,19 @@ class ValuesCalculator(object):
             'inIcuCumulative',
             'onVentilatorCumulative']
 
+        # omit 7-day average values
+        self.omit_7_day_average = [
+            'positive',
+            'totalTestResults',
+            'totalTestEncountersViral',
+            'totalTestsViral',
+            'totalTestsPeopleViral',
+            'totalTestsAntibody',
+            'totalTestsPeopleAntibody',
+            'totalTestsAntigen',
+            'totalTestsPeopleAntigen',
+        ]
+
     @staticmethod
     def get_date(core_data):
         """Returns a Python date object associated with this core_data entry. """
@@ -131,7 +144,8 @@ class ValuesCalculator(object):
     def calculate_values(self, core_data, field_name):
         """
         Returns calculated values for the given core data field as a dictionary. If the field name
-        is in the list of fields to not calculate, returns None.
+        is in the list of fields to not calculate, returns None. (Also special-casing certain
+        fields to not return a seven-day-average computation.)
 
         Parameters
         ----------
@@ -143,12 +157,16 @@ class ValuesCalculator(object):
         if field_name in self.do_not_calculate_fields:
             return None
 
-        return {
+        computed_values = {
             'population_percent': self.population_percent(core_data, field_name),
             'change_from_prior_day': self.change_from_prior_day(core_data, field_name),
-            'seven_day_average': self.seven_day_average(core_data, field_name),
             'seven_day_change_percent': self.seven_day_change_percent(core_data, field_name),
         }
+
+        if field_name not in self.omit_7_day_average:
+            computed_values['seven_day_average'] = self.seven_day_average(core_data, field_name)
+
+        return computed_values
 
 
 ##############################################################################################

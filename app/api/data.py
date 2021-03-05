@@ -254,7 +254,7 @@ def edit_core_data_from_states_daily():
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
     state_to_edit = payload['context']['state']
-    latest_daily_data_for_state = states_daily_query(state=state_to_edit).all()
+    latest_daily_data_for_state = states_daily_query(state=state_to_edit, research=True).all()
 
     # split up by date for easier lookup/comparison with input edit rows
     key_to_date = defaultdict(dict)  # state -> date -> data

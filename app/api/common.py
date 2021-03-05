@@ -12,10 +12,15 @@ from sqlalchemy.sql import label
 # https://stackoverflow.com/questions/45775724/sqlalchemy-group-by-and-return-max-date?rq=1
 #
 # Returns a SQLAlchemy BaseQuery object. If input state is not None, will return daily data only
-# for the input state. If public_stop is True, this will serve data only through March 7, 2021.
-def states_daily_query(state=None, preview=False, limit=None, public_stop=True):
-    # first retrieve latest published batch per state
-    filter_list = [Batch.dataEntryType.in_(['daily', 'edit'])]
+# for the input state. If research is False (default), this will serve data through March 7, 2021.
+def states_daily_query(state=None, preview=False, limit=None, research=False):
+    # first retrieve latest published batch per state. If we're in "research" mode, also serve
+    # "research" batches.
+    allowed_batch_types = ['daily', 'edit']
+    if research:
+        allowed_batch_types.append('research')
+    filter_list = [Batch.dataEntryType.in_(allowed_batch_types)]
+    
     if state is not None:
         if isinstance(state, str):
             state = [state]
@@ -42,7 +47,7 @@ def states_daily_query(state=None, preview=False, limit=None, public_stop=True):
     if limit is not None:
         filter_list = [latest_state_daily_batches.c.row <= limit]
 
-    if public_stop:
+    if not research:
         filter_list.append(CoreData.date <= datetime.date(2021, 3, 7))
 
     # we don't serve data past March 7, 2021
@@ -57,7 +62,7 @@ def states_daily_query(state=None, preview=False, limit=None, public_stop=True):
     return latest_daily_data_query
 
 
-def us_daily_query(preview=False, date_format='%Y-%m-%d', limit=None, public_stop=True):
+def us_daily_query(preview=False, date_format='%Y-%m-%d', limit=None, research=False):
     """Query US Daily Data
 
     Sums up the numeric columns from the data for all states to provide an aggregate for the whole
@@ -69,13 +74,13 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d', limit=None, public_sto
         date_format: (str, optional): optional strftime format string.
             If provided, the `date` property of the output will be formatted in the specified
             fashion (default '%Y-%m-%d')
-        public_stop: (bool, optional) If true, will serve data only through March 7, 2021.
+        research: (bool, optional) If False (default), will serve data only through March 7, 2021.
 
     Returns:
         dict: Dictionary of US daily data, one row per date
     """
     states_daily = states_daily_query(
-        preview=preview, limit=limit, public_stop=public_stop).subquery('states_daily')
+        preview=preview, limit=limit, research=research).subquery('states_daily')
 
     # get a list of columns to aggregate, sum over those from the states_daily subquery
     colnames = CoreData.numeric_fields()
@@ -94,7 +99,7 @@ def us_daily_query(preview=False, date_format='%Y-%m-%d', limit=None, public_sto
     # property, this is difficult without complex sql. Instead, getting states daily results as
     # CoreData objects, and going to do aggregation in Python.
     date_total_results_dict = defaultdict(int)
-    states_daily_full_results = states_daily_query(preview=preview, public_stop=public_stop).all()
+    states_daily_full_results = states_daily_query(preview=preview, research=research).all()
     for result in states_daily_full_results:
         if result.totalTestResults is not None:
             date_total_results_dict[result.date] += result.totalTestResults

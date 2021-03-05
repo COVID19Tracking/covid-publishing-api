@@ -221,7 +221,7 @@ def test_get_states_daily_for_state(app, headers):
     assert resp.json[1]['negative'] == 4
 
 
-def test_get_states_us_daily_march_2021_stop(app, headers):
+def test_get_states_us_daily_research(app, headers):
     test_data = daily_push_ny_wa_march_2021()
     client = app.test_client()
     # Write a batch containing the above data, two days each of NY and WA
@@ -256,3 +256,7 @@ def test_get_states_us_daily_march_2021_stop(app, headers):
     assert resp.json[0]['date'] == '2021-03-07'
     assert resp.json[0]['positive'] == 25
     assert resp.json[0]['negative'] == 14
+
+    resp = client.get("/api/v1/public/us/daily?research=true")
+    assert resp.status_code == 200
+    assert len(resp.json) == 2

@@ -21,7 +21,8 @@ def get_states():
 def get_states_daily():
     flask.current_app.logger.info('Retrieving States Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    latest_daily_data = states_daily_query(preview=include_preview).all()
+    research = request.args.get('research', default=False, type=inputs.boolean)
+    latest_daily_data = states_daily_query(preview=include_preview, research=research).all()
     return flask.jsonify([x.to_dict() for x in latest_daily_data])
 
 
@@ -29,8 +30,9 @@ def get_states_daily():
 def get_states_daily_for_state(state):
     flask.current_app.logger.info('Retrieving States Daily for state %s' % state)
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
+    research = request.args.get('research', default=False, type=inputs.boolean)
     latest_daily_data_for_state = states_daily_query(
-        state=state.upper(), preview=include_preview).all()
+        state=state.upper(), preview=include_preview, research=research).all()
     if len(latest_daily_data_for_state) == 0:
         # likely state not found
         return flask.Response("States Daily data unavailable for state %s" % state, status=404)
@@ -42,6 +44,7 @@ def get_states_daily_for_state(state):
 def get_us_daily():
     flask.current_app.logger.info('Retrieving US Daily')
     include_preview = request.args.get('preview', default=False, type=inputs.boolean)
-    us_data_by_date = us_daily_query(preview=include_preview)
+    research = request.args.get('research', default=False, type=inputs.boolean)
+    us_data_by_date = us_daily_query(preview=include_preview, research=research)
 
     return flask.jsonify(us_data_by_date)

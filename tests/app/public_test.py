@@ -11,7 +11,9 @@ from flask import json, jsonify
 from app import db
 from app.models.data import *
 
-from common import daily_push_ny_wa_two_days, daily_push_ny_ca_total_test_results_different_source
+from common import daily_push_ny_wa_two_days, daily_push_ny_wa_march_2021, \
+    daily_push_ny_ca_total_test_results_different_source
+
 
 
 def test_get_state_info(app):
@@ -217,3 +219,40 @@ def test_get_states_daily_for_state(app, headers):
     assert resp.json[1]['date'] == '2020-05-24'
     assert resp.json[1]['positive'] == 15
     assert resp.json[1]['negative'] == 4
+
+
+def test_get_states_us_daily_march_2021_stop(app, headers):
+    test_data = daily_push_ny_wa_march_2021()
+    client = app.test_client()
+    # Write a batch containing the above data, two days each of NY and WA
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(test_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    # publish batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+
+    # should only come back with 1 date
+    resp = client.get("/api/v1/public/states/ny/daily")
+    assert len(resp.json) == 1
+    assert resp.json[0]['date'] == '2021-03-07'
+    assert resp.json[0]['positive'] == 15
+    assert resp.json[0]['negative'] == 4
+
+    # get both states
+    resp = client.get("/api/v1/public/states/daily")
+    assert resp.status_code == 200
+    # check that we returned both NY and WA, 3/7 data for each
+    assert len(resp.json) == 2
+    for data in resp.json:
+        assert data['date'] == '2021-03-07'
+
+    resp = client.get("/api/v1/public/us/daily")
+    assert resp.status_code == 200
+    assert len(resp.json) == 1
+    assert resp.json[0]['date'] == '2021-03-07'
+    assert resp.json[0]['positive'] == 25
+    assert resp.json[0]['negative'] == 14

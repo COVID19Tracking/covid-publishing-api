@@ -151,8 +151,8 @@ def post_core_data_json(payload):
     db.session.add(batch)
     db.session.flush()  # this sets the batch ID, which we need for corresponding coreData objects
 
-    # add states
-    state_dicts = payload['states']
+    # add states if exist
+    state_dicts = payload.get('states', [])
     state_objects = []
     for state_dict in state_dicts:
         state_pk = state_dict['state']

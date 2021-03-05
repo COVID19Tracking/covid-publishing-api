@@ -121,6 +121,66 @@ def test_post_core_data_updating_state(app, headers):
     assert resp.json[0]['totalTestResultsFieldDbColumn'] == "totalTestEncountersViral"
 
 
+def test_post_core_data_without_states(app, headers):
+    client = app.test_client()
+    example_filename = os.path.join(os.path.dirname(__file__), 'data.json')
+    payload = json.load(open(example_filename))
+
+    # insert initial data, with all states
+    resp = client.post("/api/v1/batches",
+                   data=json.dumps(payload),
+                   content_type='application/json',
+                   headers=headers)
+    assert resp.status_code == 201
+
+    # insert data without states, as non-research batch
+    payload.pop('states')
+    resp = client.post("/api/v1/batches",
+                   data=json.dumps(payload),
+                   content_type='application/json',
+                   headers=headers)
+    assert resp.status_code == 400
+
+
+    # insert more data, without states
+    coreData = payload.get('coreData')
+    coreData = coreData[:2]
+    for record in coreData:
+        for k, v in record.items():
+            if isinstance(v, int):
+                record[k] = v + 1
+            elif k == 'date':
+                record[k] = datetime.datetime(2021, 3, 1)
+
+    payload['coreData'] = coreData
+    payload['context']['dataEntryType'] = 'research'
+    resp = client.post("/api/v1/batches",
+                   data=json.dumps(payload),
+                   content_type='application/json',
+                   headers=headers)
+    assert resp.status_code == 201
+
+    # we should've written 56 states times 3 days overall, some core data rows, 2 batch
+    resp = client.get('/api/v1/batches')
+    assert len(resp.json['batches']) == 2
+
+    # check the 2nd batch, that updated core data without states
+    assert resp.json['batches'][1]['batchId'] == 2
+    assert len(resp.json['batches'][1]['coreData']) == 2
+    # spot-check a few values
+    assert resp.json['batches'][1]['coreData'][0]['state'] == 'AK'
+    assert resp.json['batches'][1]['coreData'][0]['positive'] == 709
+
+    # try inserting unknown states
+    payload['coreData'][0]['state'] = 'FOO'
+    resp = client.post("/api/v1/batches",
+                   data=json.dumps(payload),
+                   content_type='application/json',
+                   headers=headers)
+    assert resp.status_code == 500
+    # should we handle partial state update through batches endpoint?
+
+
 def test_get_batches(app):
     with app.app_context():
         # write 2 batches

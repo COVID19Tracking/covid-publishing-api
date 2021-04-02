@@ -134,7 +134,7 @@ def edit_state_metadata():
 ##############################################################################################
 
 # Expects a dictionary of push context, state info, and core data rows. Writes to DB.
-def post_core_data_json(payload):
+def post_core_data_json(payload):  #
     # test the input data
     try:
         validate_core_data_payload(payload)
@@ -175,7 +175,7 @@ def post_core_data_json(payload):
     core_data_dicts = payload['coreData']
     core_data_objects = []
     for core_data_dict in core_data_dicts:
-        flask.current_app.logger.info('Creating new core data row: %s' % core_data_dict)
+        flask.current_app.logger.debug('Creating new core data row: %s' % core_data_dict)
         core_data_dict['batchId'] = batch.batchId
         core_data = CoreData(**core_data_dict)
         db.session.add(core_data)

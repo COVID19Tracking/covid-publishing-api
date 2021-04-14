@@ -10,6 +10,7 @@ import config as configs
 
 # Figure out which config we want based on the `ENV` env variable, default to local
 from app.utils.backfill import backfill
+from app.utils.replay import replay
 
 env_config = config("ENV", cast=str, default="localpsql")
 config_dict = {
@@ -47,6 +48,18 @@ utils_cli = AppGroup('utils')
 @click.argument('input_file')
 def backfill_cli(input_file):
     backfill(input_file)
+
+
+@utils_cli.command("replay")
+@click.argument('input_file')
+#help='File containing list of commit hashes + dates')
+@click.argument('first_line', required=False, type=int)
+#                help='First line to process')
+@click.argument('step', required=False, type=int)
+#                help='how many lines to process, starting from first line')
+@click.option('--skip-first', default=False, is_flag=True)
+def replay_cli(input_file, skip_first, first_line, step):
+    replay(input_file, skip_first, first_line, step)
 
 
 app.cli.add_command(utils_cli)

@@ -49,9 +49,9 @@ def validate_core_data_payload(payload):
     # test the input data
     if 'context' not in payload:
         raise ValueError("Payload requires 'context' field")
-    if ('states' not in payload or not payload['states']) and \
-        (payload['context']['dataEntryType'] != 'research'):
-        raise ValueError("Payload requires 'states' field with at least one entry")
+    # if ('states' not in payload or not payload['states']) and \
+    #     (payload['context']['dataEntryType'] != 'research'):
+    #     raise ValueError("Payload requires 'states' field with at least one entry")
     if 'coreData' not in payload or not payload['coreData']:
         raise ValueError("Payload requires 'coreData' field with at least one entry")
 

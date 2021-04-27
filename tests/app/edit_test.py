@@ -122,6 +122,7 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_moc
     assert slack_mock.chat_postMessage.call_count == 3
     assert slack_mock.files_upload.call_count == 1
     assert requests_mock.call_count == 1
+    assert "Pushed and published edit" in slack_mock.chat_postMessage.call_args[1]['text']
     assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
     assert "Rows edited: 1" in slack_mock.files_upload.call_args[1]['content']
     assert "NY 2020-05-24" in slack_mock.files_upload.call_args[1]['content']
@@ -214,6 +215,55 @@ def test_edit_core_data_from_states_daily(app, headers, slack_mock, requests_moc
         headers=headers)
     assert resp.status_code == 400
 
+
+def test_edit_core_data_research(app, headers, slack_mock, requests_mock):
+    client = app.test_client()
+
+    # Write a batch containing the above data, two days for NY and WA, publish it
+    resp = client.post(
+        "/api/v1/batches",
+        data=json.dumps(daily_push_ny_wa_two_days()),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    batch_id = resp.json['batch']['batchId']
+    assert slack_mock.chat_postMessage.call_count == 1
+
+    # Publish the new batch
+    resp = client.post("/api/v1/batches/{}/publish".format(batch_id), headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 2
+    assert slack_mock.files_upload.call_count == 0
+
+    # make an edit batch for NY for yesterday, and leave today alone
+    webhook_url = 'http://example.com/web/hook'
+    app.config['API_WEBHOOK_URL'] = webhook_url
+    requests_mock.get(webhook_url, json={'it': 'worked'})
+    edit_data = edit_push_ny_yesterday_unchanged_today()
+    edit_data['context']['dataEntryType'] = 'research-edit'
+    resp = client.post(
+        "/api/v1/batches/edit_states_daily",
+        data=json.dumps(edit_data),
+        content_type='application/json',
+        headers=headers)
+    assert resp.status_code == 201
+    assert slack_mock.chat_postMessage.call_count == 3
+    assert slack_mock.files_upload.call_count == 1
+    assert requests_mock.call_count == 1
+    assert "Pushed and published research-edit" in slack_mock.chat_postMessage.call_args[1]['text']
+    assert "state: NY" in slack_mock.chat_postMessage.call_args[1]['text']
+    assert "Rows edited: 1" in slack_mock.files_upload.call_args[1]['content']
+    assert "NY 2020-05-24" in slack_mock.files_upload.call_args[1]['content']
+    assert "positive: 16 (was 15)" in slack_mock.files_upload.call_args[1]['content']
+    assert "inIcuCurrently: None (was 37)" in slack_mock.files_upload.call_args[1]['content']
+
+    batch_id = resp.json['batch']['batchId']
+    assert resp.json['batch']['user'] == 'testing'
+    # we've changed positive and removed inIcuCurrently, so both should count as changed
+    assert len(resp.json['changedFields']) == 2
+    assert 'positive' in resp.json['changedFields']
+    assert 'inIcuCurrently' in resp.json['changedFields']
+    assert resp.json['changedDates'] == '5/24/20'
 
 def test_edit_core_data_from_states_daily_timestamps_only(app, headers, slack_mock):
     client = app.test_client()

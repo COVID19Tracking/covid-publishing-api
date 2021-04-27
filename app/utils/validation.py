@@ -67,8 +67,8 @@ def validate_edit_data_payload(payload):
         raise ValueError("Payload requires 'context' field")
 
     context = payload['context']
-    if context['dataEntryType'] != 'edit':
-        raise ValueError("Payload 'context' must contain data entry type 'edit'")
+    if context['dataEntryType'] != 'edit' and context['dataEntryType'] != 'research-edit':
+        raise ValueError("Payload 'context' must contain data entry type 'edit' or 'research-edit'")
     if not context.get('batchNote'):
         raise ValueError("Payload 'context' must contain a batchNote explaining edit")
     if not context.get('state'):

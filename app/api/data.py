@@ -343,7 +343,7 @@ def edit_core_data_from_states_daily():
     diffs_for_slack = diffs.plain_text_format()
 
     notify_slack(
-        f"*Pushed and published edit batch #{batch.batchId}*. state: {state_to_edit}. (user: {batch.shiftLead})\n"
+        f"*Pushed and published {batch.dataEntryType} batch #{batch.batchId}*. state: {state_to_edit}. (user: {batch.shiftLead})\n"
         f"{batch.batchNote}", diffs_for_slack)
 
     return flask.jsonify(json_to_return), 201

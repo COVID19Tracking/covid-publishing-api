@@ -19,6 +19,7 @@ def states_daily_query(state=None, preview=False, limit=None, research=False):
     allowed_batch_types = ['daily', 'edit']
     if research:
         allowed_batch_types.append('research')
+        allowed_batch_types.append('research-edit')
     filter_list = [Batch.dataEntryType.in_(allowed_batch_types)]
     
     if state is not None:

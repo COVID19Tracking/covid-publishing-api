@@ -1,3 +1,7 @@
+**As of March 7, 2021 we are [no longer collecting new data](https://covidtracking.com/analysis-updates/giving-thanks-and-looking-ahead-our-data-collection-work-is-done). [Learn about available federal data](https://covidtracking.com/analysis-updates/federal-covid-data-101-how-to-find-data).**
+
+---
+
 # Database backed API
 
 This repo will (eventually) implement an API that sits between the data entry spreadsheet and the public web site.  Internally, it records data to a relational database.
